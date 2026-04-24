@@ -67,6 +67,76 @@ export const initialMockProject: Project = {
   decisions: [],
   risks: [],
   questions: [],
+  confluenceSources: [
+    {
+      id: "conf_1",
+      name: "Analýza Driver App",
+      url: "https://confluence.internal/driver-app-analysis",
+      shortDescription: "Hlavný analytický dokument pre novú appku",
+      manualText: `Tento dokument obsahuje analytické požiadavky na novú mobilnú aplikáciu pre vodičov.
+
+Hlavné moduly a flow:
+1. Login a 2FA:
+Vodič sa prihlasuje pomocou zamestnaneckého ID. Následne mu príde 2FA SMS kód. Ak zlyhá, môže požiadať o zavolanie.
+
+2. Online/Offline check:
+Appka neustále (každých 30 sekúnd) pinguje server a aktualizuje GPS lokáciu. Ak vypadne sieť, appka sa prepne do offline režimu a dáta sa ukladajú lokálne (CoreData/Room).
+
+3. AlzaBox helper flow:
+Pri doručovaní do AlzaBoxu sa musí vodič najprv prihlásiť do boxu naskenovaním QR kódu na displeji. Až potom sa otvoria dvere.
+
+4. Posila flow:
+Ak príde "posila" (iný vodič prevezme balíky), musí prebehnúť hand-over sken. Vodič A naskenuje "Odovzdať", Vodič B "Prijať".
+
+5. XL app integration:
+Veľké balíky (chladničky) vyžadujú integráciu do staršieho XL systému. Appka pošle webhook pri doručení.
+
+6. GPS ping a Zákaznícke ETA:
+Zákazník vidí na mape aktuálnu polohu auta. ETA sa prepočítava pomocou Google Maps Matrix API každú minútu.`,
+      owner: "Peter (BA)",
+      dateAdded: "2026-03-01",
+      lastChecked: "Včera",
+      reviewDeadline: "2026-05-15",
+      status: "Aktuálne",
+      tags: "analýza, driver app, backend",
+      aiMockData: {
+        shortSummary: "Dokumentácia pokrýva požiadavky na Driver App s dôrazom na 2FA prihlásenie, offline režim, prácu s AlzaBoxmi, odovzdávanie balíkov medzi vodičmi a integráciu ETA s GPS trackingom.",
+        detailedSummary: "Tento rozsiahly dokument specifikuje 6 hlavných logických celkov novej vodičskej aplikácie. Prvým je zabezpečené prihlásenie cez 2FA. Druhým je kritický offline režim, ktorý zabezpečuje plynulú prácu aj bez signálu pomocou lokálneho ukladania dát. Nasleduje flow pre doručovanie do AlzaBoxov, ktorý vyžaduje skenovanie QR kódov. Ďalšou dôležitou časťou je Posila flow pre odovzdávanie balíkov. Súčasťou je aj nutnosť integrácie s XL systémom a funkcia živého trackingu (GPS ping) pre presné vypočítanie ETA pre zákazníka.",
+        requirements: [
+          "REQ-1: Aplikácia musí podporovať 2FA prihlásenie cez SMS.",
+          "REQ-2: Aplikácia musí každých 30 sekúnd odoslať GPS ping.",
+          "REQ-3: Systém musí podporovať plnohodnotný offline režim s lokálnou databázou.",
+          "REQ-4: Otvorenie AlzaBoxu vyžaduje naskenovanie QR kódu boxu.",
+          "REQ-5: Pri odovzdávaní balíkov posile je nutný obojstranný sken (hand-over)."
+        ],
+        decisions: [
+          "DEC-1: Pre offline ukladanie sa použije CoreData (iOS) a Room (Android).",
+          "DEC-2: Výpočet ETA pre zákazníkov zabezpečí Google Maps Matrix API."
+        ],
+        risks: [
+          "RSK-1: Cena za volania na Google Maps Matrix API môže pri častom pingu rapídne stúpnuť.",
+          "RSK-2: Prepínanie do offline režimu môže spôsobiť duplikáciu eventov (napr. 2x doručené) po obnovení siete."
+        ],
+        questions: [
+          "QST-1: Čo sa stane, ak vodičovi pri 2FA nepríde SMS a nemá ani signál na zavolanie?",
+          "QST-2: Ako sa bude autentifikovať XL webhook?"
+        ],
+        actionSteps: [
+          "Peter: Zistiť cenník Google Maps API a navrhnúť limity pre pring.",
+          "Marek: Pripraviť proof-of-concept pre offline sync logiku."
+        ],
+        jiraTasks: [
+          "DRV-101: Implementácia 2FA login screenu",
+          "DRV-102: Background job pre GPS ping (30s interval)",
+          "DRV-103: DB schéma pre offline režim"
+        ],
+        docUpdates: [
+          "Je potrebné doplniť API definíciu pre webhook do XL aplikácie (chýbajú headers).",
+          "Chýba definícia chybových hlášok pri zlyhaní skenu na AlzaBoxe."
+        ]
+      }
+    }
+  ],
   systems: [
     {
       id: "sys_1",

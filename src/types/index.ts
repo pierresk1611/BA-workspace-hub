@@ -1,6 +1,35 @@
 export type ProjectStatus = "Idea" | "Discovery" | "Analýza" | "Solution Design" | "Refinement" | "Vývoj" | "Testovanie" | "UAT" | "Rollout" | "Done" | "Pozastavené";
 export type ProjectPriority = "Nízka" | "Stredná" | "Vysoká" | "Kritická";
 
+export type ConfluenceStatus = "Draft" | "Aktuálne" | "Čaká na kontrolu" | "Zastarané" | "Nahradené";
+
+export interface AISummaryData {
+  shortSummary?: string;
+  detailedSummary?: string;
+  requirements?: string[];
+  decisions?: string[];
+  risks?: string[];
+  questions?: string[];
+  actionSteps?: string[];
+  jiraTasks?: string[];
+  docUpdates?: string[];
+}
+
+export interface ConfluenceSource {
+  id: string;
+  name: string;
+  url: string;
+  manualText: string;
+  shortDescription: string;
+  owner: string;
+  dateAdded: string;
+  lastChecked: string;
+  reviewDeadline: string;
+  status: ConfluenceStatus;
+  tags: string;
+  aiMockData?: AISummaryData;
+}
+
 export type SystemType = "Confluence" | "Jira" | "Kafka" | "Asana" | "Teams" | "Email" | "Miro" | "Figma" | "Git repository" | "API dokumentácia" | "Monitoring" | "Interná aplikácia" | "SQL / databázový zdroj" | "Iné";
 
 export interface LinkedSystem {
@@ -64,6 +93,7 @@ export interface Project {
   decisions: any[];
   risks: any[];
   questions: any[];
+  confluenceSources: ConfluenceSource[];
   systems: LinkedSystem[];
   tasks: any[];
 }

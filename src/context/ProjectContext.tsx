@@ -1,6 +1,6 @@
 import { createContext, useContext, useState } from "react";
 import type { ReactNode } from "react";
-import type { Project, LinkedSystem } from "../types";
+import type { Project, LinkedSystem, ConfluenceSource } from "../types";
 import { initialMockProject } from "../data/mockProject";
 
 interface ProjectContextType {
@@ -13,6 +13,9 @@ interface ProjectContextType {
   addSystem: (projectId: string, system: LinkedSystem) => void;
   updateSystem: (projectId: string, systemId: string, system: Partial<LinkedSystem>) => void;
   deleteSystem: (projectId: string, systemId: string) => void;
+  addConfluenceSource: (projectId: string, source: ConfluenceSource) => void;
+  updateConfluenceSource: (projectId: string, sourceId: string, source: Partial<ConfluenceSource>) => void;
+  deleteConfluenceSource: (projectId: string, sourceId: string) => void;
 }
 
 const ProjectContext = createContext<ProjectContextType | undefined>(undefined);
@@ -68,6 +71,36 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
     }));
   };
 
+  const addConfluenceSource = (projectId: string, source: ConfluenceSource) => {
+    setProjects(prev => prev.map(p => {
+      if (p.id === projectId) {
+        return { ...p, confluenceSources: [...p.confluenceSources, source] };
+      }
+      return p;
+    }));
+  };
+
+  const updateConfluenceSource = (projectId: string, sourceId: string, updatedFields: Partial<ConfluenceSource>) => {
+    setProjects(prev => prev.map(p => {
+      if (p.id === projectId) {
+        return {
+          ...p,
+          confluenceSources: p.confluenceSources.map(src => src.id === sourceId ? { ...src, ...updatedFields } : src)
+        };
+      }
+      return p;
+    }));
+  };
+
+  const deleteConfluenceSource = (projectId: string, sourceId: string) => {
+    setProjects(prev => prev.map(p => {
+      if (p.id === projectId) {
+        return { ...p, confluenceSources: p.confluenceSources.filter(src => src.id !== sourceId) };
+      }
+      return p;
+    }));
+  };
+
   return (
     <ProjectContext.Provider value={{
       projects,
@@ -78,7 +111,10 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
       setActiveProject,
       addSystem,
       updateSystem,
-      deleteSystem
+      deleteSystem,
+      addConfluenceSource,
+      updateConfluenceSource,
+      deleteConfluenceSource
     }}>
       {children}
     </ProjectContext.Provider>
