@@ -1,14 +1,27 @@
-export const mockProject = {
+import type { Project } from "../types";
+
+export const initialMockProject: Project = {
+  id: "proj_driver_app_1",
   name: "Driver App",
-  description: "Zjednotená vodičská aplikácia pre AlzaBox, Posila flow a XL integráciu.",
+  shortDescription: "Zjednotená vodičská aplikácia pre AlzaBox, Posila flow a XL integráciu.",
+  detailedDescription: "Kompletný redesign mobilnej aplikácie pre vodičov, vrátane novej architektúry pre integráciu kuriérskych firiem. Cieľom je zjednotiť systémy a znížiť chybovosť pri doručovaní do AlzaBoxov.",
   status: "Analýza",
   priority: "Vysoká",
   team: {
     businessAnalyst: "Peter",
     productOwner: "Katka",
+    businessOwner: "Jozef",
     techLead: "Marek",
+    qaOwner: "Lucia",
+    stakeholders: "Logistika, Zákaznícka podpora"
   },
+  startDate: "2026-01-15",
+  targetDate: "2026-09-30",
   release: "Q3 2026",
+  mainDeadline: "2026-05-10",
+  tags: "Mobilná Appka, Logistika, Integrácia",
+  type: "Transformácia",
+  notes: "Kľúčový projekt pre tento rok.",
   metrics: {
     progress: 37,
     healthScore: 72,
@@ -49,5 +62,11 @@ export const mockProject = {
     { id: 1, user: "Peter", action: "pridal nový SQL dotaz pre logistiku", time: "Pred 2 hodinami" },
     { id: 2, user: "Katka", action: "schválila požiadavku REQ-45 (Posila flow)", time: "Včera" },
     { id: 3, user: "Marek", action: "označil riziko RSK-12 ako mitigované", time: "Včera" },
-  ]
+  ],
+  requirements: [],
+  decisions: [],
+  risks: [],
+  questions: [],
+  systems: [],
+  tasks: []
 };

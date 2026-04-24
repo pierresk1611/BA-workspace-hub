@@ -5,3 +5,4 @@
 | 2026-04-24 | Iniciačný prompt pre vytvorenie repozitára a základných súborov | Nastavenie Vite, React, TS, Tailwind a dokumentácie. Nastavenie pravidiel repozitára. | chore: initialize BA Workspace prototype repository |
 
 | 2026-04-24 | Vytvor základ aplikácie | Návrh a implementácia layoutu, sidebar, dashboard s mock dátami a grafmi | feat: add base BA Workspace dashboard |
+| 2026-04-24 | Doplň flow na vytvorenie projektu | Nahradenie hardcoded objektu za React Context, pridanie modálneho formulára pre tvorbu a editáciu projektov, prepojenie Topbaru a Dashboardu na aktívny stav. | feat: add project creation flow |

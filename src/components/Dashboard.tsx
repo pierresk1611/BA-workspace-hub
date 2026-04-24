@@ -1,9 +1,11 @@
+import { useState } from 'react';
 import { 
   AlertCircle, Calendar, Clock, Database, CheckSquare, 
   HelpCircle, MessageSquare, Plus, FileText, Kanban, Bot, ShieldCheck,
-  TrendingUp, Download, Network
+  TrendingUp, Download, Network, Edit
 } from "lucide-react";
-import { mockProject } from "../data/mockProject";
+import { useProject } from "../context/ProjectContext";
+import { ProjectFormModal } from "./ProjectFormModal";
 import { cn } from "../lib/utils";
 import { 
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -42,56 +44,78 @@ function QuickActionButton({ icon: Icon, label, primary }: any) {
 }
 
 export function Dashboard() {
-  const { metrics, charts, upcomingMeetings, recentActivities, team } = mockProject;
+  const { activeProject } = useProject();
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+  if (!activeProject) return <div className="p-6 text-center text-slate-500">Žiadny projekt nie je vybraný.</div>;
+
+  const { metrics, charts, upcomingMeetings, recentActivities, team } = activeProject;
 
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6">
       
       {/* Header Section */}
-      <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-        <div>
-          <div className="flex items-center gap-3 mb-2">
-            <h1 className="text-2xl font-bold text-slate-900">{mockProject.name}</h1>
+      <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 bg-white p-6 rounded-xl border border-slate-200 shadow-sm relative">
+        <div className="flex-1">
+          <div className="flex items-center gap-3 mb-2 flex-wrap">
+            <h1 className="text-2xl font-bold text-slate-900">{activeProject.name}</h1>
             <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-700 border border-blue-200">
-              {mockProject.status}
+              {activeProject.status}
             </span>
             <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-700 border border-red-200">
-              Priorita: {mockProject.priority}
+              Priorita: {activeProject.priority}
             </span>
+            <button 
+              onClick={() => setIsEditModalOpen(true)}
+              className="ml-auto md:ml-4 text-xs flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors font-medium border border-slate-200"
+            >
+              <Edit className="w-3.5 h-3.5" />
+              Upraviť projekt
+            </button>
           </div>
-          <p className="text-slate-500 text-sm max-w-2xl">{mockProject.description}</p>
+          <p className="text-slate-500 text-sm max-w-3xl leading-relaxed">{activeProject.detailedDescription || activeProject.shortDescription}</p>
+          
+          {activeProject.tags && (
+            <div className="flex gap-2 mt-3">
+              {activeProject.tags.split(',').map(tag => (
+                <span key={tag} className="text-[10px] uppercase font-bold tracking-wider px-2 py-1 bg-slate-100 text-slate-500 rounded">{tag.trim()}</span>
+              ))}
+            </div>
+          )}
         </div>
         
-        <div className="flex gap-4 text-sm text-slate-600 bg-slate-50 p-3 rounded-lg border border-slate-100">
+        <div className="grid grid-cols-2 md:grid-cols-2 gap-x-6 gap-y-3 text-sm text-slate-600 bg-slate-50 p-4 rounded-xl border border-slate-100 min-w-[300px]">
           <div>
-            <span className="block text-xs text-slate-400 font-medium">Business Analyst</span>
-            <span className="font-semibold">{team.businessAnalyst}</span>
+            <span className="block text-[10px] uppercase tracking-wider text-slate-400 font-bold mb-0.5">Business Analyst</span>
+            <span className="font-semibold">{team.businessAnalyst || '-'}</span>
           </div>
-          <div className="w-px bg-slate-200"></div>
           <div>
-            <span className="block text-xs text-slate-400 font-medium">Product Owner</span>
-            <span className="font-semibold">{team.productOwner}</span>
+            <span className="block text-[10px] uppercase tracking-wider text-slate-400 font-bold mb-0.5">Product Owner</span>
+            <span className="font-semibold">{team.productOwner || '-'}</span>
           </div>
-          <div className="w-px bg-slate-200"></div>
           <div>
-            <span className="block text-xs text-slate-400 font-medium">Tech Lead</span>
-            <span className="font-semibold">{team.techLead}</span>
+            <span className="block text-[10px] uppercase tracking-wider text-slate-400 font-bold mb-0.5">Tech Lead</span>
+            <span className="font-semibold">{team.techLead || '-'}</span>
+          </div>
+          <div>
+            <span className="block text-[10px] uppercase tracking-wider text-slate-400 font-bold mb-0.5">QA Owner</span>
+            <span className="font-semibold">{team.qaOwner || '-'}</span>
           </div>
         </div>
       </div>
 
       {/* Metrics Row */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <MetricCard title="Celkový progres" value={`${metrics.progress}%`} icon={TrendingUp} trend={`Cieľ: ${mockProject.release}`} />
+        <MetricCard title="Celkový progres" value={`${metrics.progress}%`} icon={TrendingUp} trend={`Cieľ: ${activeProject.release || '-'}`} />
         <MetricCard title="Health Score" value={`${metrics.healthScore}%`} icon={ShieldCheck} valueClass={metrics.healthScore > 70 ? "text-green-600" : "text-amber-500"} />
-        <MetricCard title="Najbližší deadline" value={metrics.nearestDeadline} icon={Calendar} trend="O 16 dní" />
+        <MetricCard title="Hlavný deadline" value={activeProject.mainDeadline || '-'} icon={Calendar} trend={`Štart: ${activeProject.startDate || '-'}`} />
         <MetricCard 
           title="Overdue položky" 
           value={metrics.overdueItems} 
           icon={AlertCircle} 
-          className="border-red-200 bg-red-50/50"
-          valueClass="text-red-600"
-          trend="Vyžaduje pozornosť"
+          className={metrics.overdueItems > 0 ? "border-red-200 bg-red-50/50" : ""}
+          valueClass={metrics.overdueItems > 0 ? "text-red-600" : ""}
+          trend={metrics.overdueItems > 0 ? "Vyžaduje pozornosť" : "Všetko stíhame"}
         />
       </div>
 
@@ -134,7 +158,7 @@ export function Dashboard() {
                     <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{fontSize: 12, fill: '#64748b'}} />
                     <Tooltip cursor={{fill: '#f1f5f9'}} contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
                     <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={24}>
-                      {charts.tasksByStatus.map((entry, index) => (
+                      {charts.tasksByStatus.map((entry: any, index: number) => (
                         <Cell key={`cell-${index}`} fill={entry.color} />
                       ))}
                     </Bar>
@@ -241,6 +265,12 @@ export function Dashboard() {
           </div>
         </div>
       </div>
+
+      <ProjectFormModal 
+        isOpen={isEditModalOpen} 
+        onClose={() => setIsEditModalOpen(false)} 
+        initialData={activeProject} 
+      />
     </div>
   );
 }
