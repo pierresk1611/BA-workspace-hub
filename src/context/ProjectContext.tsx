@@ -10,6 +10,7 @@ interface ProjectContextType {
   addProject: (project: Project) => void;
   updateProject: (id: string, project: Partial<Project>) => void;
   setActiveProject: (id: string) => void;
+  deleteProject: (id: string) => void;
   addSystem: (projectId: string, system: LinkedSystem) => void;
   updateSystem: (projectId: string, systemId: string, system: Partial<LinkedSystem>) => void;
   deleteSystem: (projectId: string, systemId: string) => void;
@@ -101,6 +102,18 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
     }));
   };
 
+  const deleteProject = (id: string) => {
+    setProjects(prev => {
+      const updated = prev.filter(p => p.id !== id);
+      if (activeProjectId === id && updated.length > 0) {
+        setActiveProjectId(updated[0].id);
+      } else if (updated.length === 0) {
+        setActiveProjectId('');
+      }
+      return updated;
+    });
+  };
+
   return (
     <ProjectContext.Provider value={{
       projects,
@@ -109,6 +122,7 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
       addProject,
       updateProject,
       setActiveProject,
+      deleteProject,
       addSystem,
       updateSystem,
       deleteSystem,

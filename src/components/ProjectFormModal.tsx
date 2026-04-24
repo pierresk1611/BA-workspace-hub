@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
-import type { Project, ProjectStatus, ProjectPriority } from '../types';
+import type { Project, ProjectStatus, ProjectPriority, ProjectType } from '../types';
 import { useProject } from '../context/ProjectContext';
 
 interface ProjectFormModalProps {
@@ -11,6 +11,8 @@ interface ProjectFormModalProps {
 
 const statuses: ProjectStatus[] = ["Idea", "Discovery", "Analýza", "Solution Design", "Refinement", "Vývoj", "Testovanie", "UAT", "Rollout", "Done", "Pozastavené"];
 const priorities: ProjectPriority[] = ["Nízka", "Stredná", "Vysoká", "Kritická"];
+const projectTypes: ProjectType[] = ["IT projekt", "Logistický projekt", "Procesná zmena", "Reporting / BI", "Data / SQL analýza", "Interný nástroj", "Iné"];
+
 
 export function ProjectFormModal({ isOpen, onClose, initialData }: ProjectFormModalProps) {
   const { addProject, updateProject } = useProject();
@@ -21,6 +23,7 @@ export function ProjectFormModal({ isOpen, onClose, initialData }: ProjectFormMo
     detailedDescription: '',
     status: 'Idea',
     priority: 'Stredná',
+    type: 'IT projekt',
     team: {
       businessAnalyst: '',
       productOwner: '',
@@ -34,7 +37,6 @@ export function ProjectFormModal({ isOpen, onClose, initialData }: ProjectFormMo
     release: '',
     mainDeadline: '',
     tags: '',
-    type: '',
     notes: ''
   });
 
@@ -45,7 +47,7 @@ export function ProjectFormModal({ isOpen, onClose, initialData }: ProjectFormMo
       setFormData({
         name: '', shortDescription: '', detailedDescription: '', status: 'Idea', priority: 'Stredná',
         team: { businessAnalyst: '', productOwner: '', businessOwner: '', techLead: '', qaOwner: '', stakeholders: '' },
-        startDate: '', targetDate: '', release: '', mainDeadline: '', tags: '', type: '', notes: ''
+        startDate: '', targetDate: '', release: '', mainDeadline: '', tags: '', type: 'IT projekt', notes: ''
       });
     }
   }, [initialData, isOpen]);
@@ -67,20 +69,34 @@ export function ProjectFormModal({ isOpen, onClose, initialData }: ProjectFormMo
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    const today = new Date().toISOString();
     if (initialData) {
-      updateProject(initialData.id, formData);
+      updateProject(initialData.id, { ...formData, lastModified: today });
     } else {
       const newProject: Project = {
         ...(formData as any),
         id: `proj_${Date.now()}`,
-        metrics: { progress: 0, healthScore: 100, nearestDeadline: formData.mainDeadline || '-', overdueItems: 0, openJira: 0, openQuestions: 0, decisions: 0, highRisks: 0, sqlQueries: 0, sqlResults: 0 },
+        lastModified: today,
+        metrics: { 
+          progress: 0, 
+          healthScore: 100, 
+          nearestDeadline: formData.mainDeadline || '-', 
+          overdueItems: 0, 
+          openJira: 0, 
+          openQuestions: 0, 
+          decisions: 0, 
+          highRisks: 0, 
+          sqlQueries: 0, 
+          sqlResults: 0 
+        },
         charts: { progressOverTime: [], tasksByStatus: [], requirementsByStatus: [] },
         upcomingMeetings: [],
         recentActivities: [],
-        requirements: [], decisions: [], risks: [], questions: [], systems: [], tasks: []
+        requirements: [], decisions: [], risks: [], questions: [], confluenceSources: [], systems: [], tasks: []
       };
       addProject(newProject);
     }
+
     onClose();
   };
 
@@ -191,7 +207,9 @@ export function ProjectFormModal({ isOpen, onClose, initialData }: ProjectFormMo
                 </div>
                 <div className="col-span-2">
                   <label className="block text-sm font-medium text-slate-700 mb-1">Typ projektu</label>
-                  <input name="type" value={formData.type || ''} onChange={handleChange} className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
+                  <select name="type" value={formData.type || 'IT projekt'} onChange={handleChange} className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                    {projectTypes.map(t => <option key={t} value={t}>{t}</option>)}
+                  </select>
                 </div>
                 <div className="col-span-4">
                   <label className="block text-sm font-medium text-slate-700 mb-1">Poznámky</label>

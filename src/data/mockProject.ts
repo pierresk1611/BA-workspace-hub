@@ -4,7 +4,7 @@ export const initialMockProject: Project = {
   id: "proj_driver_app_1",
   name: "Driver App",
   shortDescription: "Zjednotená vodičská aplikácia pre AlzaBox, Posila flow a XL integráciu.",
-  detailedDescription: "Kompletný redesign mobilnej aplikácie pre vodičov, vrátane novej architektúry pre integráciu kuriérskych firiem. Cieľom je zjednotiť systémy a znížiť chybovosť pri doručovaní do AlzaBoxov.",
+  detailedDescription: "Projekt rieši frontendový pracovný cockpit pre vodičov. Zahŕňa jednotný login, 2FA, online/offline check, AlzaBox helper flow, Posila flow, XL integráciu, GPS ping, zákaznícke ETA a bezpečnostné fallback mechanizmy.",
   status: "Analýza",
   priority: "Vysoká",
   team: {
@@ -19,18 +19,18 @@ export const initialMockProject: Project = {
   targetDate: "2026-09-30",
   release: "Q3 2026",
   mainDeadline: "2026-05-10",
-  tags: "Mobilná Appka, Logistika, Integrácia",
-  type: "Transformácia",
+  tags: "Logistics, AlzaBox, Driver App, XL, Posila, Security, Mobile App",
+  type: "Logistický projekt",
   notes: "Kľúčový projekt pre tento rok.",
   metrics: {
     progress: 37,
     healthScore: 72,
-    nearestDeadline: "2026-05-10",
-    overdueItems: 3,
+    nearestDeadline: "2026-06-15",
+    overdueItems: 2,
     openJira: 14,
-    openQuestions: 5,
+    openQuestions: 6,
     decisions: 12,
-    highRisks: 2,
+    highRisks: 6,
     sqlQueries: 8,
     sqlResults: 24,
   },
@@ -251,5 +251,6 @@ Zákazník vidí na mape aktuálnu polohu auta. ETA sa prepočítava pomocou Goo
       lastUpdated: "Včera"
     }
   ],
-  tasks: []
+  tasks: [],
+  lastModified: "2026-04-24T22:30:00Z"
 };

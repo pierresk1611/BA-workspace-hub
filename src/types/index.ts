@@ -1,5 +1,7 @@
 export type ProjectStatus = "Idea" | "Discovery" | "Analýza" | "Solution Design" | "Refinement" | "Vývoj" | "Testovanie" | "UAT" | "Rollout" | "Done" | "Pozastavené";
 export type ProjectPriority = "Nízka" | "Stredná" | "Vysoká" | "Kritická";
+export type ProjectType = "IT projekt" | "Logistický projekt" | "Procesná zmena" | "Reporting / BI" | "Data / SQL analýza" | "Interný nástroj" | "Iné";
+
 
 export type ConfluenceStatus = "Draft" | "Aktuálne" | "Čaká na kontrolu" | "Zastarané" | "Nahradené";
 
@@ -83,8 +85,9 @@ export interface Project {
   release: string;
   mainDeadline: string;
   tags: string;
-  type: string;
+  type: ProjectType;
   notes: string;
+  lastModified: string;
   metrics: ProjectMetrics;
   charts: any;
   upcomingMeetings: any[];
