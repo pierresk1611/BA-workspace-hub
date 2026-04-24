@@ -1,6 +1,6 @@
 import { createContext, useContext, useState } from "react";
 import type { ReactNode } from "react";
-import type { Project } from "../types";
+import type { Project, LinkedSystem } from "../types";
 import { initialMockProject } from "../data/mockProject";
 
 interface ProjectContextType {
@@ -10,6 +10,9 @@ interface ProjectContextType {
   addProject: (project: Project) => void;
   updateProject: (id: string, project: Partial<Project>) => void;
   setActiveProject: (id: string) => void;
+  addSystem: (projectId: string, system: LinkedSystem) => void;
+  updateSystem: (projectId: string, systemId: string, system: Partial<LinkedSystem>) => void;
+  deleteSystem: (projectId: string, systemId: string) => void;
 }
 
 const ProjectContext = createContext<ProjectContextType | undefined>(undefined);
@@ -35,6 +38,36 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
     setActiveProjectId(id);
   };
 
+  const addSystem = (projectId: string, system: LinkedSystem) => {
+    setProjects(prev => prev.map(p => {
+      if (p.id === projectId) {
+        return { ...p, systems: [...p.systems, system] };
+      }
+      return p;
+    }));
+  };
+
+  const updateSystem = (projectId: string, systemId: string, updatedFields: Partial<LinkedSystem>) => {
+    setProjects(prev => prev.map(p => {
+      if (p.id === projectId) {
+        return {
+          ...p,
+          systems: p.systems.map(sys => sys.id === systemId ? { ...sys, ...updatedFields } : sys)
+        };
+      }
+      return p;
+    }));
+  };
+
+  const deleteSystem = (projectId: string, systemId: string) => {
+    setProjects(prev => prev.map(p => {
+      if (p.id === projectId) {
+        return { ...p, systems: p.systems.filter(sys => sys.id !== systemId) };
+      }
+      return p;
+    }));
+  };
+
   return (
     <ProjectContext.Provider value={{
       projects,
@@ -42,7 +75,10 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
       activeProject,
       addProject,
       updateProject,
-      setActiveProject
+      setActiveProject,
+      addSystem,
+      updateSystem,
+      deleteSystem
     }}>
       {children}
     </ProjectContext.Provider>

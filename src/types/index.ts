@@ -1,6 +1,24 @@
 export type ProjectStatus = "Idea" | "Discovery" | "Analýza" | "Solution Design" | "Refinement" | "Vývoj" | "Testovanie" | "UAT" | "Rollout" | "Done" | "Pozastavené";
 export type ProjectPriority = "Nízka" | "Stredná" | "Vysoká" | "Kritická";
 
+export type SystemType = "Confluence" | "Jira" | "Kafka" | "Asana" | "Teams" | "Email" | "Miro" | "Figma" | "Git repository" | "API dokumentácia" | "Monitoring" | "Interná aplikácia" | "SQL / databázový zdroj" | "Iné";
+
+export interface LinkedSystem {
+  id: string;
+  type: SystemType;
+  customTypeName?: string;
+  name: string;
+  url: string;
+  shortDescription: string;
+  manualText: string;
+  owner: string;
+  status: string;
+  priority: string;
+  deadline: string;
+  tags: string;
+  lastUpdated: string;
+}
+
 export interface ProjectTeam {
   businessAnalyst: string;
   productOwner: string;
@@ -46,6 +64,6 @@ export interface Project {
   decisions: any[];
   risks: any[];
   questions: any[];
-  systems: any[];
+  systems: LinkedSystem[];
   tasks: any[];
 }
