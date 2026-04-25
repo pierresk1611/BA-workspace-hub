@@ -4,7 +4,8 @@
 ### 🔐 Bezpečnosť a Izolácia Dát
 **Tento prototyp je navrhnutý ako maximálne bezpečný a izolovaný systém:**
 - **Žiadne API integrácie:** Aplikácia sa nepripája na Jira, Confluence, Teams ani iné externé systémy.
-- **Manuálny vstup:** Všetky dáta a texty (emaily, prepisy meetingov) musia byť vložené manuálne používateľom.
+- **Manuálny vstup:** Všetky dáta, texty (emaily, prepisy meetingov) a Asana tasky (cez CSV/JSON/Text import) musia byť vložené manuálne používateľom.
+- **Asana Import:** Podporuje manuálny import z CSV súborov, JSON dát a Plain Textu bez pripojenia na Asana API. Súbory sa spracovávajú lokálne v prehliadači.
 - **Mock Sandbox:** SQL Workspace a AI Agent pracujú výhradne nad lokálne uloženými mock dátami.
 - **Žiadne Credentials:** Aplikácia neukladá heslá, tokeny ani reálne connection stringy.
 
@@ -12,6 +13,12 @@ Podrobné pravidlá nájdete v [SECURITY.md](SECURITY.md) a [docs/security-rules
 
 ## Štruktúra Projektu
 Aplikácia je interný pracovný dashboard pre Business Analysta. Slúži na správu projektov, linkov, manuálne vložených textov, požiadaviek, rozhodnutí, otvorených otázok, rizík, závislostí, taskov, kalendára, deadlineov, meeting transcriptov, SQL dotazov, AI sumarizácie a exportov.
+
+### Projektový Lifecycle
+Systém umožňuje plnohodnotnú správu životného cyklu projektu:
+- **Aktívne projekty:** Bežná práca na analýze a dodávke.
+- **Ukončenie projektu:** Formálne uzavretie projektu (archivácia). Projekt ostáva v systéme ako historický záznam s dokumentáciou dôvodov uzavretia, ale je v read-only móde.
+- **Vymazanie projektu:** Úplné odstránenie projektu a všetkých jeho lokálne naviazaných dát z prototypu.
 
 ## Tech stack
 - React

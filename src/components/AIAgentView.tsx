@@ -12,7 +12,7 @@ import { useProject } from '../context/ProjectContext';
 type AgentMode = 
   | 'Project Summary' | 'Requirements' | 'Decision' | 'Open Questions' 
   | 'Risk' | 'Deadline' | 'Jira Draft' | 'Confluence Draft' 
-  | 'Meeting Notes' | 'SQL' | 'Traceability' | 'BA Quality' | 'Export';
+  | 'Meeting Notes' | 'SQL' | 'Traceability' | 'BA Quality' | 'Asana Analysis' | 'Export';
 
 interface Message {
   id: string;
@@ -55,11 +55,10 @@ export function AIAgentView() {
 
   const suggestedActions = [
     "Zhrň aktuálny stav projektu",
+    "Zhrni importované Asana tasky",
+    "Nájdi Asana tasky bez ownera alebo deadlinu",
+    "Navrhni Jira tasky z Asana importov",
     "Nájdi hlavné riziká",
-    "Nájdi otvorené otázky",
-    "Vygeneruj Jira-ready tasky",
-    "Vygeneruj acceptance criteria",
-    "Vygeneruj SQL dotaz",
     "Sprav BA Quality Check",
     "Priprav status report"
   ];
@@ -131,6 +130,16 @@ export function AIAgentView() {
       res.shortAnswer = "Navrhnutý SQL dotaz pre analýzu logistických dát.";
       res.details = "Dotaz spája tabuľku doručení s tabuľkou chýb GPS signálu.";
       res.suggestedEntities = [{ type: "SQL query", title: "GPS Accuracy Analysis", content: "SELECT d.id, g.error_margin FROM deliveries d JOIN gps_logs g ON d.id = g.delivery_id WHERE g.accuracy > 50;" }];
+    } else if (q.includes('asana') || mode === 'Asana Analysis') {
+      const asanaCount = project.asanaTasks?.length || 0;
+      const issues = project.asanaTasks?.filter((t:any) => t.warnings && t.warnings.length > 0).length || 0;
+      res.shortAnswer = `Analyzoval som ${asanaCount} importovaných Asana taskov. Identifikoval som ${issues} úloh s kvalitou dát, ktoré vyžadujú tvoju pozornosť.`;
+      res.details = `Máme ${project.asanaTasks?.filter((t:any) => t.status === 'Done').length || 0} dokončených úloh. Najbližší termín je ${project.asanaTasks?.find((t:any) => t.status !== 'Done')?.dueDate || 'nedefinovaný'}.`;
+      res.nextSteps = ["Doplniť chýbajúcich ownerov k 3 taskom", "Preveriť blokovaný task 'GPS Rules'"];
+      res.suggestedEntities = [
+        { type: "Draft správy", title: "Follow-up na Mareka", content: "Ahoj Marek, v Asane vidím, že task GPS Rules je blokovaný..." },
+        { type: "Jira Návrh", title: "Nová Jira Story z Asany", content: "Na základe Asana tasku 'Login Flow' odporúčam vytvoriť Jira User Story." }
+      ];
     } else if (q.includes('quality') || mode === 'BA Quality') {
       res.shortAnswer = "BA Quality Check dokončený. Skóre: 85/100.";
       res.details = "3 požiadavky nemajú AC, 2 riziká nemajú mitigation deadline.";

@@ -1,4 +1,4 @@
-export type ProjectStatus = "Idea" | "Discovery" | "Analýza" | "Solution Design" | "Refinement" | "Vývoj" | "Testovanie" | "UAT" | "Rollout" | "Done" | "Pozastavené";
+export type ProjectStatus = "Idea" | "Discovery" | "Analýza" | "Solution Design" | "Refinement" | "Vývoj" | "Testovanie" | "UAT" | "Rollout" | "Done" | "Pozastavené" | "Ukončené";
 export type ProjectPriority = "Nízka" | "Stredná" | "Vysoká" | "Kritická";
 export type ProjectType = "IT projekt" | "Logistický projekt" | "Procesná zmena" | "Reporting / BI" | "Data / SQL analýza" | "Interný nástroj" | "Iné";
 
@@ -351,10 +351,15 @@ export interface AsanaTask {
   dueDate: string;
   milestone: string;
   sourceUrl?: string;
+  asanaUrl?: string;
   manualText?: string;
   relatedRequirementId?: string;
   relatedJiraKey?: string;
   lastUpdated: string;
+  sourceImportType?: "CSV" | "JSON" | "Plain Text" | "Mock" | "Manual";
+  importedAt?: string;
+  projectId?: string;
+  warnings?: string[];
 }
 
 export type CommunicationType = "Email" | "Teams chat" | "Teams channel" | "Meeting chat" | "Stakeholder note" | "Iné";
@@ -521,4 +526,11 @@ export interface Project {
   sqlResults: SQLResult[];
   deadlines: Deadline[];
   tasks: any[];
+  isClosed?: boolean;
+  closedAt?: string;
+  closedBy?: string;
+  closureReason?: string;
+  closureNote?: string;
+  reopenedAt?: string;
+  reopenedBy?: string;
 }

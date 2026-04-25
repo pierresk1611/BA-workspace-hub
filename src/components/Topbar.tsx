@@ -1,8 +1,10 @@
 import { useNavigate, useLocation, useParams } from 'react-router-dom';
-import { Bell, ChevronRight, LogOut, ChevronDown } from 'lucide-react';
+import { ChevronRight, LogOut, ChevronDown } from 'lucide-react';
 import { useProject } from '../context/ProjectContext';
 import { useAuth } from '../context/AuthContext';
 import { GlobalSearch } from './GlobalSearch';
+import { NotificationCenter } from './NotificationCenter';
+import { calculateProjectHealth } from '../lib/projectUtils';
 
 const MODULE_LABELS: Record<string, string> = {
   'requirements': 'Požiadavky',
@@ -68,6 +70,7 @@ export function Topbar() {
 
   const breadcrumbs = buildBreadcrumbs();
   const currentProjectId = params.projectId;
+  const displayedProject = currentProjectId ? projects.find(p => p.id === currentProjectId) : activeProject;
 
   return (
     <header className="h-16 bg-white/90 backdrop-blur-md border-b border-slate-200 px-6 flex items-center justify-between sticky top-0 z-40 shrink-0">
@@ -116,26 +119,31 @@ export function Topbar() {
               }}
               className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-black text-slate-700 outline-none cursor-pointer hover:border-indigo-300 transition-all"
             >
-              {projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+              <optgroup label="AKTÍVNE PROJEKTY">
+                {projects.filter(p => !p.isClosed).map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+              </optgroup>
+              <optgroup label="UKONČENÉ PROJEKTY">
+                {projects.filter(p => p.isClosed).map(p => <option key={p.id} value={p.id}>{p.name} (Ukončené)</option>)}
+              </optgroup>
             </select>
           </div>
         )}
 
         {/* Health */}
-        {activeProject && (
-          <div className="hidden xl:flex items-center gap-2 px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl">
-            <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Health</span>
-            <span className={`text-xs font-black ${activeProject.metrics.healthScore > 80 ? 'text-emerald-600' : 'text-amber-600'}`}>
-              {activeProject.metrics.healthScore}%
-            </span>
-          </div>
-        )}
+        {displayedProject && (() => {
+          const healthScore = calculateProjectHealth(displayedProject).score;
+          return (
+            <div className="hidden xl:flex items-center gap-2 px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl">
+              <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Health</span>
+              <span className={`text-xs font-black ${healthScore > 80 ? 'text-emerald-600' : healthScore > 50 ? 'text-amber-600' : 'text-rose-600'}`}>
+                {healthScore}%
+              </span>
+            </div>
+          );
+        })()}
 
         {/* Notifications */}
-        <button className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all relative">
-          <Bell className="w-4 h-4" />
-          <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-rose-500 rounded-full border border-white" />
-        </button>
+        <NotificationCenter />
 
         <div className="w-px h-6 bg-slate-200" />
 

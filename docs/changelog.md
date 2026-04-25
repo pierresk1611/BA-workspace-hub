@@ -11,8 +11,15 @@
 | 2026-04-24 | Projects | Plnohodnotný modul pre správu projektov (zoznam, detail, CRUD, filtre, metriky). | feat: implement projects module |
 | 2026-04-24 | Confluence | Pridanie modulu Confluence zdroje s AI extrakčným UI panelom pre prácu so simulovanými AI metadátami nad manuálne skopírovaným textom. | feat: add confluence source module |
 | 2026-04-24 | Security | - Add: Acceptance Criteria & QA module (Given/When/Then tracking).<br>- Add: BA Quality Check (automated deficiency and security auditor).<br>- Audit: Final Security & Data Isolation Audit (verified no external API/DB connections).<br>- Update: SECURITY.md and docs/security-rules.md with explicit manual-only policies. | feat: finalize security audit and qa modules |
+| 2026-04-25 | Projects | Implementácia akcií "Ukončiť projekt" (archivácia) a "Vymazať projekt" (hard delete). Úprava dashboardov, filtrov a projektového detailu. | feat: add project lifecycle actions |
 
 ## [1.1.0] - 2026-04-25
+### Added
+- Project Lifecycle Management: formal project closure (read-only mode) and destructive project deletion.
+- Lifecycle Modals: `CloseProjectModal` (confirmation with reason) and `DeleteProjectModal` (name verification).
+- Dashboard updates: separate KPIs for Active vs. Closed projects.
+- Project Selector updates: grouped active and closed projects in Sidebar and Topbar.
+
 ### Fixed
 - Authentication flow with `/api/login` serverless Vercel function integration.
 - Sidebar routing fully migrated to use `react-router-dom` `NavLink` components.

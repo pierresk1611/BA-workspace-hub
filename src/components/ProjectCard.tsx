@@ -1,9 +1,10 @@
-import { MoreVertical, Calendar, Users, TrendingUp, AlertCircle, Edit, Trash2, ArrowRight } from 'lucide-react';
+import { MoreVertical, Calendar, Users, TrendingUp, AlertCircle, Edit, Trash2, ArrowRight, Archive, RotateCcw } from 'lucide-react';
 import { useState } from 'react';
 import type { Project } from '../types';
 import { useProject } from '../context/ProjectContext';
 import { StatusBadge, PriorityBadge } from './Badge';
 import { cn } from '../lib/utils';
+import { calculateProjectHealth } from '../lib/projectUtils';
 
 interface ProjectCardProps {
   project: Project;
@@ -12,8 +13,10 @@ interface ProjectCardProps {
 }
 
 export function ProjectCard({ project, onClick, onEdit }: ProjectCardProps) {
-  const { deleteProject } = useProject();
+  const { deleteProject, closeProject, reopenProject } = useProject();
   const [showMenu, setShowMenu] = useState(false);
+
+  const isClosed = project.isClosed || project.status === 'Ukončené';
 
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -23,20 +26,39 @@ export function ProjectCard({ project, onClick, onEdit }: ProjectCardProps) {
     setShowMenu(false);
   };
 
+  const handleClose = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (confirm(`Naozaj chcete ukončiť projekt ${project.name}?`)) {
+      closeProject(project.id, 'Manuálne ukončené z portfólia', '');
+    }
+    setShowMenu(false);
+  };
+
+  const handleReopen = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (confirm(`Naozaj chcete znovu otvoriť projekt ${project.name}?`)) {
+      reopenProject(project.id);
+    }
+    setShowMenu(false);
+  };
+
   const isOverdue = project.mainDeadline && new Date(project.mainDeadline) < new Date();
   const hasIssue = !project.team.businessAnalyst || !project.mainDeadline;
+  const healthScore = calculateProjectHealth(project).score;
 
   return (
     <div 
       onClick={onClick}
       className={cn(
-        "bg-white rounded-[2.5rem] border border-slate-200 shadow-sm card-hover overflow-hidden flex flex-col relative",
-        isOverdue && "border-rose-300 ring-4 ring-rose-500/5"
+        "bg-white rounded-[2.5rem] border border-slate-200 shadow-sm card-hover overflow-hidden flex flex-col relative transition-all duration-500",
+        isOverdue && !isClosed && "border-rose-300 ring-4 ring-rose-500/5",
+        isClosed && "grayscale-[0.5] opacity-80"
       )}
     >
       {/* Top Banner (Optional for priority) */}
       <div className={cn(
         "h-2 w-full",
+        isClosed ? "bg-slate-400" :
         project.priority === 'Kritická' ? "bg-rose-500" : 
         project.priority === 'Vysoká' ? "bg-orange-500" : "bg-slate-100"
       )}></div>
@@ -69,8 +91,17 @@ export function ProjectCard({ project, onClick, onEdit }: ProjectCardProps) {
                 <button onClick={(e) => { onEdit(e); setShowMenu(false); }} className="w-full text-left px-4 py-2.5 text-sm font-bold text-slate-700 hover:bg-slate-50 flex items-center gap-3">
                   <Edit className="w-4 h-4 text-indigo-500" /> Upraviť Projekt
                 </button>
+                {isClosed ? (
+                  <button onClick={handleReopen} className="w-full text-left px-4 py-2.5 text-sm font-bold text-emerald-600 hover:bg-emerald-50 flex items-center gap-3">
+                    <RotateCcw className="w-4 h-4" /> Znovu otvoriť
+                  </button>
+                ) : (
+                  <button onClick={handleClose} className="w-full text-left px-4 py-2.5 text-sm font-bold text-amber-600 hover:bg-amber-50 flex items-center gap-3">
+                    <Archive className="w-4 h-4" /> Ukončiť projekt
+                  </button>
+                )}
                 <button onClick={handleDelete} className="w-full text-left px-4 py-2.5 text-sm font-bold text-red-600 hover:bg-rose-50 flex items-center gap-3">
-                  <Trash2 className="w-4 h-4" /> Zmazať Projekt
+                  <Trash2 className="w-4 h-4" /> Vymazať projekt
                 </button>
               </div>
             )}
@@ -132,14 +163,14 @@ export function ProjectCard({ project, onClick, onEdit }: ProjectCardProps) {
              <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Health</span>
              <span className={cn(
                "text-xs font-black",
-               project.metrics.healthScore > 80 ? "text-emerald-600" : 
-               project.metrics.healthScore > 50 ? "text-amber-600" : "text-rose-600"
-             )}>{project.metrics.healthScore}%</span>
+               healthScore > 80 ? "text-emerald-600" : 
+               healthScore > 50 ? "text-amber-600" : "text-rose-600"
+             )}>{healthScore}%</span>
           </div>
           <div className={cn(
             "w-3 h-3 rounded-full shadow-sm",
-            project.metrics.healthScore > 80 ? "bg-emerald-500" : 
-            project.metrics.healthScore > 50 ? "bg-amber-500" : "bg-rose-500 animate-pulse"
+            healthScore > 80 ? "bg-emerald-500" : 
+            healthScore > 50 ? "bg-amber-500" : "bg-rose-500 animate-pulse"
           )}></div>
           <ArrowRight className="w-4 h-4 text-slate-300 group-hover:text-indigo-600 group-hover:translate-x-1 transition-all" />
         </div>

@@ -71,7 +71,7 @@ export function ProjectsView() {
           />
         </div>
         <div className="flex items-center gap-2">
-           {(['All', 'Analýza', 'Solution Design', 'Discovery', 'Vývoj', 'Done'] as const).map(status => (
+           {(['All', 'Analýza', 'Solution Design', 'Discovery', 'Vývoj', 'Done', 'Ukončené'] as const).map(status => (
              <button
                key={status}
                onClick={() => setStatusFilter(status === 'All' ? '' : status)}

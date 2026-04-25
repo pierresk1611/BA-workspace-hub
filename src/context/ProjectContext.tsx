@@ -50,12 +50,15 @@ interface ProjectContextType {
   addAsanaTask: (projectId: string, task: AsanaTask) => void;
   updateAsanaTask: (projectId: string, taskId: string, task: Partial<AsanaTask>) => void;
   deleteAsanaTask: (projectId: string, taskId: string) => void;
+  importAsanaTasks: (projectId: string, tasks: AsanaTask[]) => void;
   addCommunication: (projectId: string, comm: Communication) => void;
   updateCommunication: (projectId: string, commId: string, comm: Partial<Communication>) => void;
   deleteCommunication: (projectId: string, commId: string) => void;
   addMeeting: (projectId: string, meeting: Meeting) => void;
   updateMeeting: (projectId: string, meetingId: string, meeting: Partial<Meeting>) => void;
   deleteMeeting: (projectId: string, meetingId: string) => void;
+  closeProject: (id: string, reason: string, note: string) => void;
+  reopenProject: (id: string) => void;
 }
 
 const ProjectContext = createContext<ProjectContextType | undefined>(undefined);
@@ -471,6 +474,32 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
     }));
   };
 
+  const importAsanaTasks = (projectId: string, tasks: AsanaTask[]) => {
+    setProjects(prev => prev.map(p => {
+      if (p.id === projectId) {
+        const existingTasks = [...(p.asanaTasks || [])];
+        const tasksToProcess = [...tasks];
+        
+        // Match and update existing tasks, then add remaining new ones
+        const updatedExisting = existingTasks.map(et => {
+          const matchIndex = tasksToProcess.findIndex(nt => 
+            (nt.asanaUrl && et.asanaUrl === nt.asanaUrl) || 
+            (et.title === nt.title && et.dueDate === nt.dueDate)
+          );
+          
+          if (matchIndex !== -1) {
+            const match = tasksToProcess.splice(matchIndex, 1)[0];
+            return { ...et, ...match };
+          }
+          return et;
+        });
+
+        return { ...p, asanaTasks: [...updatedExisting, ...tasksToProcess] };
+      }
+      return p;
+    }));
+  };
+
   const addCommunication = (projectId: string, comm: Communication) => {
     setProjects(prev => prev.map(p => {
       if (p.id === projectId) {
@@ -534,13 +563,47 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
   const deleteProject = (id: string) => {
     setProjects(prev => {
       const updated = prev.filter(p => p.id !== id);
-      if (activeProjectId === id && updated.length > 0) {
-        setActiveProjectId(updated[0].id);
-      } else if (updated.length === 0) {
+      if (activeProjectId === id) {
         setActiveProjectId('');
       }
       return updated;
     });
+  };
+
+  const closeProject = (id: string, reason: string, note: string) => {
+    setProjects(prev => prev.map(p => {
+      if (p.id === id) {
+        return {
+          ...p,
+          status: 'Ukončené',
+          isClosed: true,
+          closedAt: new Date().toISOString(),
+          closedBy: 'peter',
+          closureReason: reason,
+          closureNote: note,
+          metrics: {
+            ...p.metrics,
+            progress: Math.max(p.metrics.progress, 100)
+          }
+        };
+      }
+      return p;
+    }));
+  };
+
+  const reopenProject = (id: string) => {
+    setProjects(prev => prev.map(p => {
+      if (p.id === id) {
+        return {
+          ...p,
+          status: 'Analýza',
+          isClosed: false,
+          reopenedAt: new Date().toISOString(),
+          reopenedBy: 'peter'
+        };
+      }
+      return p;
+    }));
   };
 
   return (
@@ -591,12 +654,15 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
       addAsanaTask,
       updateAsanaTask,
       deleteAsanaTask,
+      importAsanaTasks,
       addCommunication,
       updateCommunication,
       deleteCommunication,
       addMeeting,
       updateMeeting,
-      deleteMeeting
+      deleteMeeting,
+      closeProject,
+      reopenProject
     }}>
       {children}
     </ProjectContext.Provider>

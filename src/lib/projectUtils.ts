@@ -1,5 +1,127 @@
 import type { Project } from "../types";
 
+export interface HealthBreakdown {
+  type: string;
+  label: string;
+  count: number;
+  points: number;
+}
+
+export interface ProjectHealthResult {
+  score: number;
+  base: number;
+  deductions: HealthBreakdown[];
+  summaryText: string;
+}
+
+export function calculateProjectHealth(project: any): ProjectHealthResult {
+  const base = 100;
+  let score = base;
+  const deductions: HealthBreakdown[] = [];
+  const today = new Date().toISOString().split('T')[0];
+
+  const allDeadlines = [
+    ...(project.deadlines || []),
+    ...(project.requirements || []).map((r: any) => ({ dueDate: r.deadline, status: r.status })),
+    ...(project.asanaTasks || []).map((t: any) => ({ dueDate: t.dueDate, status: t.status })),
+    ...(project.questions || []).map((q: any) => ({ dueDate: q.dueDate, status: q.status }))
+  ];
+
+  const overdueCount = allDeadlines.filter((d: any) => 
+    d.dueDate && d.dueDate < today && !["Done", "Closed", "Answered", "Resolved", "Completed", "Potvrdené", "Zrušené"].includes(d.status)
+  ).length;
+
+  if (overdueCount > 0) {
+    const points = Math.min(overdueCount * 5, 25);
+    score -= points;
+    deductions.push({ type: "overdue", label: "Overdue položky", count: overdueCount, points: -points });
+  }
+
+  const criticalRisks = (project.risks || []).filter((r: any) => 
+    r.severity === 'Kritická' && !['Resolved', 'Closed', 'Accepted'].includes(r.status)
+  ).length;
+  if (criticalRisks > 0) {
+    const points = Math.min(criticalRisks * 10, 30);
+    score -= points;
+    deductions.push({ type: "critical_risk", label: "Kritické otvorené riziká", count: criticalRisks, points: -points });
+  }
+
+  const highRisks = (project.risks || []).filter((r: any) => 
+    r.severity === 'Vysoká' && !['Resolved', 'Closed', 'Accepted'].includes(r.status)
+  ).length;
+  if (highRisks > 0) {
+    const points = Math.min(highRisks * 6, 24);
+    score -= points;
+    deductions.push({ type: "high_risk", label: "Vysoké otvorené riziká", count: highRisks, points: -points });
+  }
+
+  const overdueQuestions = (project.questions || []).filter((q: any) => 
+    q.dueDate && q.dueDate < today && !['Answered', 'Cancelled'].includes(q.status)
+  ).length;
+  if (overdueQuestions > 0) {
+    const points = Math.min(overdueQuestions * 4, 20);
+    score -= points;
+    deductions.push({ type: "overdue_question", label: "Otvorené otázky po deadline", count: overdueQuestions, points: -points });
+  }
+
+  const missingOwnerCount = [
+    ...(project.requirements || []).filter((r: any) => !r.owner && !['Done', 'Obsolete'].includes(r.status)),
+    ...(project.questions || []).filter((q: any) => !q.owner && !['Answered', 'Cancelled'].includes(q.status)),
+    ...(project.risks || []).filter((r: any) => !r.owner && !['Resolved', 'Closed'].includes(r.status)),
+    ...(project.asanaTasks || []).filter((t: any) => !t.assignee && !['Completed'].includes(t.status))
+  ].length;
+  if (missingOwnerCount > 0) {
+    const points = Math.min(missingOwnerCount * 3, 15);
+    score -= points;
+    deductions.push({ type: "missing_owner", label: "Položky bez ownera", count: missingOwnerCount, points: -points });
+  }
+
+  const missingDeadlineCount = [
+    ...(project.questions || []).filter((q: any) => !q.dueDate && !['Answered', 'Cancelled'].includes(q.status)),
+    ...(project.asanaTasks || []).filter((t: any) => !t.dueDate && !['Completed'].includes(t.status))
+  ].length;
+  if (missingDeadlineCount > 0) {
+    const points = Math.min(missingDeadlineCount * 2, 10);
+    score -= points;
+    deductions.push({ type: "missing_deadline", label: "Položky bez deadline", count: missingDeadlineCount, points: -points });
+  }
+
+  const missingAC = (project.requirements || []).filter((r: any) => 
+    r.status === 'Confirmed' && (!r.acceptanceCriteria || r.acceptanceCriteria.length === 0)
+  ).length;
+  if (missingAC > 0) {
+    const points = Math.min(missingAC * 3, 15);
+    score -= points;
+    deductions.push({ type: "missing_ac", label: "Chýbajúce acceptance criteria", count: missingAC, points: -points });
+  }
+
+  const sqlWarnings = (project.sqlQueries || []).filter((q: any) => 
+    q.status === 'Failed' || q.status === 'Error'
+  ).length;
+  if (sqlWarnings > 0) {
+    const points = Math.min(sqlWarnings * 2, 10);
+    score -= points;
+    deductions.push({ type: "sql_warning", label: "SQL Data Quality Warnings", count: sqlWarnings, points: -points });
+  }
+
+  score = Math.min(100, Math.max(0, Math.round(score)));
+
+  let summaryText = "";
+  if (deductions.length === 0) {
+    summaryText = "Health score je stabilný. Nie sú evidované overdue položky ani kritické riziká.";
+  } else {
+    const issues = deductions.map(d => `${d.count}x ${d.label.toLowerCase()}`).join(", ");
+    summaryText = `Health score je znížený o tieto odpočty: ${issues}.`;
+  }
+
+  return {
+    score,
+    base,
+    deductions,
+    summaryText
+  };
+}
+
 export function calculateProjectProgress(project: Project) {
   // Weights
   const weights = {

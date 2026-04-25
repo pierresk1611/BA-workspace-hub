@@ -24,5 +24,9 @@ Tento dokument definuje záväzné pravidlá pre prácu s prototypom BA Workspac
 - **Pravidlo:** Nulová tolerancia pre ukladanie credentials.
 - **Implementácia:** Aplikácia nepoužíva žiadny systém prihlásenia (Auth). Všetky "Tokeny" v mock dátach sú generované náhodne a nemajú žiadnu funkčnú hodnotu.
 
+## 6. Mazanie a čistenie dát
+- **Pravidlo:** Používateľ musí mať plnú kontrolu nad lokálnymi dátami.
+- **Implementácia:** Funkcia "Vymazať projekt" vykoná hard delete objektu projektu a všetkých jeho vnorených polí (požiadavky, tasky...) z lokálneho stavu.
+
 ---
 **Bezpečnostný status: ISOLATED PROTOTYPE**

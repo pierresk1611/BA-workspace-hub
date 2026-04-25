@@ -3,10 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { 
   FolderOpen, TrendingUp, AlertTriangle, Clock, Filter, 
   ChevronRight, Activity, ShieldCheck, Zap, ArrowRight,
-  BarChart2, Search
+  BarChart2, Search, Database
 } from 'lucide-react';
 import { useProject } from '../context/ProjectContext';
-import { calculateProjectProgress } from '../lib/projectUtils';
+import { calculateProjectProgress, calculateProjectHealth } from '../lib/projectUtils';
 import { cn } from '../lib/utils';
 
 const STATUS_COLORS: Record<string, string> = {
@@ -16,6 +16,7 @@ const STATUS_COLORS: Record<string, string> = {
   'In Progress': 'bg-blue-100 text-blue-700 border-blue-200',
   'Done': 'bg-emerald-100 text-emerald-700 border-emerald-200',
   'Blocked': 'bg-rose-100 text-rose-700 border-rose-200',
+  'Ukončené': 'bg-slate-100 text-slate-700 border-slate-200',
 };
 
 const PRIORITY_COLORS: Record<string, string> = {
@@ -46,13 +47,27 @@ export function AllProjectsDashboard() {
   }), [projects, search, statusFilter, priorityFilter]);
 
   // Global stats
+  const activeProjects = projects.filter(p => !p.isClosed && p.status !== 'Ukončené');
+  const closedProjectsCount = projects.filter(p => p.isClosed || p.status === 'Ukončené').length;
+
   const totalProjects = projects.length;
-  const overdueTotal = projects.reduce((s, p) => s + (p.metrics.overdueItems || 0), 0);
-  const avgHealth = projects.length > 0 
-    ? Math.round(projects.reduce((s, p) => s + p.metrics.healthScore, 0) / projects.length) 
+  const overdueTotal = activeProjects.reduce((s, p) => s + (p.metrics.overdueItems || 0), 0);
+  const activeProjectsHealth = activeProjects.map(p => calculateProjectHealth(p).score);
+  const avgHealth = activeProjectsHealth.length > 0 
+    ? Math.round(activeProjectsHealth.reduce((s, h) => s + h, 0) / activeProjectsHealth.length) 
     : 0;
   const allStatuses = [...new Set(projects.map(p => p.status))];
-  const highRiskProjects = projects.filter(p => p.metrics.healthScore < 72);
+  const highRiskProjects = activeProjects.filter(p => calculateProjectHealth(p).score < 72);
+
+  const totalAsanaTasks = activeProjects.reduce((s, p) => s + (p.asanaTasks?.length || 0), 0);
+  const overdueAsanaTasks = activeProjects.reduce((s, p) => {
+    const today = new Date().toISOString().split('T')[0];
+    const overdue = p.asanaTasks?.filter(t => t.dueDate && t.dueDate < today && t.status !== 'Done').length || 0;
+    return s + overdue;
+  }, 0);
+  const projectsWithAsanaWarnings = activeProjects.filter(p => 
+    p.asanaTasks?.some(t => t.warnings && t.warnings.length > 0)
+  ).length;
 
   return (
     <div className="p-8 space-y-10 animate-in fade-in duration-500 bg-slate-50 min-h-full overflow-y-auto custom-scrollbar">
@@ -89,10 +104,10 @@ export function AllProjectsDashboard() {
       {/* Global KPIs */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
         {[
-          { label: 'Total Projects', val: totalProjects, icon: FolderOpen, color: 'text-indigo-600', bg: 'bg-indigo-50', border: 'border-indigo-100' },
-          { label: 'Avg Health Score', val: `${avgHealth}%`, icon: ShieldCheck, color: avgHealth > 75 ? 'text-emerald-600' : 'text-amber-600', bg: avgHealth > 75 ? 'bg-emerald-50' : 'bg-amber-50', border: avgHealth > 75 ? 'border-emerald-100' : 'border-amber-100' },
+          { label: 'Active Projects', val: activeProjects.length, icon: FolderOpen, color: 'text-indigo-600', bg: 'bg-indigo-50', border: 'border-indigo-100' },
+          { label: 'AVG Health Score', val: `${avgHealth}%`, icon: ShieldCheck, color: avgHealth > 75 ? 'text-emerald-600' : 'text-amber-600', bg: avgHealth > 75 ? 'bg-emerald-50' : 'bg-amber-50', border: avgHealth > 75 ? 'border-emerald-100' : 'border-amber-100' },
           { label: 'Overdue Items', val: overdueTotal, icon: AlertTriangle, color: 'text-rose-600', bg: 'bg-rose-50', border: 'border-rose-100' },
-          { label: 'At Risk', val: highRiskProjects.length, icon: Activity, color: 'text-amber-600', bg: 'bg-amber-50', border: 'border-amber-100' },
+          { label: 'Closed Projects', val: closedProjectsCount, icon: Database, color: 'text-slate-600', bg: 'bg-slate-100', border: 'border-slate-200' },
         ].map((s, i) => (
           <div key={i} className={cn("bg-white p-8 rounded-[2.5rem] border shadow-xl flex items-center gap-6", s.border)}>
             <div className={cn("p-4 rounded-2xl", s.bg, s.color)}>
@@ -104,6 +119,39 @@ export function AllProjectsDashboard() {
             </div>
           </div>
         ))}
+      </div>
+
+      {/* Asana Global Metrics */}
+      <div className="bg-slate-900 rounded-[3rem] p-10 text-white relative overflow-hidden shadow-2xl">
+         <div className="absolute -right-12 -bottom-12 w-64 h-64 bg-rose-500 opacity-10 rounded-full blur-3xl" />
+         <div className="relative z-10">
+           <h3 className="text-xs font-black text-rose-400 uppercase tracking-[0.3em] mb-8 flex items-center gap-2">
+             <TrendingUp className="w-4 h-4" /> Asana Integration Overview
+           </h3>
+           <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+             <div className="space-y-2">
+               <p className="text-5xl font-black text-white">{totalAsanaTasks}</p>
+               <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Total Manual Tasks</p>
+               <div className="flex items-center gap-2 text-[10px] font-black text-slate-500 pt-2">
+                 <Database className="w-3 h-3" /> NO API CONNECTION
+               </div>
+             </div>
+             <div className="space-y-2">
+               <p className={cn("text-5xl font-black", overdueAsanaTasks > 0 ? "text-rose-400" : "text-emerald-400")}>
+                 {overdueAsanaTasks}
+               </p>
+               <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Global Overdue Tasks</p>
+               <p className="text-[10px] font-medium text-slate-500">Vyžaduje manuálnu kontrolu a update statusu.</p>
+             </div>
+             <div className="space-y-2">
+               <p className={cn("text-5xl font-black", projectsWithAsanaWarnings > 0 ? "text-amber-400" : "text-emerald-400")}>
+                 {projectsWithAsanaWarnings}
+               </p>
+               <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Projects with Quality Issues</p>
+               <p className="text-[10px] font-medium text-slate-500">Chýbajúci owneri alebo deadliny v importoch.</p>
+             </div>
+           </div>
+         </div>
       </div>
 
       {/* Filters & Search */}
@@ -149,7 +197,8 @@ export function AllProjectsDashboard() {
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
           {filteredProjects.map(project => {
             const stats = calculateProjectProgress(project);
-            const isAtRisk = project.metrics.healthScore < 72;
+            const healthScore = calculateProjectHealth(project).score;
+            const isAtRisk = healthScore < 72;
             return (
               <div
                 key={project.id}
@@ -215,7 +264,7 @@ export function AllProjectsDashboard() {
                 {/* Footer */}
                 <div className="px-8 py-5 border-t border-slate-100 bg-slate-50/50 grid grid-cols-3 gap-4">
                   <div className="text-center">
-                    <p className="text-xs font-black text-slate-900">{project.metrics.healthScore}%</p>
+                    <p className="text-xs font-black text-slate-900">{healthScore}%</p>
                     <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Health</p>
                   </div>
                   <div className="text-center border-x border-slate-200">
@@ -248,6 +297,7 @@ export function AllProjectsDashboard() {
               <tbody className="divide-y divide-slate-50">
                 {filteredProjects.map(project => {
                   const stats = calculateProjectProgress(project);
+                  const healthScore = calculateProjectHealth(project).score;
                   return (
                     <tr 
                       key={project.id}
@@ -284,8 +334,8 @@ export function AllProjectsDashboard() {
                         </div>
                       </td>
                       <td className="px-8 py-6">
-                        <span className={cn("text-sm font-black", project.metrics.healthScore > 75 ? "text-emerald-600" : project.metrics.healthScore > 60 ? "text-amber-600" : "text-rose-600")}>
-                          {project.metrics.healthScore}%
+                        <span className={cn("text-sm font-black", healthScore > 75 ? "text-emerald-600" : healthScore > 60 ? "text-amber-600" : "text-rose-600")}>
+                          {healthScore}%
                         </span>
                       </td>
                       <td className="px-8 py-6">

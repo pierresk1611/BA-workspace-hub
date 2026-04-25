@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { 
   CheckCircle2, Search, Filter, Plus, Edit, Trash2, FileText, ArrowRight,
-  Clock, ChevronRight, Download, Zap,
+  Clock, ChevronRight, Download, Zap, Upload, Database,
   ExternalLink, Send, Kanban, TrendingUp, AlertTriangle
 } from 'lucide-react';
 import { useProject } from '../context/ProjectContext';
 import { AsanaTaskFormModal } from './AsanaTaskFormModal';
+import { AsanaImportModal } from './AsanaImportModal';
 import { StatusBadge, PriorityBadge, EmptyState } from './Badge';
 import { PieChart as ReChartsPieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
 import type { AsanaTask, AsanaTaskStatus } from '../types';
@@ -16,6 +17,7 @@ const statusOptions: AsanaTaskStatus[] = ["Not started", "In progress", "Blocked
 export function AsanaView() {
   const { activeProject, deleteAsanaTask } = useProject();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<AsanaTask | undefined>(undefined);
   
   const [search, setSearch] = useState('');
@@ -94,6 +96,12 @@ export function AsanaView() {
         </div>
         <div className="flex items-center gap-4">
           <button 
+            onClick={() => setIsImportModalOpen(true)}
+            className="px-6 py-4 bg-white border border-slate-200 text-slate-600 rounded-[1.5rem] font-black text-sm uppercase tracking-widest hover:bg-slate-50 active:scale-95 transition-all flex items-center gap-2 shadow-sm"
+          >
+            <Upload className="w-5 h-5" /> Import
+          </button>
+          <button 
             onClick={() => { setEditingTask(undefined); setIsModalOpen(true); }}
             className="px-8 py-4 bg-rose-500 text-white rounded-[1.5rem] font-black text-sm uppercase tracking-widest shadow-xl shadow-rose-100 hover:bg-rose-600 active:scale-95 transition-all flex items-center gap-2"
           >
@@ -171,13 +179,14 @@ export function AsanaView() {
              <div className="overflow-x-auto custom-scrollbar">
                 <table className="w-full text-left border-collapse">
                   <thead>
-                    <tr className="bg-slate-50/30 border-b border-slate-100">
-                      <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Task Details</th>
-                      <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Owner</th>
-                      <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Progress</th>
-                      <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Due Date</th>
-                      <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Status</th>
-                      <th className="px-8 py-5 text-right"></th>
+                    <tr className="bg-slate-50 border-b border-slate-200">
+                      <th className="px-6 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] w-12"></th>
+                      <th className="px-6 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Task Details</th>
+                      <th className="px-6 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Owner</th>
+                      <th className="px-6 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Status & Progress</th>
+                      <th className="px-6 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Import Info</th>
+                      <th className="px-6 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Deadline</th>
+                      <th className="px-6 py-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-right">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-50">
@@ -190,18 +199,18 @@ export function AsanaView() {
                           activeTaskId === t.id && "bg-rose-50/50"
                         )}
                       >
-                        <td className="px-8 py-6">
-                           <div className="flex items-center gap-4">
-                              <div className="w-10 h-10 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center text-[10px] font-black text-slate-400 group-hover:bg-rose-500 group-hover:text-white group-hover:border-rose-400 transition-all">
-                                {t.id.split('-')[1] || t.id.substring(0, 3)}
-                              </div>
-                              <div>
-                                 <h4 className="text-sm font-black text-slate-900 leading-tight mb-1 group-hover:text-rose-600 transition-colors">{t.title}</h4>
-                                 <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t.milestone}</p>
-                              </div>
+                        <td className="px-6 py-6 text-center">
+                            <div className="w-10 h-10 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center text-[10px] font-black text-slate-400 group-hover:bg-rose-500 group-hover:text-white group-hover:border-rose-400 transition-all">
+                              {t.id.split('-')[1] || t.id.substring(0, 3)}
+                            </div>
+                        </td>
+                        <td className="px-6 py-6">
+                           <div>
+                              <h4 className="text-sm font-black text-slate-900 leading-tight mb-1 group-hover:text-rose-600 transition-colors">{t.title}</h4>
+                              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t.milestone}</p>
                            </div>
                         </td>
-                        <td className="px-8 py-6">
+                        <td className="px-6 py-6">
                            <div className="flex items-center gap-3">
                               <div className="w-7 h-7 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-[9px] font-black text-slate-600">
                                  {t.owner.charAt(0)}
@@ -209,24 +218,45 @@ export function AsanaView() {
                               <span className="text-xs font-bold text-slate-700">{t.owner}</span>
                            </div>
                         </td>
-                        <td className="px-8 py-6">
-                           <div className="flex items-center gap-4 min-w-[120px]">
-                              <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden">
-                                <div className="h-full bg-rose-500 rounded-full transition-all duration-1000" style={{ width: `${t.progress}%` }} />
+                        <td className="px-6 py-6">
+                           <div className="flex flex-col gap-2">
+                              <StatusBadge status={t.status as any} />
+                              <div className="flex items-center gap-3">
+                                <div className="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden w-20">
+                                  <div className="h-full bg-rose-500 rounded-full transition-all duration-1000" style={{ width: `${t.progress}%` }} />
+                                </div>
+                                <span className="text-[9px] font-black text-slate-400">{t.progress}%</span>
                               </div>
-                              <span className="text-[10px] font-black text-slate-900">{t.progress}%</span>
                            </div>
                         </td>
-                        <td className="px-8 py-6">
+                        <td className="px-6 py-6">
+                           <div className="flex flex-col gap-1">
+                              {t.sourceImportType ? (
+                                <>
+                                  <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-1">
+                                    <Database className="w-3 h-3" /> {t.sourceImportType}
+                                  </span>
+                                  <span className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">
+                                    {t.importedAt ? new Date(t.importedAt).toLocaleDateString() : '-'}
+                                  </span>
+                                  {t.warnings && t.warnings.length > 0 && (
+                                    <span className="flex items-center gap-1 text-[8px] font-black text-amber-600 uppercase bg-amber-50 px-1 rounded border border-amber-100">
+                                      <AlertTriangle className="w-2.5 h-2.5" /> {t.warnings.length} issues
+                                    </span>
+                                  )}
+                                </>
+                              ) : (
+                                <span className="text-[10px] font-black text-slate-300 uppercase italic">Manual Entry</span>
+                              )}
+                           </div>
+                        </td>
+                        <td className="px-6 py-6">
                            <div className="flex items-center gap-2 text-xs font-black text-slate-600">
                               <Clock className="w-4 h-4 text-rose-400" />
                               {t.dueDate}
                            </div>
                         </td>
-                        <td className="px-8 py-6">
-                           <StatusBadge status={t.status as any} />
-                        </td>
-                        <td className="px-8 py-6 text-right">
+                        <td className="px-6 py-6 text-right">
                           <ChevronRight className={cn("w-6 h-6 transition-all", activeTaskId === t.id ? "text-rose-600 translate-x-1" : "text-slate-300")} />
                         </td>
                       </tr>
@@ -413,6 +443,11 @@ export function AsanaView() {
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)} 
         initialData={editingTask} 
+      />
+
+      <AsanaImportModal
+        isOpen={isImportModalOpen}
+        onClose={() => setIsImportModalOpen(false)}
       />
       
     </div>

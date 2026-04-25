@@ -16,7 +16,7 @@ type ExportType =
   | 'Status Report' | 'Manager Summary' | 'Confluence Summary' 
   | 'Jira Tasks' | 'Decision Log' | 'Open Questions' 
   | 'Requirements Register' | 'Risk Summary' | 'Deadline Report'
-  | 'SQL Documentation' | 'SQL Results' | 'Mermaid Diagram';
+  | 'SQL Documentation' | 'SQL Results' | 'Mermaid Diagram' | 'Asana Tasks';
 
 interface ExportCard {
   id: ExportType;
@@ -50,6 +50,7 @@ export function ExportsView() {
     { id: 'SQL Documentation', title: 'SQL Query Documentation', description: 'Dokumentácia SQL dotazov, filtrov a interpretácie.', icon: TerminalSquare, color: 'slate', category: 'Technical' },
     { id: 'SQL Results', title: 'SQL Result Export', description: 'Markdown tabuľka s manuálne vloženými výsledkami.', icon: Table, color: 'slate', category: 'Technical' },
     { id: 'Mermaid Diagram', title: 'Mermaid Flow Diagram', description: 'Textový popis diagramu pre vizualizáciu flowov.', icon: Share2, color: 'purple', category: 'Technical' },
+    { id: 'Asana Tasks', title: 'Asana Task Register', description: 'Export importovaných úloh a ich kvality dát.', icon: Kanban, color: 'rose', category: 'Analysis' },
   ];
 
   const generateMarkdown = (type: ExportType) => {
@@ -95,6 +96,16 @@ export function ExportsView() {
         md = `# Decision Log: ${activeProject.name}\n\n`;
         md += `| ID | Rozhodnutie | Status | Schválil | Dátum |\n| --- | --- | --- | --- | --- |\n`;
         md += activeProject.decisions.map(d => `| ${d.id} | ${d.title} | ${d.status} | ${d.approvedBy} | ${d.date} |`).join('\n');
+        break;
+
+      case 'Asana Tasks':
+        md = `# Asana Task Register: ${activeProject.name}\n\n`;
+        md += `**Dátum exportu:** ${today} | **Celkom taskov:** ${activeProject.asanaTasks?.length || 0}\n\n`;
+        md += `| ID | Task | Owner | Status | Deadline | Import Source | Warnings |\n`;
+        md += `| --- | --- | --- | --- | --- | --- | --- |\n`;
+        md += (activeProject.asanaTasks || []).map(t => {
+          return `| ${t.id} | ${t.title} | ${t.owner} | ${t.status} | ${t.dueDate || '-'} | ${t.sourceImportType || 'Manual'} | ${t.warnings?.join(', ') || '-'} |`;
+        }).join('\n');
         break;
 
       default:

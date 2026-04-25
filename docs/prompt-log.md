@@ -11,6 +11,7 @@
 | 2026-04-24 | Implementuj modul Projekty | Odstránenie placeholderu a implementácia plnohodnotnej správy projektov (Card Grid, Detail View, Edit/Delete flow). Rozšírenie mock dát pre Driver App a pridanie metriík (Health Score, Progress). | feat: implement projects module |
 | 2026-04-24 | Vytvor modul Confluence zdroje | Vytvorenie detailného view s rozdeleným UI na manuálny reader a interaktívny AI Panel. AI akcie ako extrakcia požiadaviek, rizík a rozhodnutí sú napojené na predpripravené mock dáta (Driver App) s umelým delayom (1.5s). | feat: add confluence source module |
 | 2026-04-25 | Finalizácia modulov a bezpečnostný audit | Vytvorenie modulov "Acceptance Criteria & QA" a "BA Quality Check", vykonanie finálneho bezpečnostného auditu (no-API, no-DB) a aktualizácia dokumentácie. | feat: finalize modules and security audit |
+| 2026-04-25 | Projekty Lifecycle | Uprav modul „Projekty“ a celý project lifecycle o dve nové akcie: 1. kompletne ukončiť projekt, 2. vymazať projekt. Ukončiť projekt = archív/read-only. Vymazať projekt = hard delete lokálneho stavu. | feat: add project lifecycle actions |
 
 ## 2026-04-25 - Sidebar & Auth Routing Fixes
 **User Prompt:**

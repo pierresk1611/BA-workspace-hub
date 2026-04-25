@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { useProject } from '../context/ProjectContext';
 import { calculateProjectProgress } from '../lib/projectUtils';
+import { cn } from '../lib/utils';
 
 export function Dashboard() {
   const { activeProject } = useProject();
@@ -45,6 +46,16 @@ export function Dashboard() {
     { title: "XL integration scope", owner: "Katka (PO)", status: "Awaiting Stakeholder Decision" },
     { title: "GPS rules", owner: "Marek (Tech Lead)", status: "Technical Verification" }
   ];
+
+  const asanaOverdue = activeProject.asanaTasks?.filter(t => 
+    t.dueDate && t.dueDate < new Date().toISOString().split('T')[0] && t.status !== 'Done'
+  ).length || 0;
+  
+  const asanaNextDue = activeProject.asanaTasks
+    ?.filter(t => t.dueDate && t.dueDate >= new Date().toISOString().split('T')[0] && t.status !== 'Done')
+    .sort((a, b) => a.dueDate.localeCompare(b.dueDate))[0]?.dueDate || 'None';
+
+  const asanaWarnings = activeProject.asanaTasks?.reduce((acc, t) => acc + (t.warnings?.length || 0), 0) || 0;
 
   return (
     <div className="p-8 space-y-8 animate-in fade-in duration-500 bg-slate-50 min-h-full overflow-y-auto custom-scrollbar">
@@ -132,11 +143,45 @@ export function Dashboard() {
              </div>
           </div>
         </div>
-
       </div>
 
-      {/* Progress Over Time */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      {/* Asana Operational Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="md:col-span-1 bg-rose-600 rounded-[2rem] p-8 text-white shadow-xl shadow-rose-100 relative overflow-hidden">
+           <div className="absolute -right-8 -bottom-8 w-32 h-32 bg-white/10 rounded-full blur-2xl" />
+           <p className="text-[10px] font-black uppercase tracking-[0.2em] mb-6 opacity-70">Asana Tasks</p>
+           <p className="text-4xl font-black mb-2">{activeProject.asanaTasks?.length || 0}</p>
+           <p className="text-xs font-bold opacity-70">Importované úlohy</p>
+        </div>
+        <div className="bg-white rounded-[2rem] p-8 border border-slate-200 shadow-sm">
+           <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
+             <Clock className="w-4 h-4 text-rose-500" /> Overdue
+           </p>
+           <p className={cn("text-4xl font-black mb-2", asanaOverdue > 0 ? "text-rose-600" : "text-emerald-600")}>
+             {asanaOverdue}
+           </p>
+           <p className="text-xs font-bold text-slate-400">Úlohy po termíne</p>
+        </div>
+        <div className="bg-white rounded-[2rem] p-8 border border-slate-200 shadow-sm">
+           <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
+             <Flag className="w-4 h-4 text-indigo-500" /> Next Due
+           </p>
+           <p className="text-2xl font-black text-slate-900 mb-2">{asanaNextDue}</p>
+           <p className="text-xs font-bold text-slate-400">Najbližší deadline</p>
+        </div>
+        <div className="bg-white rounded-[2rem] p-8 border border-slate-200 shadow-sm">
+           <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
+             <AlertTriangle className="w-4 h-4 text-amber-500" /> Warnings
+           </p>
+           <p className={cn("text-4xl font-black mb-2", asanaWarnings > 0 ? "text-amber-600" : "text-emerald-600")}>
+             {asanaWarnings}
+           </p>
+           <p className="text-xs font-bold text-slate-400">Quality issues v importe</p>
+        </div>
+      </div>
+
+      {/* Metrics Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         
         <div className="lg:col-span-2 bg-white rounded-[2.5rem] p-10 shadow-xl border border-slate-100">
           <div className="flex items-center justify-between mb-8">
