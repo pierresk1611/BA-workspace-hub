@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import type { ReactNode } from "react";
 import type { Project, LinkedSystem, ConfluenceSource, JiraItem, DataFlow, SQLQuery, SQLResult, Deadline, Requirement, Decision, Question, Risk, Dependency, AsanaTask, Communication, Meeting } from "../types";
-import { demoProjectsData } from "../data/mockProject";
+import { demoProjectsData } from "../demo/demoSeedData";
 
 interface ProjectContextType {
   projects: Project[];
@@ -63,8 +63,8 @@ interface ProjectContextType {
   clearAllData: () => void;
 }
 
-const ProjectContext = createContext<ProjectContextType | undefined>(undefined);
 const STORAGE_KEY = "ba_workspace_projects";
+const CLEAN_MODE_KEY = "ba_workspace_clean_mode";
 
 export function ProjectProvider({ children }: { children: ReactNode }) {
   const [projects, setProjects] = useState<Project[]>(() => {
@@ -72,9 +72,9 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) return JSON.parse(stored);
       
-      // Default behavior: empty unless explicitly enabled
-      const enableDemo = import.meta.env.VITE_ENABLE_DEMO_DATA === 'true';
-      return enableDemo ? demoProjectsData : [];
+      // Default behavior: empty
+      localStorage.setItem(CLEAN_MODE_KEY, "true");
+      return [];
     } catch (e) {
       return [];
     }
@@ -642,6 +642,7 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
     setProjects([]);
     setActiveProjectId('');
     localStorage.removeItem(STORAGE_KEY);
+    localStorage.setItem(CLEAN_MODE_KEY, "true");
   };
 
   return (

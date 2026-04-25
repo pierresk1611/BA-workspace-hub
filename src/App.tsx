@@ -31,19 +31,39 @@ import { ProjectProvider } from './context/ProjectContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { useProject } from './context/ProjectContext';
 
+import { useState } from 'react';
+import { MobileMenu } from './components/MobileMenu';
+import { OfflineBanner } from './components/OfflineBanner';
+
 // ProtectedRoute: redirects to /login if not authenticated
 function ProtectedRoute() {
   const { isAuthenticated } = useAuth();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
+
   return (
-    <div className="flex h-screen bg-slate-50 overflow-hidden font-sans">
-      <Sidebar />
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <Topbar />
-        <main className="flex-1 overflow-y-auto custom-scrollbar relative">
-          <Outlet />
+    <div className="flex h-screen bg-slate-50 overflow-hidden font-sans relative w-full">
+      <OfflineBanner />
+      
+      {/* Desktop Sidebar - fixed on the left */}
+      <aside className="hidden lg:block h-full w-72 shrink-0 border-r border-slate-200 bg-slate-900 z-30">
+        <Sidebar />
+      </aside>
+
+      {/* Mobile Menu Drawer - over everything else */}
+      <MobileMenu isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
+
+      {/* Main Content Area */}
+      <div className="flex-1 flex flex-col overflow-hidden w-full relative min-w-0">
+        <Topbar onMenuClick={() => setIsSidebarOpen(true)} />
+        
+        <main className="flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar relative w-full bg-slate-50 pb-safe">
+          <div className="w-full max-w-[1600px] mx-auto min-h-full">
+            <Outlet />
+          </div>
         </main>
       </div>
     </div>

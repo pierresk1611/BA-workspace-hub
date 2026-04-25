@@ -242,75 +242,103 @@ export function NotificationCenter() {
         )}
       </button>
 
-      {isOpen && (
-        <div className="absolute top-full right-0 mt-2 w-[400px] bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden z-50 flex flex-col max-h-[85vh]">
-          
-          <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between shrink-0 bg-slate-50/50">
-            <h3 className="text-sm font-black text-slate-900">Notification Centre</h3>
-            {unreadCount > 0 && (
-              <button 
-                onClick={markAllRead}
-                className="text-[10px] font-black text-indigo-600 hover:text-indigo-700 uppercase tracking-widest flex items-center gap-1"
-              >
-                <Check className="w-3 h-3" />
-                Označiť všetko
-              </button>
-            )}
+      {/* Popover / Drawer Container */}
+      <div className={cn(
+        "fixed inset-0 z-[60] lg:absolute lg:inset-auto lg:top-full lg:right-0 lg:mt-2 lg:w-[400px] lg:max-h-[85vh] bg-white lg:rounded-2xl shadow-2xl border-l lg:border border-slate-200 overflow-hidden flex flex-col transition-all duration-500",
+        isOpen ? "translate-x-0 opacity-100" : "translate-x-full lg:translate-x-0 lg:opacity-0 lg:pointer-events-none"
+      )}>
+        
+        {/* Header */}
+        <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between shrink-0 bg-slate-50/50">
+          <div className="flex items-center gap-3">
+             <button onClick={() => setIsOpen(false)} className="lg:hidden p-2 text-slate-400 hover:text-slate-600">
+               <X className="w-5 h-5" />
+             </button>
+             <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest">Notifikácie</h3>
           </div>
-
-          <div className="px-4 py-2 border-b border-slate-100 flex gap-2 overflow-x-auto no-scrollbar shrink-0">
-            {['All', 'Unread', 'Deadline', 'Risk', 'Question', 'Data Quality', 'System'].map(f => (
-              <button
-                key={f}
-                onClick={() => setFilter(f as any)}
-                className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest whitespace-nowrap transition-colors ${
-                  filter === f 
-                    ? 'bg-slate-900 text-white' 
-                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                }`}
-              >
-                {f}
-              </button>
-            ))}
-          </div>
-
-          <div className="overflow-y-auto flex-1 p-2 space-y-2">
-            {filteredNotifications.length === 0 ? (
-              <div className="text-center py-8 text-slate-400">
-                <Bell className="w-8 h-8 mx-auto mb-2 opacity-20" />
-                <p className="text-xs font-bold">Žiadne notifikácie v tejto kategórii</p>
-              </div>
-            ) : (
-              filteredNotifications.map(notif => {
-                const isRead = readIds.has(notif.id);
-                return (
-                  <div 
-                    key={notif.id} 
-                    onClick={() => handleNotificationClick(notif)}
-                    className={`p-3 rounded-xl border cursor-pointer transition-all hover:scale-[1.01] flex gap-3 ${getSeverityColors(notif.severity, isRead)}`}
-                  >
-                    <div className="pt-1.5 shrink-0">
-                       {!isRead && getSeverityBadge(notif.severity)}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex justify-between items-start mb-1 gap-2">
-                        <span className={`text-xs font-black truncate ${isRead ? 'text-slate-600' : 'text-slate-900'}`}>
-                          {notif.title}
-                        </span>
-                        <span className="text-[9px] font-black uppercase tracking-widest opacity-60 shrink-0">
-                          {notif.type}
-                        </span>
-                      </div>
-                      <p className={`text-xs ${isRead ? 'text-slate-500' : 'font-medium'} line-clamp-2`}>
-                        {notif.message}
-                      </p>
-                    </div>
-                  </div>
-                );
-              })
-            )}
-          </div>
+          {unreadCount > 0 && (
+            <button 
+              onClick={markAllRead}
+              className="text-[10px] font-black text-indigo-600 hover:text-indigo-700 uppercase tracking-widest flex items-center gap-1"
+            >
+              <Check className="w-3 h-3" />
+              Označiť všetko
+            </button>
+          )}
         </div>
+
+        {/* Filters */}
+        <div className="px-5 py-3 border-b border-slate-100 flex gap-2 overflow-x-auto no-scrollbar shrink-0">
+          {['All', 'Unread', 'Deadline', 'Risk', 'Question', 'Data Quality', 'System'].map(f => (
+            <button
+              key={f}
+              onClick={() => setFilter(f as any)}
+              className={cn(
+                "px-3 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest whitespace-nowrap transition-colors",
+                filter === f 
+                  ? 'bg-slate-900 text-white shadow-md' 
+                  : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
+              )}
+            >
+              {f}
+            </button>
+          ))}
+        </div>
+
+        {/* List */}
+        <div className="overflow-y-auto flex-1 p-4 space-y-3 custom-scrollbar">
+          {filteredNotifications.length === 0 ? (
+            <div className="text-center py-16 text-slate-400">
+              <Bell className="w-12 h-12 mx-auto mb-4 opacity-10" />
+              <p className="text-xs font-bold uppercase tracking-widest">Žiadne novinky</p>
+            </div>
+          ) : (
+            filteredNotifications.map(notif => {
+              const isRead = readIds.has(notif.id);
+              return (
+                <div 
+                  key={notif.id} 
+                  onClick={() => handleNotificationClick(notif)}
+                  className={cn(
+                    "p-4 rounded-2xl border cursor-pointer transition-all hover:scale-[1.02] flex gap-4 shadow-sm",
+                    getSeverityColors(notif.severity, isRead)
+                  )}
+                >
+                  <div className="pt-1.5 shrink-0">
+                     {!isRead && getSeverityBadge(notif.severity)}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex justify-between items-start mb-1 gap-2">
+                      <span className={cn(
+                        "text-xs font-black truncate",
+                        isRead ? 'text-slate-600' : 'text-slate-900'
+                      )}>
+                        {notif.title}
+                      </span>
+                      <span className="text-[8px] font-black uppercase tracking-widest opacity-40 shrink-0">
+                        {notif.createdAt}
+                      </span>
+                    </div>
+                    <p className={cn(
+                      "text-xs leading-relaxed",
+                      isRead ? 'text-slate-400 font-medium' : 'text-slate-700 font-bold'
+                    )}>
+                      {notif.message}
+                    </p>
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
+      </div>
+
+      {/* Backdrop for mobile */}
+      {isOpen && (
+        <div 
+          onClick={() => setIsOpen(false)}
+          className="lg:hidden fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 animate-in fade-in duration-300"
+        />
       )}
     </div>
   );

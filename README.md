@@ -22,19 +22,35 @@ Systém umožňuje plnohodnotnú správu životného cyklu projektu:
 - **Vymazanie projektu:** Úplné odstránenie projektu a všetkých jeho lokálne naviazaných dát z prototypu.
 
 ## Tech stack
-- React
+- React (Vite)
 - TypeScript
 - Tailwind CSS
-- shadcn/ui
-- Recharts pre grafy
-- Lokálne mock dáta
+- Lucide React (Ikony)
+- Recharts (Grafy)
+- **Vite PWA Plugin** (Offline podpora & Inštalácia)
+
+## Mobilná verzia & PWA
+Aplikácia je plne responzívna a optimalizovaná pre mobilné zariadenia a tablety. Využíva **Mobile-First Design** s prvkami natívnych aplikácií (napr. full-screen drawery namiesto modálov na mobile).
+
+### 📱 Inštalácia (PWA)
+BA HUB môžete používať ako nainštalovanú aplikáciu na vašom počítači alebo mobilnom telefóne:
+1. Prihláste sa do aplikácie.
+2. Prejdite do **Nastavenia**.
+3. Kliknite na tlačidlo **Inštalovať Teraz** v sekcii Mobilná Aplikácia.
+4. Aplikácia sa pridá na vašu plochu/home screen a bude dostupná bez adresného riadku prehliadača.
+
+### 🌐 Offline Režim
+Vďaka Service Workeru je aplikácia **Offline Ready**:
+- Základné rozhranie sa načíta aj bez pripojenia na internet.
+- Lokálne dáta (LocalStorage) sú prístupné offline.
+- **Bezpečnosť:** Service worker nikdy neukladá citlivé údaje (prihlasovacie tokeny, heslá) do cache. API požiadavky na `/api/login` vyžadujú vždy sieťové pripojenie.
 
 ## Ako spustiť lokálne
 1. Nainštalujte závislosti: `npm install`
 2. Vytvorte kópiu environment súboru: `cp .env.example .env.local` a vyplňte prihlasovacie údaje.
 3. **Lokálne testovanie prihlásenia:** Keďže aplikácia využíva Vercel Serverless Functions (`/api/login`), na plnohodnotné lokálne testovanie auth flowu spustite:
    `vercel dev`
-4. Ak používate iba Vite dev server (`npm run dev`), API endpoint nebude dostupný, preto sa odporúča vývoj cez Vercel CLI.
+4. Ak používate iba Vite dev server (`npm run dev`), API endpoint nebude dostupný.
 5. Vytvorené testovacie údaje pre tento prototyp sú:
    - Username: `peter`
    - Password: `2703_Viera`
@@ -43,3 +59,4 @@ Systém umožňuje plnohodnotnú správu životného cyklu projektu:
 - **UPOZORNENIE:** Prototyp pracuje **výhradne iba s manuálne vloženým linkom a textom** a mock dátami.
 - **Žiadne priame integrácie:** Neexistujú a nesmú sa implementovať žiadne priame integrácie na Confluence, Jira, Asana, Teams, Kafka, email ani databázu.
 - Všetky externé zdroje sú prístupné iba formou odkazov (URL) a texty z nich je potrebné do aplikácie vložiť manuálne.
+- PWA a Service Worker sú konfigurované tak, aby rešpektovali izoláciu dát a neukladali žiadne tajomstvá do systémovej cache.

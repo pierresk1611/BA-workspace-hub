@@ -101,130 +101,132 @@ export function ProjectFormModal({ isOpen, onClose, initialData }: ProjectFormMo
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-4xl max-h-[90vh] flex flex-col">
-        <div className="flex items-center justify-between p-6 border-b border-slate-200">
-          <h2 className="text-xl font-bold text-slate-800">
-            {initialData ? 'Upraviť projekt' : 'Vytvoriť nový projekt'}
-          </h2>
-          <button onClick={onClose} className="p-2 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100">
-            <X className="w-5 h-5" />
+    <div className={cn(
+      "fixed inset-0 z-[100] flex items-center justify-center transition-all duration-300",
+      isOpen ? "visible" : "invisible pointer-events-none"
+    )}>
+      {/* Backdrop */}
+      <div 
+        className={cn(
+          "absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity duration-300",
+          isOpen ? "opacity-100" : "opacity-0"
+        )} 
+        onClick={onClose} 
+      />
+
+      {/* Drawer / Modal */}
+      <div className={cn(
+        "bg-white w-full h-full lg:h-auto lg:max-h-[90vh] lg:max-w-4xl lg:rounded-[2.5rem] shadow-2xl flex flex-col relative transition-transform duration-500 transform overflow-hidden",
+        isOpen ? "translate-y-0" : "translate-y-full lg:translate-y-4 lg:scale-95 lg:opacity-0"
+      )}>
+        {/* Header */}
+        <div className="flex items-center justify-between p-6 md:p-10 border-b border-slate-100 shrink-0">
+          <div>
+            <h2 className="text-xl md:text-3xl font-black text-slate-900 tracking-tight">
+              {initialData ? 'Upraviť projekt' : 'Nový projekt'}
+            </h2>
+            <p className="text-[10px] md:text-sm text-slate-400 font-bold uppercase tracking-widest mt-1 md:mt-2">
+              Definícia parametrov workspaceu
+            </p>
+          </div>
+          <button 
+            onClick={onClose} 
+            className="p-3 md:p-4 bg-slate-50 text-slate-400 hover:text-slate-600 rounded-2xl transition-all"
+          >
+            <X className="w-5 h-5 md:w-6 md:h-6" />
           </button>
         </div>
 
-        <div className="p-6 overflow-y-auto flex-1 custom-scrollbar">
-          <form id="project-form" onSubmit={handleSubmit} className="space-y-6">
+        {/* Content */}
+        <div className="flex-1 overflow-y-auto p-6 md:p-10 custom-scrollbar space-y-8 md:space-y-12">
+          <form id="project-form" onSubmit={handleSubmit} className="space-y-8 md:space-y-12">
             
             {/* Základné informácie */}
-            <div>
-              <h3 className="text-lg font-semibold text-slate-800 mb-4">Základné informácie</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="col-span-2">
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Názov projektu *</label>
-                  <input required name="name" value={formData.name || ''} onChange={handleChange} className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
+            <div className="space-y-6">
+              <h3 className="text-[10px] md:text-xs font-black text-indigo-600 uppercase tracking-[0.2em]">Základné dáta</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+                <div className="md:col-span-2">
+                  <label className="block text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Názov projektu *</label>
+                  <input required name="name" value={formData.name || ''} onChange={handleChange} className="w-full px-5 py-3 md:py-4 bg-slate-50 border border-slate-200 rounded-xl md:rounded-2xl text-xs md:text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none transition-all shadow-inner" />
                 </div>
-                <div className="col-span-2">
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Krátky popis *</label>
-                  <input required name="shortDescription" value={formData.shortDescription || ''} onChange={handleChange} className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
+                <div className="md:col-span-2">
+                  <label className="block text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Krátky popis *</label>
+                  <input required name="shortDescription" value={formData.shortDescription || ''} onChange={handleChange} className="w-full px-5 py-3 md:py-4 bg-slate-50 border border-slate-200 rounded-xl md:rounded-2xl text-xs md:text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none transition-all shadow-inner" />
                 </div>
-                <div className="col-span-2">
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Detailný popis</label>
-                  <textarea name="detailedDescription" value={formData.detailedDescription || ''} onChange={handleChange} rows={3} className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"></textarea>
+                <div className="md:col-span-2">
+                  <label className="block text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Detailný popis</label>
+                  <textarea name="detailedDescription" value={formData.detailedDescription || ''} onChange={handleChange} rows={4} className="w-full px-5 py-3 md:py-4 bg-slate-50 border border-slate-200 rounded-xl md:rounded-2xl text-xs md:text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none transition-all shadow-inner resize-none"></textarea>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Status</label>
-                  <select name="status" value={formData.status || 'Idea'} onChange={handleChange} className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                  <label className="block text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Status</label>
+                  <select name="status" value={formData.status || 'Idea'} onChange={handleChange} className="w-full px-5 py-3 md:py-4 bg-slate-50 border border-slate-200 rounded-xl md:rounded-2xl text-xs md:text-sm font-black outline-none focus:ring-2 focus:ring-indigo-500 transition-all shadow-inner appearance-none">
                     {statuses.map(s => <option key={s} value={s}>{s}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Priorita</label>
-                  <select name="priority" value={formData.priority || 'Stredná'} onChange={handleChange} className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                  <label className="block text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Priorita</label>
+                  <select name="priority" value={formData.priority || 'Stredná'} onChange={handleChange} className="w-full px-5 py-3 md:py-4 bg-slate-50 border border-slate-200 rounded-xl md:rounded-2xl text-xs md:text-sm font-black outline-none focus:ring-2 focus:ring-indigo-500 transition-all shadow-inner appearance-none">
                     {priorities.map(p => <option key={p} value={p}>{p}</option>)}
                   </select>
                 </div>
               </div>
             </div>
 
-            <hr className="border-slate-200" />
-
             {/* Tím */}
-            <div>
-              <h3 className="text-lg font-semibold text-slate-800 mb-4">Projektový tím</h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="space-y-6">
+              <h3 className="text-[10px] md:text-xs font-black text-indigo-600 uppercase tracking-[0.2em]">Projektový tím</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Business Analyst</label>
-                  <input name="team.businessAnalyst" value={formData.team?.businessAnalyst || ''} onChange={handleChange} className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
+                  <label className="block text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Business Analyst</label>
+                  <input name="team.businessAnalyst" value={formData.team?.businessAnalyst || ''} onChange={handleChange} className="w-full px-5 py-3 md:py-4 bg-slate-50 border border-slate-200 rounded-xl md:rounded-2xl text-xs md:text-sm font-bold outline-none focus:ring-2 focus:ring-indigo-500 transition-all shadow-inner" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Product Owner</label>
-                  <input name="team.productOwner" value={formData.team?.productOwner || ''} onChange={handleChange} className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
+                  <label className="block text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Product Owner</label>
+                  <input name="team.productOwner" value={formData.team?.productOwner || ''} onChange={handleChange} className="w-full px-5 py-3 md:py-4 bg-slate-50 border border-slate-200 rounded-xl md:rounded-2xl text-xs md:text-sm font-bold outline-none focus:ring-2 focus:ring-indigo-500 transition-all shadow-inner" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Business Owner</label>
-                  <input name="team.businessOwner" value={formData.team?.businessOwner || ''} onChange={handleChange} className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Tech Lead</label>
-                  <input name="team.techLead" value={formData.team?.techLead || ''} onChange={handleChange} className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">QA Owner</label>
-                  <input name="team.qaOwner" value={formData.team?.qaOwner || ''} onChange={handleChange} className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Stakeholderi</label>
-                  <input name="team.stakeholders" value={formData.team?.stakeholders || ''} onChange={handleChange} placeholder="Napr. Logistika, Marketing..." className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
+                  <label className="block text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Business Owner</label>
+                  <input name="team.businessOwner" value={formData.team?.businessOwner || ''} onChange={handleChange} className="w-full px-5 py-3 md:py-4 bg-slate-50 border border-slate-200 rounded-xl md:rounded-2xl text-xs md:text-sm font-bold outline-none focus:ring-2 focus:ring-indigo-500 transition-all shadow-inner" />
                 </div>
               </div>
             </div>
 
-            <hr className="border-slate-200" />
-
             {/* Dátumy a metadáta */}
-            <div>
-              <h3 className="text-lg font-semibold text-slate-800 mb-4">Dátumy a Klasifikácia</h3>
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="space-y-6 pb-20">
+              <h3 className="text-[10px] md:text-xs font-black text-indigo-600 uppercase tracking-[0.2em]">Klasifikácia</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Dátum začiatku</label>
-                  <input type="date" name="startDate" value={formData.startDate || ''} onChange={handleChange} className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Cieľové dokončenie</label>
-                  <input type="date" name="targetDate" value={formData.targetDate || ''} onChange={handleChange} className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
+                  <label className="block text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Dátum začiatku</label>
+                  <input type="date" name="startDate" value={formData.startDate || ''} onChange={handleChange} className="w-full px-5 py-3 md:py-4 bg-slate-50 border border-slate-200 rounded-xl md:rounded-2xl text-xs md:text-sm font-black outline-none focus:ring-2 focus:ring-indigo-500 transition-all shadow-inner" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Hlavný deadline</label>
-                  <input type="date" name="mainDeadline" value={formData.mainDeadline || ''} onChange={handleChange} className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
+                  <label className="block text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Hlavný deadline</label>
+                  <input type="date" name="mainDeadline" value={formData.mainDeadline || ''} onChange={handleChange} className="w-full px-5 py-3 md:py-4 bg-slate-50 border border-slate-200 rounded-xl md:rounded-2xl text-xs md:text-sm font-black outline-none focus:ring-2 focus:ring-indigo-500 transition-all shadow-inner" />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Cieľový release</label>
-                  <input name="release" value={formData.release || ''} onChange={handleChange} placeholder="Napr. Q3 2026" className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
-                </div>
-                <div className="col-span-2">
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Tagy</label>
-                  <input name="tags" value={formData.tags || ''} onChange={handleChange} placeholder="Oddelené čiarkou" className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
-                </div>
-                <div className="col-span-2">
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Typ projektu</label>
-                  <select name="type" value={formData.type || 'IT projekt'} onChange={handleChange} className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                <div className="md:col-span-2">
+                  <label className="block text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Typ projektu</label>
+                  <select name="type" value={formData.type || 'IT projekt'} onChange={handleChange} className="w-full px-5 py-3 md:py-4 bg-slate-50 border border-slate-200 rounded-xl md:rounded-2xl text-xs md:text-sm font-black outline-none focus:ring-2 focus:ring-indigo-500 transition-all shadow-inner appearance-none">
                     {projectTypes.map(t => <option key={t} value={t}>{t}</option>)}
                   </select>
-                </div>
-                <div className="col-span-4">
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Poznámky</label>
-                  <textarea name="notes" value={formData.notes || ''} onChange={handleChange} rows={2} className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"></textarea>
                 </div>
               </div>
             </div>
           </form>
         </div>
 
-        <div className="p-6 border-t border-slate-200 bg-slate-50 flex justify-end gap-3 rounded-b-xl">
-          <button onClick={onClose} className="px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-200 rounded-lg transition-colors">
+        {/* Footer */}
+        <div className="p-6 md:p-10 border-t border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row gap-3 md:gap-4 shrink-0">
+          <button 
+            onClick={onClose} 
+            className="flex-1 px-8 py-4 md:py-5 bg-white border border-slate-200 text-slate-600 rounded-xl md:rounded-2xl font-black text-[10px] md:text-xs uppercase tracking-widest hover:bg-slate-50 transition-all"
+          >
             Zrušiť
           </button>
-          <button type="submit" form="project-form" className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors">
+          <button 
+            type="submit" 
+            form="project-form" 
+            className="flex-1 px-8 py-4 md:py-5 bg-indigo-600 text-white rounded-xl md:rounded-2xl font-black text-[10px] md:text-xs uppercase tracking-widest shadow-xl shadow-indigo-100 hover:bg-indigo-700 transition-all"
+          >
             {initialData ? 'Uložiť zmeny' : 'Vytvoriť projekt'}
           </button>
         </div>

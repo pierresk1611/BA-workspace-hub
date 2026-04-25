@@ -133,40 +133,37 @@ export function AIAgentView() {
     };
 
     if (q.includes('stav') || q.includes('summary') || mode === 'Project Summary') {
-      res.shortAnswer = `Projekt ${project.name} je aktuálne v stave ${project.status} s celkovým progresom ${project.metrics.progress}%.`;
-      res.details = `Máme evidovaných ${project.requirements.length} požiadaviek a ${project.risks.length} rizík. Najbližší deadline je ${project.metrics.nearestDeadline}.`;
-      res.nextSteps = ["Vyriešiť blokujúce riziká", "Uzavrieť otvorené otázky do konca týždňa"];
+      res.shortAnswer = `Projekt ${project.name} je aktuálne v stave ${project.status} s celkovým progresom ${project.metrics?.progress || 0}%.`;
+      res.details = `Máme evidovaných ${project.requirements?.length || 0} požiadaviek a ${project.risks?.length || 0} rizík.`;
+      res.nextSteps = ["Vyriešiť otvorené otázky", "Preveriť termíny najbližších míľnikov"];
       res.suggestedEntities = [{ type: "Status report", title: `Report k dátumu ${new Date().toLocaleDateString()}` }];
     } else if (q.includes('rizik') || mode === 'Risk') {
-      res.shortAnswer = `Identifikoval som ${project.risks.length} rizík, z ktorých ${project.risks.filter((r:any) => r.severity === 'Vysoká' || r.severity === 'Kritická').length} sú vysoko kritické.`;
-      res.details = `Najväčším rizikom je '${project.risks[0]?.title || 'technická závislosť'}'.`;
-      res.sources = project.risks.map((r:any) => ({ type: "Risk", title: r.title, id: r.id }));
-      res.suggestedEntities = [{ type: "Riziko", title: "Nové odvodené riziko", content: "Možný dopad na časový plán kvôli meškaniu mitigácie." }];
+      const risks = project.risks || [];
+      res.shortAnswer = `Identifikoval som ${risks.length} rizík.`;
+      if (risks.length > 0) {
+        res.details = `Najväčším rizikom je '${risks[0].title}'.`;
+        res.sources = risks.map((r:any) => ({ type: "Risk", title: r.title, id: r.id }));
+      }
+      res.suggestedEntities = [{ type: "Riziko", title: "Nové odvodené riziko", content: "Možný dopad na časový plán." }];
     } else if (q.includes('jira') || mode === 'Jira Draft') {
       res.shortAnswer = "Pripravil som drafty Jira taskov na základe tvojich požiadaviek.";
-      res.details = "Tasky zahŕňajú technické špecifikácie a navrhované AC.";
+      res.details = "Tasky zahŕňajú technické špecifikácie na základe vybraných modulov.";
       res.suggestedEntities = [
-        { type: "Jira task", title: "IMPLEMENT-01: Login Flow", content: "Story: Ako vodič sa chcem prihlásiť..." },
-        { type: "Jira task", title: "LOG-02: GPS tracking service", content: "Task: Implementácia background servisu..." }
+        { type: "Jira task", title: "ARCH-01: System Integration", content: "Story: Ako systémový architekt..." },
+        { type: "Jira task", title: "DEV-02: Backend Service", content: "Task: Implementácia API rozhrania..." }
       ];
     } else if (q.includes('sql') || mode === 'SQL') {
-      res.shortAnswer = "Navrhnutý SQL dotaz pre analýzu logistických dát.";
-      res.details = "Dotaz spája tabuľku doručení s tabuľkou chýb GPS signálu.";
-      res.suggestedEntities = [{ type: "SQL query", title: "GPS Accuracy Analysis", content: "SELECT d.id, g.error_margin FROM deliveries d JOIN gps_logs g ON d.id = g.delivery_id WHERE g.accuracy > 50;" }];
+      res.shortAnswer = "Navrhnutý SQL dotaz pre analýzu dát.";
+      res.details = "Dotaz spája hlavné tabuľky podľa štruktúry v SQL Sandboxe.";
+      res.suggestedEntities = [{ type: "SQL query", title: "Data Accuracy Analysis", content: "SELECT * FROM data_table WHERE status = 'Error';" }];
     } else if (q.includes('asana') || mode === 'Asana Analysis') {
       const asanaCount = project.asanaTasks?.length || 0;
-      const issues = project.asanaTasks?.filter((t:any) => t.warnings && t.warnings.length > 0).length || 0;
-      res.shortAnswer = `Analyzoval som ${asanaCount} importovaných Asana taskov. Identifikoval som ${issues} úloh s kvalitou dát, ktoré vyžadujú tvoju pozornosť.`;
-      res.details = `Máme ${project.asanaTasks?.filter((t:any) => t.status === 'Done').length || 0} dokončených úloh. Najbližší termín je ${project.asanaTasks?.find((t:any) => t.status !== 'Done')?.dueDate || 'nedefinovaný'}.`;
-      res.nextSteps = ["Doplniť chýbajúcich ownerov k 3 taskom", "Preveriť blokovaný task 'GPS Rules'"];
-      res.suggestedEntities = [
-        { type: "Draft správy", title: "Follow-up", content: "Ahoj, k tasku..." },
-        { type: "Jira Návrh", title: "Nová Jira Story z Asany", content: "Na základe Asana tasku odporúčam vytvoriť Jira User Story." }
-      ];
+      res.shortAnswer = `Analyzoval som ${asanaCount} importovaných Asana taskov.`;
+      res.details = `Máme ${project.asanaTasks?.filter((t:any) => t.status === 'Done').length || 0} dokončených úloh.`;
+      res.nextSteps = ["Doplniť chýbajúcich ownerov", "Preveriť blokované úlohy"];
     } else if (q.includes('quality') || mode === 'BA Quality') {
-      res.shortAnswer = "BA Quality Check dokončený. Skóre: 85/100.";
-      res.details = "3 požiadavky nemajú AC, 2 riziká nemajú mitigation deadline.";
-      res.nextSteps = ["Doplniť AC k REQ-001", "Pridať deadline k RSK-002"];
+      res.shortAnswer = "BA Quality Check dokončený.";
+      res.details = "Analýza konzistencie požiadaviek a akceptačných kritérií.";
     }
 
     return res;

@@ -238,27 +238,42 @@ export function AsanaImportModal({ isOpen, onClose }: AsanaImportModalProps) {
   };
 
   return (
-    <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[110] flex items-center justify-center p-4">
-      <div className="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-5xl max-h-[90vh] overflow-hidden flex flex-col border border-slate-200">
-        
+    <div className={cn(
+      "fixed inset-0 z-[110] flex items-center justify-center transition-all duration-300",
+      isOpen ? "visible" : "invisible pointer-events-none"
+    )}>
+      {/* Backdrop */}
+      <div 
+        className={cn(
+          "absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity duration-300",
+          isOpen ? "opacity-100" : "opacity-0"
+        )} 
+        onClick={onClose} 
+      />
+
+      {/* Drawer / Modal */}
+      <div className={cn(
+        "bg-white w-full h-full lg:h-auto lg:max-h-[95vh] lg:max-w-5xl lg:rounded-[2.5rem] shadow-2xl flex flex-col relative transition-transform duration-500 transform overflow-hidden border border-slate-200",
+        isOpen ? "translate-y-0" : "translate-y-full lg:translate-y-4 lg:scale-95 lg:opacity-0"
+      )}>
         {/* Header */}
-        <div className="p-8 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+        <div className="p-6 md:p-10 border-b border-slate-100 flex items-center justify-between bg-slate-50/50 shrink-0">
           <div className="flex items-center gap-4">
-            <div className="p-3 bg-rose-500 rounded-2xl text-white shadow-lg shadow-rose-100">
-              <Upload className="w-6 h-6" />
+            <div className="p-3 md:p-4 bg-rose-500 rounded-2xl text-white shadow-lg shadow-rose-100">
+              <Upload className="w-5 h-5 md:w-6 md:h-6" />
             </div>
             <div>
-              <h2 className="text-2xl font-black text-slate-900 tracking-tight">Importovať Asana Tasky</h2>
-              <p className="text-sm text-slate-500 font-medium">Manuálny import bez pripojenia na API</p>
+              <h2 className="text-lg md:text-3xl font-black text-slate-900 tracking-tight">Import Asana Taskov</h2>
+              <p className="text-[10px] md:text-sm text-slate-500 font-bold uppercase tracking-widest mt-1">Manuálny import dát</p>
             </div>
           </div>
-          <button onClick={onClose} className="p-2 hover:bg-white rounded-xl transition-colors border border-transparent hover:border-slate-200 shadow-sm">
-            <X className="w-5 h-5 text-slate-500" />
+          <button onClick={onClose} className="p-3 md:p-4 bg-white hover:bg-slate-50 rounded-2xl transition-all border border-slate-100 shadow-sm text-slate-400">
+            <X className="w-5 h-5 md:w-6 md:h-6" />
           </button>
         </div>
 
         {/* Step Indicator */}
-        <div className="px-8 py-4 bg-white border-b border-slate-50 flex items-center gap-2 overflow-x-auto no-scrollbar">
+        <div className="px-6 md:px-10 py-4 bg-white border-b border-slate-50 flex items-center gap-2 overflow-x-auto scrollbar-hide shrink-0">
           {[
             { n: 1, label: 'Zdroj' },
             { n: 2, label: 'Dáta' },
@@ -268,7 +283,7 @@ export function AsanaImportModal({ isOpen, onClose }: AsanaImportModalProps) {
           ].map(s => (
             <React.Fragment key={s.n}>
               <div className={cn(
-                "flex items-center gap-2 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest whitespace-nowrap transition-all",
+                "flex items-center gap-2 px-4 py-2 rounded-full text-[9px] md:text-[10px] font-black uppercase tracking-widest whitespace-nowrap transition-all",
                 step === s.n ? "bg-indigo-600 text-white shadow-md" : 
                 step > s.n ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-400"
               )}>
@@ -281,11 +296,11 @@ export function AsanaImportModal({ isOpen, onClose }: AsanaImportModalProps) {
         </div>
 
         {/* Content Area */}
-        <div className="flex-1 overflow-y-auto custom-scrollbar p-8">
+        <div className="flex-1 overflow-y-auto custom-scrollbar p-6 md:p-10">
           
           {/* Step 1: Select Type */}
           {step === 1 && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
               {[
                 { type: 'CSV', icon: Upload, desc: 'Nahrať alebo vložiť CSV export', color: 'bg-indigo-50 text-indigo-600 border-indigo-100' },
                 { type: 'JSON', icon: FileJson, desc: 'Vložiť JSON pole objektov', color: 'bg-amber-50 text-amber-600 border-amber-100' },
@@ -295,13 +310,13 @@ export function AsanaImportModal({ isOpen, onClose }: AsanaImportModalProps) {
                 <button 
                   key={t.type}
                   onClick={() => { setImportType(t.type as any); setStep(t.type === 'Demo' ? 4 : 2); if(t.type === 'Demo') processInput('', 'Demo'); }}
-                  className="p-8 bg-white border border-slate-200 rounded-[2.5rem] text-left hover:border-indigo-500 hover:shadow-2xl hover:-translate-y-1 transition-all group"
+                  className="p-6 md:p-10 bg-white border border-slate-200 rounded-[2.5rem] text-left hover:border-indigo-500 hover:shadow-2xl hover:-translate-y-1 transition-all group"
                 >
-                  <div className={cn("w-14 h-14 rounded-2xl flex items-center justify-center mb-6 shadow-sm", t.color)}>
-                    <t.icon className="w-7 h-7" />
+                  <div className={cn("w-12 h-12 md:w-16 md:h-16 rounded-2xl flex items-center justify-center mb-6 shadow-sm", t.color)}>
+                    <t.icon className="w-6 h-6 md:w-8 md:h-8" />
                   </div>
-                  <h4 className="text-lg font-black text-slate-900 mb-2">{t.type}</h4>
-                  <p className="text-xs text-slate-500 font-medium leading-relaxed">{t.desc}</p>
+                  <h4 className="text-base md:text-xl font-black text-slate-900 mb-2">{t.type}</h4>
+                  <p className="text-[10px] md:text-xs text-slate-500 font-medium leading-relaxed">{t.desc}</p>
                 </button>
               ))}
             </div>
@@ -309,13 +324,13 @@ export function AsanaImportModal({ isOpen, onClose }: AsanaImportModalProps) {
 
           {/* Step 2: Input Area */}
           {step === 2 && (
-            <div className="space-y-6 animate-in fade-in duration-300">
-              <div className="flex items-center justify-between">
-                <h3 className="text-xl font-black text-slate-900">Vložte {importType} dáta</h3>
+            <div className="space-y-6 md:space-y-8 animate-in fade-in duration-300">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <h3 className="text-lg md:text-2xl font-black text-slate-900 tracking-tight">Vložte {importType} dáta</h3>
                 {importType === 'CSV' && (
                   <button 
                     onClick={() => fileInputRef.current?.click()}
-                    className="flex items-center gap-2 px-4 py-2 bg-indigo-50 text-indigo-600 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-indigo-100 transition-colors"
+                    className="flex items-center justify-center gap-2 px-6 py-3 bg-indigo-50 text-indigo-600 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-indigo-100 transition-colors"
                   >
                     <Upload className="w-4 h-4" /> Nahrať súbor
                     <input type="file" accept=".csv" ref={fileInputRef} onChange={handleFileUpload} className="hidden" />
@@ -330,28 +345,28 @@ export function AsanaImportModal({ isOpen, onClose }: AsanaImportModalProps) {
                   placeholder={
                     importType === 'JSON' ? '[\n  { "name": "Task 1", "owner": "Peter" }\n]' : 
                     importType === 'CSV' ? 'Name,Owner,Deadline\nTask 1,Peter,2026-05-10' :
-                    'Zadajte jeden task na riadok alebo skopírujte zoznam...'
+                    'Zadajte jeden task na riadok...'
                   }
-                  className="w-full h-80 p-6 bg-slate-50 border border-slate-200 rounded-[2rem] font-mono text-xs focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all resize-none"
+                  className="w-full h-64 md:h-96 p-6 md:p-8 bg-slate-50 border border-slate-200 rounded-[2rem] font-mono text-[10px] md:text-xs focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all resize-none shadow-inner"
                 />
-                <div className="absolute top-4 right-4 px-3 py-1 bg-white/80 backdrop-blur rounded-lg border border-slate-200 text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                <div className="absolute top-4 right-4 px-3 py-1 bg-white/80 backdrop-blur rounded-lg border border-slate-200 text-[9px] font-black text-slate-400 uppercase tracking-widest">
                   {importType} Input
                 </div>
               </div>
 
-              <div className="p-4 bg-amber-50 border border-amber-100 rounded-2xl flex items-center gap-3 text-amber-800 text-xs font-medium">
-                <AlertTriangle className="w-4 h-4 shrink-0" />
-                Vkladajte iba manuálne exportované dáta. Aplikácia neukladá vaše prihlasovacie údaje k Asane.
+              <div className="p-5 md:p-6 bg-amber-50/50 border border-amber-100 rounded-3xl flex items-start gap-4 text-amber-800 text-[10px] md:text-xs font-medium leading-relaxed">
+                <AlertTriangle className="w-5 h-5 shrink-0 text-amber-500" />
+                Vkladajte iba manuálne exportované dáta. Aplikácia neukladá vaše prihlasovacie údaje k Asane. Všetko spracovanie prebieha lokálne vo vašom prehliadači.
               </div>
 
-              <div className="flex justify-between items-center pt-4">
-                <button onClick={() => setStep(1)} className="text-slate-400 font-bold hover:text-slate-600 flex items-center gap-2">
+              <div className="flex justify-between items-center pt-4 shrink-0">
+                <button onClick={() => setStep(1)} className="text-[10px] md:text-xs font-black uppercase tracking-widest text-slate-400 hover:text-slate-600 transition-colors">
                   Späť
                 </button>
                 <button 
                   disabled={!inputText.trim()}
                   onClick={() => processInput(inputText, importType)}
-                  className="px-10 py-4 bg-indigo-600 text-white rounded-2xl font-black text-sm uppercase tracking-widest shadow-xl shadow-indigo-100 hover:bg-indigo-700 disabled:opacity-50 disabled:shadow-none transition-all"
+                  className="px-8 md:px-12 py-4 md:py-5 bg-indigo-600 text-white rounded-2xl font-black text-[10px] md:text-xs uppercase tracking-widest shadow-xl shadow-indigo-100 hover:bg-indigo-700 disabled:opacity-50 disabled:shadow-none transition-all"
                 >
                   Spracovať dáta
                 </button>
@@ -361,66 +376,70 @@ export function AsanaImportModal({ isOpen, onClose }: AsanaImportModalProps) {
 
           {/* Step 3: Mapping */}
           {step === 3 && (
-            <div className="space-y-8 animate-in fade-in duration-300">
-              <div className="flex items-center justify-between">
+            <div className="space-y-6 md:space-y-8 animate-in fade-in duration-300">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                  <h3 className="text-xl font-black text-slate-900">Mapovanie stĺpcov</h3>
-                  <p className="text-sm text-slate-500 font-medium">Priraďte stĺpce z vášho súboru k poliam v BA Workspace.</p>
+                  <h3 className="text-lg md:text-2xl font-black text-slate-900 tracking-tight">Mapovanie stĺpcov</h3>
+                  <p className="text-[10px] md:text-sm text-slate-500 font-medium">Priraďte stĺpce z vášho súboru k poliam v BA Workspace.</p>
                 </div>
-                <div className="px-4 py-2 bg-emerald-50 text-emerald-700 rounded-xl text-xs font-black flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4" /> {parsedData.length} riadkov nájdených
+                <div className="px-4 py-2 bg-emerald-50 text-emerald-700 rounded-xl text-[10px] font-black flex items-center gap-2 border border-emerald-100 w-fit">
+                  <CheckCircle2 className="w-4 h-4" /> {parsedData.length} riadkov
                 </div>
               </div>
 
-              <div className="bg-white border border-slate-200 rounded-[2rem] overflow-hidden">
-                <table className="w-full text-left border-collapse">
-                  <thead>
-                    <tr className="bg-slate-50 border-b border-slate-100">
-                      <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Zdrojový stĺpec</th>
-                      <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Cieľové pole</th>
-                      <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Príklad hodnoty</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-50">
-                    {mapping.map((m, i) => (
-                      <tr key={i}>
-                        <td className="px-8 py-5 text-sm font-bold text-slate-700">{m.source}</td>
-                        <td className="px-8 py-5">
-                          <select 
-                            value={m.target}
-                            onChange={e => {
-                              const newMapping = [...mapping];
-                              newMapping[i].target = e.target.value as any;
-                              setMapping(newMapping);
-                            }}
-                            className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-indigo-500"
-                          >
-                            <option value="">-- Ignorovať --</option>
-                            <option value="title">Task Name</option>
-                            <option value="description">Description</option>
-                            <option value="owner">Assignee / Owner</option>
-                            <option value="status">Status</option>
-                            <option value="priority">Priority</option>
-                            <option value="dueDate">Due Date</option>
-                            <option value="progress">Progress %</option>
-                            <option value="asanaUrl">Asana URL</option>
-                            <option value="milestone">Section / Milestone</option>
-                          </select>
-                        </td>
-                        <td className="px-8 py-5 text-xs text-slate-400 italic">
-                          {parsedData[0]?.[m.source]?.toString().substring(0, 30) || '-'}
-                        </td>
+              <div className="bg-white border border-slate-200 rounded-[2rem] overflow-hidden shadow-sm">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left border-collapse min-w-[600px]">
+                    <thead>
+                      <tr className="bg-slate-50 border-b border-slate-100">
+                        <th className="px-6 md:px-8 py-5 text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Zdrojový stĺpec</th>
+                        <th className="px-6 md:px-8 py-5 text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Cieľové pole</th>
+                        <th className="px-6 md:px-8 py-5 text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Príklad</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody className="divide-y divide-slate-50">
+                      {mapping.map((m, i) => (
+                        <tr key={i} className="hover:bg-slate-50/30 transition-all">
+                          <td className="px-6 md:px-8 py-5 text-xs md:text-sm font-bold text-slate-700">{m.source}</td>
+                          <td className="px-6 md:px-8 py-5">
+                            <select 
+                              value={m.target}
+                              onChange={e => {
+                                const newMapping = [...mapping];
+                                newMapping[i].target = e.target.value as any;
+                                setMapping(newMapping);
+                              }}
+                              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-[10px] md:text-xs font-black outline-none appearance-none"
+                            >
+                              <option value="">-- Ignorovať --</option>
+                              <option value="title">Task Name</option>
+                              <option value="description">Description</option>
+                              <option value="owner">Assignee / Owner</option>
+                              <option value="status">Status</option>
+                              <option value="priority">Priority</option>
+                              <option value="dueDate">Due Date</option>
+                              <option value="progress">Progress %</option>
+                              <option value="asanaUrl">Asana URL</option>
+                              <option value="milestone">Section / Milestone</option>
+                            </select>
+                          </td>
+                          <td className="px-6 md:px-8 py-5 text-[10px] text-slate-400 italic">
+                            {parsedData[0]?.[m.source]?.toString().substring(0, 30) || '-'}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
 
-              <div className="flex justify-between items-center pt-4">
-                <button onClick={() => setStep(2)} className="text-slate-400 font-bold hover:text-slate-600">Späť</button>
+              <div className="flex justify-between items-center pt-4 shrink-0">
+                <button onClick={() => setStep(2)} className="text-[10px] md:text-xs font-black uppercase tracking-widest text-slate-400 hover:text-slate-600 transition-colors">
+                  Späť
+                </button>
                 <button 
                   onClick={applyMapping}
-                  className="px-10 py-4 bg-indigo-600 text-white rounded-2xl font-black text-sm uppercase tracking-widest shadow-xl shadow-indigo-100 hover:bg-indigo-700 transition-all"
+                  className="px-8 md:px-12 py-4 md:py-5 bg-indigo-600 text-white rounded-2xl font-black text-[10px] md:text-xs uppercase tracking-widest shadow-xl shadow-indigo-100 hover:bg-indigo-700 transition-all"
                 >
                   Zobraziť Preview
                 </button>
@@ -430,65 +449,62 @@ export function AsanaImportModal({ isOpen, onClose }: AsanaImportModalProps) {
 
           {/* Step 4: Preview */}
           {step === 4 && (
-            <div className="space-y-8 animate-in fade-in duration-300">
-              <div className="flex items-center justify-between">
+            <div className="space-y-6 md:space-y-8 animate-in fade-in duration-300">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                  <h3 className="text-xl font-black text-slate-900">Náhľad importu</h3>
-                  <p className="text-sm text-slate-500 font-medium">Skontrolujte dáta pred finálnym uložením.</p>
+                  <h3 className="text-lg md:text-2xl font-black text-slate-900 tracking-tight">Náhľad importu</h3>
+                  <p className="text-[10px] md:text-sm text-slate-500 font-medium">Skontrolujte dáta pred finálnym uložením.</p>
                 </div>
-                <div className="flex gap-4">
-                  <div className="px-4 py-2 bg-slate-100 text-slate-600 rounded-xl text-xs font-black flex items-center gap-2">
+                <div className="flex flex-wrap gap-2 md:gap-4">
+                  <div className="px-4 py-2 bg-slate-100 text-slate-600 rounded-xl text-[10px] font-black flex items-center gap-2 border border-slate-200">
                     <Database className="w-4 h-4" /> {previewTasks.length} taskov
                   </div>
                   {previewTasks.some(t => t.warnings && t.warnings.length > 0) && (
-                    <div className="px-4 py-2 bg-amber-50 text-amber-700 rounded-xl text-xs font-black flex items-center gap-2 border border-amber-100">
-                      <AlertTriangle className="w-4 h-4" /> {previewTasks.filter(t => t.warnings && t.warnings.length > 0).length} s warningom
+                    <div className="px-4 py-2 bg-amber-50 text-amber-700 rounded-xl text-[10px] font-black flex items-center gap-2 border border-amber-100">
+                      <AlertTriangle className="w-4 h-4" /> {previewTasks.filter(t => t.warnings && t.warnings.length > 0).length} warningov
                     </div>
                   )}
                 </div>
               </div>
 
-              <div className="bg-white border border-slate-200 rounded-[2.5rem] overflow-hidden">
+              <div className="bg-white border border-slate-200 rounded-[2rem] overflow-hidden shadow-sm">
                 <div className="overflow-x-auto">
-                  <table className="w-full text-left border-collapse">
+                  <table className="w-full text-left border-collapse min-w-[700px]">
                     <thead>
                       <tr className="bg-slate-50 border-b border-slate-100">
-                        <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Task Name</th>
-                        <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Owner</th>
-                        <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Status / Priority</th>
-                        <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Deadline</th>
-                        <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Warnings</th>
+                        <th className="px-6 py-4 text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Task Name</th>
+                        <th className="px-6 py-4 text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Owner</th>
+                        <th className="px-6 py-4 text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Info</th>
+                        <th className="px-6 py-4 text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Warnings</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-50">
                       {previewTasks.map((t, i) => (
-                        <tr key={i} className={cn(t.warnings && t.warnings.length > 0 ? "bg-amber-50/30" : "")}>
+                        <tr key={i} className={cn("hover:bg-slate-50/30 transition-all", t.warnings && t.warnings.length > 0 ? "bg-amber-50/20" : "")}>
                           <td className="px-6 py-4">
-                            <p className="text-sm font-black text-slate-900">{t.title}</p>
-                            <p className="text-[10px] text-slate-400 truncate max-w-[200px]">{t.asanaUrl || 'Bez URL'}</p>
+                            <p className="text-xs md:text-sm font-black text-slate-900 leading-tight">{t.title}</p>
+                            <p className="text-[9px] text-slate-400 truncate max-w-[200px] mt-1">{t.asanaUrl || 'Bez URL'}</p>
                           </td>
                           <td className="px-6 py-4">
-                            <span className={cn("px-2 py-1 rounded-lg text-[10px] font-black uppercase", t.owner === 'Nepriradené' ? "bg-rose-50 text-rose-500" : "bg-slate-100 text-slate-600")}>
+                            <span className={cn("px-3 py-1 rounded-lg text-[9px] font-black uppercase", t.owner === 'Nepriradené' ? "bg-rose-50 text-rose-500" : "bg-slate-100 text-slate-600")}>
                               {t.owner}
                             </span>
                           </td>
                           <td className="px-6 py-4">
                             <div className="flex flex-col gap-1">
-                              <span className="text-[10px] font-black text-indigo-600 uppercase">{t.status}</span>
-                              <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{t.priority}</span>
+                              <span className="text-[9px] font-black text-indigo-600 uppercase leading-none">{t.status}</span>
+                              <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-none mt-0.5">{t.priority}</span>
+                              <span className="text-[9px] font-black text-slate-700 leading-none mt-1">{t.dueDate || '-'}</span>
                             </div>
-                          </td>
-                          <td className="px-6 py-4 text-xs font-black text-slate-700">
-                            {t.dueDate || <span className="text-rose-500">Chýba</span>}
                           </td>
                           <td className="px-6 py-4">
                             <div className="flex flex-wrap gap-1">
                               {t.warnings?.map((w, wi) => (
-                                <span key={wi} className="px-2 py-0.5 bg-amber-100 text-amber-700 rounded text-[9px] font-black uppercase tracking-tighter">
+                                <span key={wi} className="px-2 py-0.5 bg-amber-100 text-amber-700 rounded text-[8px] font-black uppercase tracking-tighter">
                                   {w}
                                 </span>
                               ))}
-                              {t.warnings?.length === 0 && <span className="text-emerald-500 text-[10px] font-black">✓ OK</span>}
+                              {t.warnings?.length === 0 && <span className="text-emerald-500 text-[9px] font-black uppercase tracking-widest">✓ OK</span>}
                             </div>
                           </td>
                         </tr>
@@ -498,20 +514,22 @@ export function AsanaImportModal({ isOpen, onClose }: AsanaImportModalProps) {
                 </div>
               </div>
 
-              <div className="flex justify-between items-center pt-4">
-                <button onClick={() => setStep(importType === 'Demo' ? 1 : 3)} className="text-slate-400 font-bold hover:text-slate-600">Späť</button>
-                <div className="flex gap-4">
+              <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-4 shrink-0">
+                <button onClick={() => setStep(importType === 'Demo' ? 1 : 3)} className="text-[10px] md:text-xs font-black uppercase tracking-widest text-slate-400 hover:text-slate-600 transition-colors order-2 sm:order-1">
+                  Späť
+                </button>
+                <div className="flex items-center gap-3 w-full sm:w-auto order-1 sm:order-2">
                    <button 
                     onClick={resetImport}
-                    className="px-6 py-4 text-slate-400 font-black text-xs uppercase tracking-widest hover:text-slate-600"
+                    className="flex-1 sm:flex-none px-6 py-4 text-slate-400 font-black text-[10px] md:text-xs uppercase tracking-widest hover:text-slate-600"
                   >
                     Reset
                   </button>
                   <button 
                     onClick={handleFinalImport}
-                    className="px-10 py-4 bg-emerald-600 text-white rounded-2xl font-black text-sm uppercase tracking-widest shadow-xl shadow-emerald-100 hover:bg-emerald-700 transition-all flex items-center gap-3"
+                    className="flex-[2] sm:flex-none px-8 md:px-12 py-4 md:py-5 bg-emerald-600 text-white rounded-2xl font-black text-[10px] md:text-xs uppercase tracking-widest shadow-xl shadow-emerald-100 hover:bg-emerald-700 transition-all flex items-center justify-center gap-3"
                   >
-                    <Save className="w-5 h-5" /> Importovať {previewTasks.length} taskov
+                    <Save className="w-5 h-5" /> Importovať
                   </button>
                 </div>
               </div>
@@ -520,42 +538,55 @@ export function AsanaImportModal({ isOpen, onClose }: AsanaImportModalProps) {
 
           {/* Step 5: Summary */}
           {step === 5 && (
-            <div className="space-y-12 py-10 text-center animate-in zoom-in-95 duration-500">
-              <div className="w-24 h-24 bg-emerald-100 text-emerald-600 rounded-[2rem] flex items-center justify-center mx-auto shadow-lg shadow-emerald-50">
-                <CheckCircle2 className="w-12 h-12" />
+            <div className="space-y-10 md:space-y-16 py-10 md:py-20 text-center animate-in zoom-in-95 duration-500">
+              <div className="w-20 h-20 md:w-32 md:h-32 bg-emerald-100 text-emerald-600 rounded-[2.5rem] flex items-center justify-center mx-auto shadow-lg shadow-emerald-50">
+                <CheckCircle2 className="w-10 h-10 md:w-16 md:h-16" />
               </div>
               
-              <div className="space-y-4">
-                <h3 className="text-4xl font-black text-slate-900 tracking-tight">Import Úspešný!</h3>
-                <p className="text-slate-500 font-medium text-lg">Dáta z Asany boli úspešne pridané do projektu {activeProject?.name}.</p>
+              <div className="space-y-4 md:space-y-6">
+                <h3 className="text-3xl md:text-5xl font-black text-slate-900 tracking-tight">Import Úspešný!</h3>
+                <p className="text-slate-500 font-medium text-sm md:text-xl max-w-xl mx-auto leading-relaxed italic">"Dáta z Asany boli úspešne pridané do projektu {activeProject?.name}."</p>
               </div>
 
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-3xl mx-auto">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 max-w-4xl mx-auto">
                 {[
                   { label: 'Nájdené', val: summary.total, color: 'text-slate-900' },
                   { label: 'Importované', val: summary.imported, color: 'text-emerald-600' },
                   { label: 'Preskočené', val: summary.skipped, color: 'text-slate-400' },
                   { label: 'S Warningom', val: summary.warnings, color: summary.warnings > 0 ? 'text-amber-600' : 'text-emerald-600' }
                 ].map((s, i) => (
-                  <div key={i} className="bg-slate-50 p-6 rounded-3xl border border-slate-100">
-                    <p className={cn("text-3xl font-black mb-1", s.color)}>{s.val}</p>
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{s.label}</p>
+                  <div key={i} className="bg-slate-50 p-6 rounded-[2rem] border border-slate-100 shadow-sm">
+                    <p className={cn("text-2xl md:text-4xl font-black mb-1", s.color)}>{s.val}</p>
+                    <p className="text-[8px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest">{s.label}</p>
                   </div>
                 ))}
               </div>
 
-              <div className="pt-8">
+              <div className="pt-6 md:pt-10">
                 <button 
                   onClick={onClose}
-                  className="px-12 py-5 bg-slate-900 text-white rounded-[2rem] font-black text-sm uppercase tracking-[0.2em] shadow-2xl hover:bg-slate-800 active:scale-95 transition-all"
+                  className="w-full sm:w-auto px-12 md:px-20 py-5 md:py-6 bg-slate-900 text-white rounded-[2.5rem] font-black text-[10px] md:text-sm uppercase tracking-[0.3em] shadow-2xl hover:bg-slate-800 active:scale-95 transition-all"
                 >
-                  Zavrieť a zobraziť tasky
+                  Zavrieť a hotovo
                 </button>
               </div>
             </div>
           )}
 
         </div>
+
+        {/* Security Footer */}
+        <div className="px-6 md:px-10 py-4 md:py-6 bg-slate-900 flex flex-wrap items-center justify-center gap-4 md:gap-10 shrink-0">
+           <div className="flex items-center gap-2 text-[8px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest">
+             <AlertTriangle className="w-3.5 h-3.5 text-amber-500" /> Manuálny Import
+           </div>
+           <div className="hidden sm:block w-1.5 h-1.5 bg-slate-700 rounded-full" />
+           <p className="text-[8px] md:text-[10px] font-black text-slate-500 uppercase tracking-widest">No API Sync</p>
+           <div className="hidden sm:block w-1.5 h-1.5 bg-slate-700 rounded-full" />
+           <p className="text-[8px] md:text-[10px] font-black text-slate-500 uppercase tracking-widest">Local Browser Parsing Only</p>
+        </div>
+      </div>
+    </div>
 
         {/* Security Footer */}
         <div className="px-8 py-5 bg-slate-900 flex items-center justify-center gap-6">

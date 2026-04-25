@@ -9,7 +9,7 @@ import { useProject } from '../context/ProjectContext';
 import { useAuth } from '../context/AuthContext';
 import { cn } from '../lib/utils';
 
-interface SidebarItem {
+export interface SidebarItem {
   key: string;
   label: string;
   icon: React.ComponentType<{ className?: string }>;
@@ -33,12 +33,12 @@ export function buildSidebarPath(item: SidebarItem, projectId: string | undefine
   return item.path || "/";
 }
 
-interface SidebarGroup {
+export interface SidebarGroup {
   title: string;
   items: SidebarItem[];
 }
 
-const sidebarGroups: SidebarGroup[] = [
+export const sidebarGroups: SidebarGroup[] = [
   {
     title: "Core Workspace",
     items: [

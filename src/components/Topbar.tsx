@@ -29,7 +29,13 @@ const MODULE_LABELS: Record<string, string> = {
   'asana': 'Asana',
 };
 
-export function Topbar() {
+import { Menu } from 'lucide-react';
+
+interface TopbarProps {
+  onMenuClick?: () => void;
+}
+
+export function Topbar({ onMenuClick }: TopbarProps) {
   const { activeProject, setActiveProject, projects } = useProject();
   const { username, logout } = useAuth();
   const navigate = useNavigate();
@@ -73,17 +79,25 @@ export function Topbar() {
   const displayedProject = currentProjectId ? projects.find(p => p.id === currentProjectId) : activeProject;
 
   return (
-    <header className="h-16 bg-white/90 backdrop-blur-md border-b border-slate-200 px-6 flex items-center justify-between sticky top-0 z-40 shrink-0">
+    <header className="h-16 lg:h-20 bg-white/90 backdrop-blur-md border-b border-slate-200 px-4 md:px-6 flex items-center justify-between sticky top-0 z-40 shrink-0 w-full">
       
-      {/* Left: Breadcrumbs */}
-      <div className="flex items-center gap-2 flex-1 min-w-0 mr-4">
-        {/* Breadcrumbs */}
-        <nav className="flex items-center gap-1 min-w-0">
+      {/* Left: Mobile Menu + Breadcrumbs */}
+      <div className="flex items-center gap-2 md:gap-4 flex-1 min-w-0">
+        <button 
+          onClick={onMenuClick}
+          className="lg:hidden p-2.5 bg-slate-100 rounded-xl text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 transition-all active:scale-95 shadow-sm"
+          aria-label="Otvoriť menu"
+        >
+          <Menu className="w-5 h-5" />
+        </button>
+
+        {/* Breadcrumbs - hidden on very small screens or compact */}
+        <nav className="hidden sm:flex items-center gap-1 min-w-0">
           {breadcrumbs.map((crumb, idx) => (
             <div key={idx} className="flex items-center gap-1 min-w-0">
               {idx > 0 && <ChevronRight className="w-3.5 h-3.5 text-slate-300 shrink-0" />}
               {idx === breadcrumbs.length - 1 ? (
-                <span className="text-xs font-black text-slate-900 truncate max-w-[180px]">{crumb.label}</span>
+                <span className="text-xs font-black text-slate-900 truncate max-w-[120px] md:max-w-[180px]">{crumb.label}</span>
               ) : (
                 <button
                   onClick={() => navigate(crumb.path)}
@@ -95,87 +109,53 @@ export function Topbar() {
             </div>
           ))}
         </nav>
+
+        {/* Brand Mobile Fallback (if no breadcrumbs) */}
+        <div className="sm:hidden flex items-center gap-2">
+           <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
+              <Bot className="w-4 h-4 text-white" />
+           </div>
+           <span className="text-sm font-black text-slate-900 tracking-tight">BA HUB</span>
+        </div>
       </div>
 
-      {/* Center: Search */}
-      <div className="hidden lg:flex items-center flex-1 max-w-sm">
-        <GlobalSearch />
-      </div>
-
-      {/* Right: Project context + User */}
-      <div className="flex items-center gap-4 ml-4">
+      {/* Right: Search + Notifications + User */}
+      <div className="flex items-center gap-2 md:gap-4 ml-2">
         
-        {/* Project Selector */}
-        {currentProjectId && (
-          <div className="hidden lg:flex items-center gap-2">
-            <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest hidden lg:inline-block">Aktívny Projekt</span>
-            <select 
-              value={params.projectId || activeProject?.id || ''}
-              onChange={e => { 
-                const selectedId = e.target.value;
-                if (selectedId === 'create') {
-                  navigate('/projects');
-                  return;
-                }
-                setActiveProject(selectedId); 
-                const currentModule = location.pathname.split('/')[3];
-                navigate(currentModule ? `/projects/${selectedId}/${currentModule}` : `/projects/${selectedId}`);
-              }}
-              className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-black text-slate-700 outline-none cursor-pointer hover:border-indigo-300 transition-all"
-            >
-              <option value="" disabled>Vyber projekt...</option>
-              {projects.length === 0 && <option value="" disabled>Žiadne projekty</option>}
-              <optgroup label="AKTÍVNE PROJEKTY">
-                {projects.filter(p => !p.isClosed).map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-              </optgroup>
-              <optgroup label="UKONČENÉ PROJEKTY">
-                {projects.filter(p => p.isClosed).map(p => <option key={p.id} value={p.id}>{p.name} (Ukončené)</option>)}
-              </optgroup>
-              <option value="create">+ Vytvoriť projekt...</option>
-            </select>
+        {/* Search - hidden on mobile, or compact icon */}
+        <div className="hidden lg:flex items-center max-w-sm mr-2">
+          <GlobalSearch />
+        </div>
+
+        {/* Project Context - compact on mobile */}
+        {displayedProject && (
+          <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl">
+             <div className={cn(
+               "w-2 h-2 rounded-full",
+               calculateProjectHealth(displayedProject).score > 80 ? 'bg-emerald-500' : 'bg-amber-500'
+             )} />
+             <span className="text-[10px] font-black text-slate-900 truncate max-w-[80px]">
+               {displayedProject.name}
+             </span>
           </div>
         )}
-
-        {/* Health */}
-        {displayedProject && (() => {
-          const healthScore = calculateProjectHealth(displayedProject).score;
-          return (
-            <div className="hidden xl:flex items-center gap-2 px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl">
-              <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Health</span>
-              <span className={`text-xs font-black ${healthScore > 80 ? 'text-emerald-600' : healthScore > 50 ? 'text-amber-600' : 'text-rose-600'}`}>
-                {healthScore}%
-              </span>
-            </div>
-          );
-        })()}
 
         {/* Notifications */}
         <NotificationCenter />
 
-        <div className="w-px h-6 bg-slate-200" />
-
-        {/* User + Logout */}
-        <div className="flex items-center gap-3">
-          <button className="flex items-center gap-2 p-1 hover:bg-slate-50 rounded-xl transition-all border border-transparent hover:border-slate-200 group">
-            <div className="flex flex-col items-end">
-              <span className="text-xs font-black text-slate-900 group-hover:text-indigo-600 transition-colors leading-none">{username || 'BA User'}</span>
-              <span className="text-[9px] font-black text-slate-400 uppercase tracking-tighter">Lead Analyst</span>
-            </div>
-            <div className="w-8 h-8 bg-gradient-to-tr from-slate-800 to-slate-900 rounded-xl flex items-center justify-center text-white font-black text-[10px] shadow-lg">
-              {username ? username.charAt(0).toUpperCase() : 'BA'}
-            </div>
-            <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
-          </button>
-
-          <button 
-            onClick={handleLogout}
-            className="p-2 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-xl transition-all"
-            title="Odhlásiť sa"
-          >
-            <LogOut className="w-4 h-4" />
-          </button>
-        </div>
+        {/* User - compact on mobile */}
+        <button className="flex items-center gap-2 p-1 hover:bg-slate-50 rounded-xl transition-all border border-transparent hover:border-slate-200 group">
+          <div className="hidden sm:flex flex-col items-end">
+            <span className="text-[10px] font-black text-slate-900 group-hover:text-indigo-600 transition-colors leading-none">{username || 'BA'}</span>
+            <span className="text-[8px] font-black text-slate-400 uppercase tracking-tighter">Lead</span>
+          </div>
+          <div className="w-8 h-8 md:w-9 md:h-9 bg-gradient-to-tr from-slate-800 to-slate-900 rounded-xl flex items-center justify-center text-white font-black text-[10px] shadow-lg">
+            {username ? username.charAt(0).toUpperCase() : 'BA'}
+          </div>
+        </button>
       </div>
     </header>
+  );
+}
   );
 }

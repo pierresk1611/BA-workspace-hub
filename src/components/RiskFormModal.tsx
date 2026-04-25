@@ -93,141 +93,150 @@ export function RiskFormModal({ isOpen, onClose, initialData }: RiskFormModalPro
   };
 
   return (
-    <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[95vh] overflow-hidden flex flex-col border border-slate-200">
-        <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+    <div className={cn(
+      "fixed inset-0 z-[100] flex items-center justify-center transition-all duration-300",
+      isOpen ? "visible" : "invisible pointer-events-none"
+    )}>
+      {/* Backdrop */}
+      <div 
+        className={cn(
+          "absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity duration-300",
+          isOpen ? "opacity-100" : "opacity-0"
+        )} 
+        onClick={onClose} 
+      />
+
+      {/* Drawer / Modal */}
+      <div className={cn(
+        "bg-white w-full h-full lg:h-auto lg:max-h-[95vh] lg:max-w-4xl lg:rounded-[2.5rem] shadow-2xl flex flex-col relative transition-transform duration-500 transform overflow-hidden border border-slate-200",
+        isOpen ? "translate-y-0" : "translate-y-full lg:translate-y-4 lg:scale-95 lg:opacity-0"
+      )}>
+        {/* Header */}
+        <div className="p-6 md:p-10 border-b border-slate-100 flex items-center justify-between bg-slate-50/50 shrink-0">
           <div>
-            <h2 className="text-xl font-bold text-slate-900">{initialData ? 'Upraviť riziko' : 'Nové riziko'}</h2>
-            <p className="text-sm text-slate-500">Identifikácia a plán mitigácie rizika</p>
+            <h2 className="text-xl md:text-3xl font-black text-slate-900 tracking-tight">{initialData ? 'Upraviť riziko' : 'Nové riziko'}</h2>
+            <p className="text-[10px] md:text-sm text-slate-500 font-bold uppercase tracking-widest mt-1">Identifikácia a plán mitigácie</p>
           </div>
-          <button onClick={onClose} className="p-2 hover:bg-white rounded-xl transition-colors border border-transparent hover:border-slate-200 shadow-sm">
-            <X className="w-5 h-5 text-slate-500" />
+          <button onClick={onClose} className="p-3 md:p-4 bg-white hover:bg-slate-50 rounded-2xl transition-all border border-slate-100 shadow-sm text-slate-400">
+            <X className="w-5 h-5 md:w-6 md:h-6" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 custom-scrollbar">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Content */}
+        <div className="flex-1 overflow-y-auto p-6 md:p-10 custom-scrollbar">
+          <form id="risk-form" onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12">
             
-            {/* Left Column: Risk Details */}
-            <div className="space-y-6">
+            <div className="space-y-6 md:space-y-8">
               <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-1">Názov rizika <span className="text-red-500">*</span></label>
-                <input required name="title" value={formData.title} onChange={handleChange} className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-rose-500 outline-none transition-all" />
+                <label className="block text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Názov rizika *</label>
+                <input required name="title" value={formData.title} onChange={handleChange} className="w-full px-5 py-3 md:py-4 bg-slate-50 border border-slate-200 rounded-xl md:rounded-2xl outline-none focus:ring-2 focus:ring-rose-500 transition-all font-bold text-xs md:text-sm shadow-inner" />
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-1">Popis rizika</label>
-                <textarea name="description" value={formData.description} onChange={handleChange} rows={3} className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none resize-none" />
+                <label className="block text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Popis rizika</label>
+                <textarea name="description" value={formData.description} onChange={handleChange} rows={3} className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none resize-none text-[11px] md:text-sm font-medium shadow-inner" />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
                 <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-1">Kategória</label>
-                  <select name="category" value={formData.category} onChange={handleChange} className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none">
+                  <label className="block text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Kategória</label>
+                  <select name="category" value={formData.category} onChange={handleChange} className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none text-[11px] md:text-xs font-black appearance-none">
                     {categories.map(c => <option key={c} value={c}>{c}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-1">Status</label>
-                  <select name="status" value={formData.status} onChange={handleChange} className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none">
+                  <label className="block text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Status</label>
+                  <select name="status" value={formData.status} onChange={handleChange} className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none text-[11px] md:text-xs font-black appearance-none">
                     {statusOptions.map(s => <option key={s} value={s}>{s}</option>)}
                   </select>
                 </div>
               </div>
 
-              <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-4">
-                <h3 className="text-xs font-bold text-slate-700 flex items-center gap-2 uppercase tracking-wider">
-                  <AlertTriangle className="w-4 h-4 text-rose-500" />
-                  Risk Matrix Assessment
+              <div className="p-6 md:p-8 bg-rose-50/30 rounded-[2.5rem] border border-rose-100 space-y-6 shadow-sm">
+                <h3 className="text-[10px] font-black text-rose-600 flex items-center gap-2 uppercase tracking-[0.2em]">
+                  <AlertTriangle className="w-4 h-4" />
+                  Risk Assessment Matrix
                 </h3>
-                <div className="grid grid-cols-2 gap-6">
+                <div className="space-y-8">
                   <div>
-                    <label className="block text-xs font-bold text-slate-500 mb-2">Pravdepodobnosť (1-5)</label>
-                    <input type="range" name="probability" min="1" max="5" value={formData.probability} onChange={handleChange} className="w-full accent-rose-500" />
-                    <div className="flex justify-between text-[10px] text-slate-400 mt-1">
-                      <span>Nízka</span>
-                      <span>Vysoká</span>
+                    <div className="flex justify-between items-center mb-4">
+                       <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Pravdepodobnosť</label>
+                       <span className="text-xs font-black text-rose-600">{formData.probability}/5</span>
                     </div>
+                    <input type="range" name="probability" min="1" max="5" value={formData.probability} onChange={handleChange} className="w-full h-2 bg-rose-100 rounded-lg appearance-none cursor-pointer accent-rose-600" />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-slate-500 mb-2">Dopad / Impact (1-5)</label>
-                    <input type="range" name="impact" min="1" max="5" value={formData.impact} onChange={handleChange} className="w-full accent-rose-500" />
-                    <div className="flex justify-between text-[10px] text-slate-400 mt-1">
-                      <span>Zanedbateľný</span>
-                      <span>Katastrofálny</span>
+                    <div className="flex justify-between items-center mb-4">
+                       <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Dopad (Impact)</label>
+                       <span className="text-xs font-black text-rose-600">{formData.impact}/5</span>
                     </div>
+                    <input type="range" name="impact" min="1" max="5" value={formData.impact} onChange={handleChange} className="w-full h-2 bg-rose-100 rounded-lg appearance-none cursor-pointer accent-rose-600" />
                   </div>
                 </div>
-                <div className="flex items-center justify-between p-3 bg-white rounded-xl border border-slate-100">
-                  <span className="text-sm font-bold text-slate-600">Výsledná Severity:</span>
-                  <span className={`px-3 py-1 rounded-lg text-xs font-black uppercase ${
-                    formData.severity === 'Kritická' ? 'bg-rose-600 text-white' :
+                <div className="flex items-center justify-between p-4 bg-white rounded-2xl border border-rose-100 shadow-inner">
+                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Severity:</span>
+                  <span className={cn(
+                    "px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-[0.1em]",
+                    formData.severity === 'Kritická' ? 'bg-rose-600 text-white shadow-lg shadow-rose-200' :
                     formData.severity === 'Vysoká' ? 'bg-orange-500 text-white' :
                     formData.severity === 'Stredná' ? 'bg-amber-400 text-white' : 'bg-slate-400 text-white'
-                  }`}>
+                  )}>
                     {formData.severity}
                   </span>
                 </div>
               </div>
             </div>
 
-            {/* Right Column: Mitigation & Links */}
-            <div className="space-y-6">
+            <div className="space-y-6 md:space-y-8">
               <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-1 flex items-center gap-2">
-                  <Shield className="w-4 h-4 text-emerald-500" />
-                  Mitigation Plan (Opatrenia)
+                <label className="block text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center justify-between">
+                  <span>Plán Mitigácie</span>
+                  <button type="button" className="flex items-center gap-2 text-[9px] font-black text-indigo-600 uppercase hover:bg-indigo-50 px-3 py-1.5 rounded-lg border border-indigo-100 transition-all">
+                    <Zap className="w-3.5 h-3.5" /> AI Plan
+                  </button>
                 </label>
-                <textarea name="mitigationPlan" value={formData.mitigationPlan} onChange={handleChange} rows={4} className="w-full p-2.5 bg-emerald-50/30 border border-emerald-100 rounded-xl outline-none resize-none font-medium" placeholder="Aké kroky podnikneme na zníženie rizika?" />
-                <button type="button" className="mt-2 text-[10px] font-black text-indigo-600 uppercase flex items-center gap-1 hover:text-indigo-700">
-                  <Zap className="w-3 h-3" /> Vygenerovať mitigáciu cez AI
-                </button>
+                <textarea name="mitigationPlan" value={formData.mitigationPlan} onChange={handleChange} rows={5} className="w-full p-5 bg-emerald-50/20 border border-emerald-100 rounded-[2rem] outline-none resize-none text-[11px] md:text-sm font-bold shadow-inner" placeholder="Opatrenia na zníženie rizika..." />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
                 <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-1 flex items-center gap-2">
-                    <User className="w-4 h-4 text-slate-400" />
+                  <label className="block text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-2">
+                    <User className="w-3 h-3 text-slate-400" />
                     Owner
                   </label>
-                  <input name="owner" value={formData.owner} onChange={handleChange} className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none" />
+                  <input name="owner" value={formData.owner} onChange={handleChange} className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none text-[11px] md:text-xs font-bold" />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-1 flex items-center gap-2">
-                    <Calendar className="w-4 h-4 text-slate-400" />
-                    Mitigation Deadline
+                  <label className="block text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-2">
+                    <Calendar className="w-3 h-3 text-slate-400" />
+                    Deadline
                   </label>
-                  <input type="date" name="mitigationDeadline" value={formData.mitigationDeadline} onChange={handleChange} className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none" />
+                  <input type="date" name="mitigationDeadline" value={formData.mitigationDeadline} onChange={handleChange} className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none text-[11px] md:text-xs font-bold" />
                 </div>
               </div>
 
-              <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-4">
-                <h3 className="text-xs font-bold text-slate-700 flex items-center gap-2 uppercase tracking-wider">
+              <div className="p-5 md:p-6 bg-slate-50/50 rounded-3xl border border-slate-200 space-y-4 shadow-sm">
+                <h3 className="text-[10px] font-black text-slate-400 flex items-center gap-2 uppercase tracking-[0.2em]">
                   <Link2 className="w-4 h-4" />
                   Prepojenia
                 </h3>
-                <div className="grid grid-cols-2 gap-4">
-                  <input name="relatedRequirementId" value={formData.relatedRequirementId} onChange={handleChange} className="w-full p-2 bg-white border border-slate-200 rounded-lg text-xs outline-none" placeholder="REQ-001" />
-                  <input name="relatedJiraKey" value={formData.relatedJiraKey} onChange={handleChange} className="w-full p-2 bg-white border border-slate-200 rounded-lg text-xs outline-none" placeholder="LOG-123" />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <input name="relatedRequirementId" value={formData.relatedRequirementId} onChange={handleChange} className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-[11px] font-bold outline-none" placeholder="REQ ID" />
+                  <input name="relatedJiraKey" value={formData.relatedJiraKey} onChange={handleChange} className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-[11px] font-bold outline-none" placeholder="Jira Key" />
                 </div>
-                <input name="relatedSystemId" value={formData.relatedSystemId} onChange={handleChange} className="w-full p-2 bg-white border border-slate-200 rounded-lg text-xs outline-none" placeholder="Súvisiaci systém ID" />
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-1">Zdrojový Link</label>
-                <input name="sourceUrl" value={formData.sourceUrl} onChange={handleChange} className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none text-xs" placeholder="https://..." />
               </div>
             </div>
 
-          </div>
-        </form>
+          </form>
+        </div>
 
-        <div className="p-6 border-t border-slate-100 bg-slate-50/50 flex items-center justify-end gap-3">
-          <button onClick={onClose} className="px-6 py-2.5 border border-slate-200 bg-white hover:bg-slate-100 text-slate-700 rounded-xl text-sm font-bold transition-all shadow-sm">
+        {/* Footer */}
+        <div className="p-6 md:p-10 border-t border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row items-center justify-end gap-3 md:gap-4 shrink-0">
+          <button onClick={onClose} className="w-full sm:w-auto px-8 py-4 border border-slate-200 bg-white hover:bg-slate-100 text-slate-700 rounded-2xl text-[10px] md:text-xs font-black uppercase tracking-widest transition-all">
             Zrušiť
           </button>
-          <button onClick={handleSubmit} className="px-8 py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-sm font-bold transition-all shadow-md flex items-center gap-2">
-            <Save className="w-4 h-4" />
+          <button type="submit" form="risk-form" className="w-full sm:w-auto px-10 py-4 bg-rose-600 hover:bg-rose-700 text-white rounded-2xl text-[10px] md:text-xs font-black uppercase tracking-widest transition-all shadow-xl shadow-rose-100 flex items-center justify-center gap-2">
+            <Save className="w-5 h-5" />
             Uložiť riziko
           </button>
         </div>

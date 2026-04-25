@@ -77,97 +77,117 @@ export function MeetingFormModal({ isOpen, onClose, initialData }: MeetingFormMo
   };
 
   return (
-    <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
-      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-5xl max-h-[95vh] overflow-hidden flex flex-col border border-slate-200">
-        <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+    <div className={cn(
+      "fixed inset-0 z-[100] flex items-center justify-center transition-all duration-300",
+      isOpen ? "visible" : "invisible pointer-events-none"
+    )}>
+      {/* Backdrop */}
+      <div 
+        className={cn(
+          "absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity duration-300",
+          isOpen ? "opacity-100" : "opacity-0"
+        )} 
+        onClick={onClose} 
+      />
+
+      {/* Drawer / Modal */}
+      <div className={cn(
+        "bg-white w-full h-full lg:h-auto lg:max-h-[95vh] lg:max-w-5xl lg:rounded-[2.5rem] shadow-2xl flex flex-col relative transition-transform duration-500 transform overflow-hidden border border-slate-200",
+        isOpen ? "translate-y-0" : "translate-y-full lg:translate-y-4 lg:scale-95 lg:opacity-0"
+      )}>
+        {/* Header */}
+        <div className="p-6 md:p-10 border-b border-slate-100 flex items-center justify-between bg-slate-50/50 shrink-0">
           <div>
-            <h2 className="text-xl font-black text-slate-900">{initialData ? 'Upraviť meeting' : 'Nový meeting'}</h2>
-            <p className="text-sm text-slate-500 font-medium">Manuálny záznam a prepis stretnutia</p>
+            <h2 className="text-xl md:text-3xl font-black text-slate-900 tracking-tight">{initialData ? 'Upraviť meeting' : 'Nový meeting'}</h2>
+            <p className="text-[10px] md:text-sm text-slate-500 font-bold uppercase tracking-widest mt-1">Manuálny záznam a prepis</p>
           </div>
-          <button onClick={onClose} className="p-2 hover:bg-white rounded-xl transition-colors border border-transparent hover:border-slate-200 shadow-sm text-slate-400">
-            <X className="w-5 h-5" />
+          <button onClick={onClose} className="p-3 md:p-4 bg-white hover:bg-slate-50 rounded-2xl transition-all border border-slate-100 shadow-sm text-slate-400">
+            <X className="w-5 h-5 md:w-6 md:h-6" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-8 custom-scrollbar">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+        {/* Content */}
+        <div className="flex-1 overflow-y-auto p-6 md:p-10 custom-scrollbar">
+          <form id="meeting-form" onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12">
             
-            <div className="space-y-6">
+            <div className="space-y-6 md:space-y-8">
               <div>
-                <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Názov meetingu *</label>
-                <input required name="title" value={formData.title} onChange={handleChange} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 transition-all font-bold" />
+                <label className="block text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Názov meetingu *</label>
+                <input required name="title" value={formData.title} onChange={handleChange} className="w-full px-5 py-3 md:py-4 bg-slate-50 border border-slate-200 rounded-xl md:rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500 transition-all font-bold text-xs md:text-sm shadow-inner" />
               </div>
 
-              <div className="grid grid-cols-3 gap-4">
-                <div className="col-span-1">
-                  <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Dátum</label>
-                  <input type="date" name="date" value={formData.date} onChange={handleChange} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none text-xs" />
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6">
+                <div>
+                  <label className="block text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Dátum</label>
+                  <input type="date" name="date" value={formData.date} onChange={handleChange} className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none text-[11px] md:text-xs font-bold" />
                 </div>
                 <div>
-                  <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Od</label>
-                  <input type="time" name="startTime" value={formData.startTime} onChange={handleChange} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none text-xs" />
+                  <label className="block text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Od</label>
+                  <input type="time" name="startTime" value={formData.startTime} onChange={handleChange} className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none text-[11px] md:text-xs font-bold" />
                 </div>
                 <div>
-                  <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Do</label>
-                  <input type="time" name="endTime" value={formData.endTime} onChange={handleChange} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none text-xs" />
+                  <label className="block text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Do</label>
+                  <input type="time" name="endTime" value={formData.endTime} onChange={handleChange} className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none text-[11px] md:text-xs font-bold" />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Účastníci</label>
-                <input name="participants" value={formData.participants} onChange={handleChange} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none" placeholder="Mená oddelené čiarkou..." />
+                <label className="block text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Účastníci</label>
+                <input name="participants" value={formData.participants} onChange={handleChange} className="w-full px-5 py-3 md:py-4 bg-slate-50 border border-slate-200 rounded-xl md:rounded-2xl outline-none text-xs md:text-sm font-bold shadow-inner" placeholder="Mená oddelené čiarkou..." />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
                 <div>
-                  <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Typ meetingu</label>
-                  <select name="type" value={formData.type} onChange={handleChange} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none text-xs font-bold">
+                  <label className="block text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Typ meetingu</label>
+                  <select name="type" value={formData.type} onChange={handleChange} className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none text-[11px] md:text-xs font-black appearance-none">
                     {typeOptions.map(o => <option key={o} value={o}>{o}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Follow-up deadline</label>
-                  <input type="date" name="followUpDeadline" value={formData.followUpDeadline} onChange={handleChange} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none text-xs" />
+                  <label className="block text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Follow-up deadline</label>
+                  <input type="date" name="followUpDeadline" value={formData.followUpDeadline} onChange={handleChange} className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none text-[11px] md:text-xs font-bold" />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Agenda</label>
-                <textarea name="agenda" value={formData.agenda} onChange={handleChange} rows={4} className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none resize-none text-sm italic" />
+                <label className="block text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Agenda</label>
+                <textarea name="agenda" value={formData.agenda} onChange={handleChange} rows={4} className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none resize-none text-[11px] md:text-sm font-medium italic shadow-inner" />
               </div>
             </div>
 
-            <div className="space-y-6">
+            <div className="space-y-6 md:space-y-8">
               <div>
-                <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Recording Link (Teams/Sharepoint)</label>
+                <label className="block text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Recording Link</label>
                 <div className="relative">
                   <Link2 className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-                  <input name="recordingUrl" value={formData.recordingUrl} onChange={handleChange} className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none text-xs text-indigo-600" placeholder="https://..." />
+                  <input name="recordingUrl" value={formData.recordingUrl} onChange={handleChange} className="w-full pl-11 pr-4 py-3 md:py-4 bg-slate-50 border border-slate-200 rounded-xl md:rounded-2xl outline-none text-xs text-indigo-600 font-bold shadow-inner" placeholder="https://..." />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Manuálne vložený transcript</label>
-                <textarea name="transcript" value={formData.transcript} onChange={handleChange} rows={12} className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none resize-none font-mono text-[10px] leading-relaxed" placeholder="Vložte prepis meetingu..." />
-                <button type="button" className="mt-2 flex items-center gap-2 text-[10px] font-black text-indigo-600 uppercase hover:text-indigo-700">
-                  <Zap className="w-3 h-3" /> AI Generate Summary from Transcript
-                </button>
+                <label className="block text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center justify-between">
+                  Transcript
+                  <button type="button" className="flex items-center gap-2 text-[9px] font-black text-indigo-600 uppercase hover:text-indigo-700 bg-indigo-50 px-3 py-1.5 rounded-lg border border-indigo-100">
+                    <Zap className="w-3 h-3" /> AI Summary
+                  </button>
+                </label>
+                <textarea name="transcript" value={formData.transcript} onChange={handleChange} rows={12} className="w-full p-5 bg-slate-50 border border-slate-200 rounded-[2rem] outline-none resize-none font-mono text-[10px] leading-relaxed shadow-inner" placeholder="Vložte prepis meetingu..." />
               </div>
 
               <div>
-                <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Poznámky</label>
-                <textarea name="notes" value={formData.notes} onChange={handleChange} rows={3} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none resize-none text-xs" />
+                <label className="block text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Poznámky</label>
+                <textarea name="notes" value={formData.notes} onChange={handleChange} rows={3} className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none resize-none text-xs shadow-inner" />
               </div>
             </div>
+          </form>
+        </div>
 
-          </div>
-        </form>
-
-        <div className="p-8 border-t border-slate-100 bg-slate-50/50 flex items-center justify-end gap-4">
-          <button onClick={onClose} className="px-8 py-3 border border-slate-200 bg-white hover:bg-slate-100 text-slate-700 rounded-2xl text-sm font-bold transition-all shadow-sm">
+        {/* Footer */}
+        <div className="p-6 md:p-10 border-t border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row items-center justify-end gap-3 md:gap-4 shrink-0">
+          <button onClick={onClose} className="w-full sm:w-auto px-8 py-4 border border-slate-200 bg-white hover:bg-slate-100 text-slate-700 rounded-2xl text-[10px] md:text-xs font-black uppercase tracking-widest transition-all">
             Zrušiť
           </button>
-          <button onClick={handleSubmit} className="px-10 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl text-sm font-bold transition-all shadow-xl flex items-center gap-2">
+          <button type="submit" form="meeting-form" className="w-full sm:w-auto px-10 py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl text-[10px] md:text-xs font-black uppercase tracking-widest transition-all shadow-xl shadow-indigo-100 flex items-center justify-center gap-2">
             <Save className="w-5 h-5" />
             Uložiť meeting
           </button>

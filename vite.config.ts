@@ -3,6 +3,7 @@ import type { ViteDevServer } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import type { IncomingMessage, ServerResponse } from 'http';
+import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig(({ mode }) => {
   // Load env file based on `mode` in the current working directory.
@@ -53,6 +54,85 @@ export default defineConfig(({ mode }) => {
   });
 
   return {
-    plugins: [react(), tailwindcss(), mockAuthPlugin()],
+    plugins: [
+      react(), 
+      tailwindcss(), 
+      mockAuthPlugin(),
+      VitePWA({
+        registerType: 'autoUpdate',
+        includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'icons/*'],
+        manifest: {
+          name: 'BA Workspace – Project Intelligence Hub',
+          short_name: 'BA Workspace',
+          description: 'Project intelligence workspace for Business Analysts',
+          theme_color: '#0f172a',
+          background_color: '#ffffff',
+          display: 'standalone',
+          orientation: 'portrait-primary',
+          start_url: '/',
+          scope: '/',
+          icons: [
+            {
+              src: 'icons/icon-192.png',
+              sizes: '192x192',
+              type: 'image/png'
+            },
+            {
+              src: 'icons/icon-512.png',
+              sizes: '512x512',
+              type: 'image/png'
+            },
+            {
+              src: 'icons/icon-maskable.png',
+              sizes: '512x512',
+              type: 'image/png',
+              purpose: 'maskable'
+            }
+          ]
+        },
+        workbox: {
+          globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
+          navigateFallback: 'index.html',
+          runtimeCaching: [
+            {
+              urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
+              handler: 'CacheFirst',
+              options: {
+                cacheName: 'google-fonts-cache',
+                expiration: {
+                  maxEntries: 10,
+                  maxAgeSeconds: 60 * 60 * 24 * 365 // <== 365 days
+                },
+                cacheableResponse: {
+                  statuses: [0, 200]
+                }
+              }
+            },
+            {
+              urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
+              handler: 'CacheFirst',
+              options: {
+                cacheName: 'gstatic-fonts-cache',
+                expiration: {
+                  maxEntries: 10,
+                  maxAgeSeconds: 60 * 60 * 24 * 365 // <== 365 days
+                },
+                cacheableResponse: {
+                  statuses: [0, 200]
+                }
+              }
+            },
+            {
+              urlPattern: /\/api\/login/i,
+              handler: 'NetworkOnly'
+            },
+            {
+              urlPattern: /\/api\/.*/i,
+              handler: 'NetworkOnly'
+            }
+          ]
+        }
+      })
+    ],
   };
 });
