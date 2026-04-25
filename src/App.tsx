@@ -5,6 +5,7 @@ import { Dashboard } from './components/Dashboard';
 import { SystemsView } from './components/SystemsView';
 import { ConfluenceView } from './components/ConfluenceView';
 import { ProjectsView } from './components/ProjectsView';
+import { JiraView } from './components/JiraView';
 import { ProjectProvider } from './context/ProjectContext';
 
 function App() {
@@ -21,7 +22,8 @@ function App() {
             {activeView === "Projekty" && <ProjectsView />}
             {activeView === "Prepojené systémy" && <SystemsView />}
             {activeView === "Confluence zdroje" && <ConfluenceView />}
-            {activeView !== "Prehľad" && activeView !== "Projekty" && activeView !== "Prepojené systémy" && activeView !== "Confluence zdroje" && (
+            {activeView === "Jira zdroje" && <JiraView />}
+            {activeView !== "Prehľad" && activeView !== "Projekty" && activeView !== "Prepojené systémy" && activeView !== "Confluence zdroje" && activeView !== "Jira zdroje" && (
               <div className="p-12 text-center text-slate-500">
                 <h2 className="text-xl font-medium mb-2">Modul: {activeView}</h2>
                 <p>Tento modul zatiaľ nie je implementovaný v prototype.</p>

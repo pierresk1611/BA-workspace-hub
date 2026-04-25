@@ -1,6 +1,6 @@
 import { createContext, useContext, useState } from "react";
 import type { ReactNode } from "react";
-import type { Project, LinkedSystem, ConfluenceSource } from "../types";
+import type { Project, LinkedSystem, ConfluenceSource, JiraItem } from "../types";
 import { initialMockProject } from "../data/mockProject";
 
 interface ProjectContextType {
@@ -17,6 +17,9 @@ interface ProjectContextType {
   addConfluenceSource: (projectId: string, source: ConfluenceSource) => void;
   updateConfluenceSource: (projectId: string, sourceId: string, source: Partial<ConfluenceSource>) => void;
   deleteConfluenceSource: (projectId: string, sourceId: string) => void;
+  addJiraItem: (projectId: string, item: JiraItem) => void;
+  updateJiraItem: (projectId: string, itemId: string, item: Partial<JiraItem>) => void;
+  deleteJiraItem: (projectId: string, itemId: string) => void;
 }
 
 const ProjectContext = createContext<ProjectContextType | undefined>(undefined);
@@ -102,6 +105,36 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
     }));
   };
 
+  const addJiraItem = (projectId: string, item: JiraItem) => {
+    setProjects(prev => prev.map(p => {
+      if (p.id === projectId) {
+        return { ...p, jiraItems: [...p.jiraItems, item] };
+      }
+      return p;
+    }));
+  };
+
+  const updateJiraItem = (projectId: string, itemId: string, updatedFields: Partial<JiraItem>) => {
+    setProjects(prev => prev.map(p => {
+      if (p.id === projectId) {
+        return {
+          ...p,
+          jiraItems: p.jiraItems.map(item => item.id === itemId ? { ...item, ...updatedFields } : item)
+        };
+      }
+      return p;
+    }));
+  };
+
+  const deleteJiraItem = (projectId: string, itemId: string) => {
+    setProjects(prev => prev.map(p => {
+      if (p.id === projectId) {
+        return { ...p, jiraItems: p.jiraItems.filter(item => item.id !== itemId) };
+      }
+      return p;
+    }));
+  };
+
   const deleteProject = (id: string) => {
     setProjects(prev => {
       const updated = prev.filter(p => p.id !== id);
@@ -128,7 +161,10 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
       deleteSystem,
       addConfluenceSource,
       updateConfluenceSource,
-      deleteConfluenceSource
+      deleteConfluenceSource,
+      addJiraItem,
+      updateJiraItem,
+      deleteJiraItem
     }}>
       {children}
     </ProjectContext.Provider>

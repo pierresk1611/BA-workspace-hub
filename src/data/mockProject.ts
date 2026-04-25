@@ -91,7 +91,7 @@ Ak príde "posila" (iný vodič prevezme balíky), musí prebehnúť hand-over s
 5. XL app integration:
 Veľké balíky (chladničky) vyžadujú integráciu do staršieho XL systému. Appka pošle webhook pri doručení.
 
-6. GPS ping a Zákaznícke ETA:
+6. GPS ping a Zákazníicke ETA:
 Zákazník vidí na mape aktuálnu polohu auta. ETA sa prepočítava pomocou Google Maps Matrix API každú minútu.`,
       owner: "Peter (BA)",
       dateAdded: "2026-03-01",
@@ -135,6 +135,143 @@ Zákazník vidí na mape aktuálnu polohu auta. ETA sa prepočítava pomocou Goo
           "Chýba definícia chybových hlášok pri zlyhaní skenu na AlzaBoxe."
         ]
       }
+    }
+  ],
+  jiraItems: [
+    {
+      id: "jira_1",
+      key: "LOG-1001",
+      title: "Login a 2FA pre Driver App",
+      type: "Story",
+      url: "https://jira.internal/browse/LOG-1001",
+      manualText: "Implementácia prihlasovacej obrazovky. Vodič zadá ID, následne dostane 2FA SMS. Systém overí kód proti auth serveru.",
+      status: "In Progress",
+      priority: "Vysoká",
+      assignee: "Marek",
+      reporter: "Peter",
+      deadline: "2026-05-10",
+      lastChecked: "Dnes",
+      tags: "security, auth"
+    },
+    {
+      id: "jira_2",
+      key: "LOG-1002",
+      title: "Online/offline check po prihlásení",
+      type: "Task",
+      url: "https://jira.internal/browse/LOG-1002",
+      manualText: "Mechanizmus na detekciu straty signálu. Pri strate prepnúť appku do offline módu a ukladať doručenia lokálne.",
+      status: "To Do",
+      priority: "Stredná",
+      assignee: "Marek",
+      reporter: "Peter",
+      deadline: "2026-05-15",
+      lastChecked: "Včera",
+      tags: "offline, sync"
+    },
+    {
+      id: "jira_3",
+      key: "LOG-1003",
+      title: "AlzaBox access helper",
+      type: "Story",
+      url: "https://jira.internal/browse/LOG-1003",
+      manualText: "Modul pre komunikáciu s AlzaBoxom. Obsahuje logiku pre bluetooth pairing a fallback otváranie.",
+      status: "In Review",
+      priority: "Vysoká",
+      assignee: "Marek",
+      reporter: "Peter",
+      deadline: "2026-05-05",
+      lastChecked: "Dnes",
+      tags: "alzabox, iot"
+    },
+    {
+      id: "jira_4",
+      key: "LOG-1004",
+      title: "Dynamic QR pre prístup k boxu",
+      type: "Story",
+      url: "https://jira.internal/browse/LOG-1004",
+      manualText: "Generovanie QR kódu na displeji telefónu, ktorý naskenuje čítačka AlzaBoxu pre overenie identity vodiča.",
+      status: "In Progress",
+      priority: "Vysoká",
+      assignee: "Lucia",
+      reporter: "Peter",
+      deadline: "2026-05-20",
+      lastChecked: "Včera",
+      tags: "qr, alzabox"
+    },
+    {
+      id: "jira_5",
+      key: "LOG-1005",
+      title: "Emergency master key fallback",
+      type: "Bug",
+      url: "https://jira.internal/browse/LOG-1005",
+      manualText: "Oprava chyby pri generovaní master kľúča v prípade, že je box úplne offline a nefunguje ani QR skener.",
+      status: "Blocked",
+      priority: "Kritická",
+      assignee: "Marek",
+      reporter: "QA Lucia",
+      deadline: "2026-04-30",
+      lastChecked: "Dnes",
+      tags: "bug, critical"
+    },
+    {
+      id: "jira_6",
+      key: "LOG-1006",
+      title: "Posila flow",
+      type: "Story",
+      url: "https://jira.internal/browse/LOG-1006",
+      manualText: "Proces odovzdania balíkov inému vodičovi v teréne. Vyžaduje párové skenovanie oboch vodičov.",
+      status: "Backlog",
+      priority: "Stredná",
+      assignee: "Nenastavené",
+      reporter: "Peter",
+      deadline: "2026-06-01",
+      lastChecked: "Pred týždňom",
+      tags: "posila, logistics"
+    },
+    {
+      id: "jira_7",
+      key: "LOG-1007",
+      title: "XL app integration cez jednotný login",
+      type: "Task",
+      url: "https://jira.internal/browse/LOG-1007",
+      manualText: "Prepojenie s legacy XL systémom pre nadrozmerné zásielky. Login musí fungovať naprieč systémami.",
+      status: "To Do",
+      priority: "Stredná",
+      assignee: "Nenastavené",
+      reporter: "Katka",
+      deadline: "2026-06-15",
+      lastChecked: "Včera",
+      tags: "xl, legacy"
+    },
+    {
+      id: "jira_8",
+      key: "LOG-1008",
+      title: "GPS ping každých 15 sekúnd",
+      type: "Story",
+      url: "https://jira.internal/browse/LOG-1008",
+      manualText: "Odosielanie GPS súradníc na backend pre sledovanie polohy vozidla v reálnom čase.",
+      status: "In Progress",
+      priority: "Nízka",
+      assignee: "Marek",
+      reporter: "Peter",
+      deadline: "2026-05-30",
+      lastChecked: "Dnes",
+      tags: "gps, tracking"
+    },
+    {
+      id: "jira_9",
+      key: "LOG-1009",
+      title: "Customer ETA view",
+      type: "Story",
+      url: "https://jira.internal/browse/LOG-1009",
+      manualText: "Zobrazenie predpokladaného času doručenia zákazníkovi na základe aktuálnej polohy vodiča.",
+      status: "To Do",
+      priority: "Stredná",
+      assignee: "Marek",
+      reporter: "Peter",
+      deadline: "2026-06-30",
+      lastChecked: "Včera",
+      tags: "eta, customer"
     }
   ],
   systems: [

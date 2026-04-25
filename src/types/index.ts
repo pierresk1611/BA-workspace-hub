@@ -72,6 +72,27 @@ export interface ProjectMetrics {
   sqlResults: number;
 }
 
+export type JiraItemType = "Epic" | "Story" | "Task" | "Bug" | "Spike" | "Sub-task";
+export type JiraStatus = "Backlog" | "To Do" | "In Progress" | "Blocked" | "In Review" | "Done" | "Cancelled";
+
+export interface JiraItem {
+  id: string;
+  key: string;
+  title: string;
+  type: JiraItemType;
+  url: string;
+  manualText: string;
+  status: JiraStatus;
+  priority: ProjectPriority;
+  assignee: string;
+  reporter: string;
+  linkedRequirement?: string;
+  linkedMilestone?: string;
+  deadline: string;
+  lastChecked: string;
+  tags: string;
+}
+
 export interface Project {
   id: string;
   name: string;
@@ -97,6 +118,7 @@ export interface Project {
   risks: any[];
   questions: any[];
   confluenceSources: ConfluenceSource[];
+  jiraItems: JiraItem[];
   systems: LinkedSystem[];
   tasks: any[];
 }
