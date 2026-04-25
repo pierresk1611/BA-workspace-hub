@@ -19,3 +19,4 @@
 - Correct project-aware mapping using `getProjectModulePath` helper for deep linking.
 - Hardcoded fallback passwords removed and secured via `.env`.
 - TypeScript build errors and Tailwind v4 compatibility issues resolved.
+- Completely rewrote `Sidebar.tsx` to map 1:1 with specific module and route identifiers, utilizing active project paths or `/projects` fallbacks natively via `NavLink` logic without a localized state.

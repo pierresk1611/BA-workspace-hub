@@ -103,15 +103,16 @@ export function Topbar() {
       <div className="flex items-center gap-4 ml-4">
         
         {/* Project Selector */}
-        {currentProjectId && activeProject && (
+        {currentProjectId && (
           <div className="hidden lg:flex items-center gap-2">
+            <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest hidden lg:inline-block">Aktívny Projekt</span>
             <select 
-              value={activeProject.id}
+              value={params.projectId || activeProject?.id || ''}
               onChange={e => { 
-                setActiveProject(e.target.value); 
-                // navigate to same module for the new project if applicable
+                const selectedId = e.target.value;
+                setActiveProject(selectedId); 
                 const currentModule = location.pathname.split('/')[3];
-                navigate(currentModule ? `/projects/${e.target.value}/${currentModule}` : `/projects/${e.target.value}`);
+                navigate(currentModule ? `/projects/${selectedId}/${currentModule}` : `/projects/${selectedId}`);
               }}
               className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-black text-slate-700 outline-none cursor-pointer hover:border-indigo-300 transition-all"
             >

@@ -1,6 +1,8 @@
 import { defineConfig, loadEnv } from 'vite';
+import type { ViteDevServer } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
+import type { IncomingMessage, ServerResponse } from 'http';
 
 export default defineConfig(({ mode }) => {
   // Load env file based on `mode` in the current working directory.
@@ -9,11 +11,11 @@ export default defineConfig(({ mode }) => {
 
   const mockAuthPlugin = () => ({
     name: 'mock-auth-plugin',
-    configureServer(server) {
-      server.middlewares.use('/api/login', (req, res, next) => {
+    configureServer(server: ViteDevServer) {
+      server.middlewares.use('/api/login', (req: IncomingMessage, res: ServerResponse, next: () => void) => {
         if (req.method === 'POST') {
           let body = '';
-          req.on('data', chunk => {
+          req.on('data', (chunk: Buffer) => {
             body += chunk.toString();
           });
           req.on('end', () => {
