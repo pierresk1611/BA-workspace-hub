@@ -7,7 +7,11 @@ export default function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { username, password } = req.body || {};
+  let body = req.body || {};
+  if (typeof body === 'string') {
+    try { body = JSON.parse(body); } catch(e) {}
+  }
+  const { username, password } = body;
 
   const validUsername = 'peter';
   const validPassword = '2703_Viera';
@@ -17,7 +21,12 @@ export default function handler(req, res) {
     return res.status(500).json({ error: 'Server configuration error' });
   }
 
-  if (username === validUsername && password === validPassword) {
+  if (
+    username &&
+    typeof username === 'string' &&
+    username.toLowerCase() === validUsername.toLowerCase() &&
+    password === validPassword
+  ) {
     // Return a simple session token (prototype-level, not production JWT)
     return res.status(200).json({
       ok: true,
