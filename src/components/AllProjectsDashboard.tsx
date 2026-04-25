@@ -197,6 +197,7 @@ export function AllProjectsDashboard() {
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
           {filteredProjects.map(project => {
             const stats = calculateProjectProgress(project);
+            const healthScore = calculateProjectHealth(project).score;
             const isClosed = project.isClosed || project.status === 'Ukončené';
             const isAtRisk = healthScore < 72 && !isClosed;
             return (
@@ -307,6 +308,7 @@ export function AllProjectsDashboard() {
                 {filteredProjects.map(project => {
                   const stats = calculateProjectProgress(project);
                   const healthScore = calculateProjectHealth(project).score;
+                  const isClosed = project.isClosed || project.status === 'Ukončené';
                   return (
                     <tr 
                       key={project.id}
