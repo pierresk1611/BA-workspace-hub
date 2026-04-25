@@ -74,12 +74,15 @@ export function Sidebar() {
   };
 
   const isItemActive = (item: SidebarItem, path: string) => {
-    if (path === '/dashboard') return location.pathname === '/dashboard';
-    if (path === '/projects') return location.pathname === '/projects';
-    if (path === `/projects/${currentProjectId}`) return location.pathname === path;
-    if (path === '/settings') return location.pathname === '/settings';
+    if (item.key === 'overview') return location.pathname === path;
+    if (item.key === 'projects') return location.pathname === '/projects';
+    if (item.key === 'settings') return location.pathname === '/settings';
     
-    // Project-scoped deep paths
+    if (item.projectScoped) {
+      if (!currentProjectId) return false;
+      return location.pathname === path || location.pathname.startsWith(path + '/');
+    }
+    
     return location.pathname === path || location.pathname.startsWith(path + '/');
   };
 
