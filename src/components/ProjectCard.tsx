@@ -42,8 +42,8 @@ export function ProjectCard({ project, onClick, onEdit }: ProjectCardProps) {
     setShowMenu(false);
   };
 
-  const isOverdue = project.mainDeadline && new Date(project.mainDeadline) < new Date();
-  const hasIssue = !project.team.businessAnalyst || !project.mainDeadline;
+  const isOverdue = project.mainDeadline && new Date(project.mainDeadline) < new Date() && !isClosed;
+  const hasIssue = (!project.team.businessAnalyst || !project.mainDeadline) && !isClosed;
   const healthScore = calculateProjectHealth(project).score;
 
   return (
@@ -150,11 +150,11 @@ export function ProjectCard({ project, onClick, onEdit }: ProjectCardProps) {
       <div className="px-8 py-5 bg-slate-50 rounded-b-[2.5rem] border-t border-slate-100 flex items-center justify-between">
         <div className="flex gap-4">
           <div className="flex items-center gap-1.5" title="Otvorené otázky">
-            <AlertCircle className={cn("w-4 h-4", project.metrics.openQuestions > 0 ? "text-amber-500" : "text-slate-300")} />
+            <AlertCircle className={cn("w-4 h-4", (project.metrics.openQuestions > 0 && !isClosed) ? "text-amber-500" : "text-slate-300")} />
             <span className="text-xs font-black text-slate-600">{project.metrics.openQuestions}</span>
           </div>
           <div className="flex items-center gap-1.5" title="Kritické riziká">
-            <AlertCircle className={cn("w-4 h-4", project.metrics.highRisks > 0 ? "text-rose-500" : "text-slate-300")} />
+            <AlertCircle className={cn("w-4 h-4", (project.metrics.highRisks > 0 && !isClosed) ? "text-rose-500" : "text-slate-300")} />
             <span className="text-xs font-black text-slate-600">{project.metrics.highRisks}</span>
           </div>
         </div>

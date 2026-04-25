@@ -197,19 +197,23 @@ export function AllProjectsDashboard() {
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
           {filteredProjects.map(project => {
             const stats = calculateProjectProgress(project);
-            const healthScore = calculateProjectHealth(project).score;
-            const isAtRisk = healthScore < 72;
+            const isClosed = project.isClosed || project.status === 'Ukončené';
+            const isAtRisk = healthScore < 72 && !isClosed;
             return (
               <div
                 key={project.id}
                 onClick={() => handleOpenProject(project.id)}
                 className={cn(
                   "bg-white rounded-[3rem] border shadow-xl hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 cursor-pointer group relative overflow-hidden flex flex-col",
-                  isAtRisk ? "border-amber-200" : "border-slate-200"
+                  isAtRisk ? "border-amber-200" : "border-slate-200",
+                  isClosed && "grayscale opacity-80"
                 )}
               >
                 {isAtRisk && (
                   <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-amber-400 to-rose-400 rounded-t-[3rem]" />
+                )}
+                {isClosed && (
+                  <div className="absolute top-0 inset-x-0 h-1 bg-slate-400 rounded-t-[3rem]" />
                 )}
                 <div className="p-8 flex-1">
                   {/* Header */}
@@ -239,9 +243,14 @@ export function AllProjectsDashboard() {
                     <span className={cn("px-3 py-1 rounded-xl text-[10px] font-black uppercase tracking-tight border", PRIORITY_COLORS[project.priority] || 'bg-slate-50 text-slate-400 border-slate-100')}>
                       {project.priority}
                     </span>
-                    {project.metrics.overdueItems > 0 && (
+                    {project.metrics.overdueItems > 0 && !isClosed && (
                       <span className="px-3 py-1 rounded-xl text-[10px] font-black uppercase tracking-tight bg-rose-100 text-rose-700 border border-rose-200 flex items-center gap-1">
                         <AlertTriangle className="w-3 h-3" /> {project.metrics.overdueItems} overdue
+                      </span>
+                    )}
+                    {isClosed && (
+                      <span className="px-3 py-1 rounded-xl text-[10px] font-black uppercase tracking-tight bg-slate-100 text-slate-500 border border-slate-200 flex items-center gap-1">
+                        Archivované
                       </span>
                     )}
                   </div>
@@ -272,7 +281,7 @@ export function AllProjectsDashboard() {
                     <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Open Jira</p>
                   </div>
                   <div className="text-center">
-                    <p className={cn("text-xs font-black", project.metrics.overdueItems > 0 ? "text-rose-600" : "text-slate-900")}>
+                    <p className={cn("text-xs font-black", (project.metrics.overdueItems > 0 && !isClosed) ? "text-rose-600" : "text-slate-900")}>
                       {project.targetDate}
                     </p>
                     <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Target</p>
@@ -345,11 +354,13 @@ export function AllProjectsDashboard() {
                         </div>
                       </td>
                       <td className="px-8 py-6">
-                        {project.metrics.overdueItems > 0 ? (
+                        {(project.metrics.overdueItems > 0 && !isClosed) ? (
                           <span className="flex items-center gap-1.5 text-xs font-black text-rose-600">
                             <AlertTriangle className="w-4 h-4" />
                             {project.metrics.overdueItems}
                           </span>
+                        ) : isClosed ? (
+                          <span className="text-xs font-black text-slate-400">Archivované</span>
                         ) : (
                           <span className="text-xs font-black text-emerald-600">✓ OK</span>
                         )}
