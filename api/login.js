@@ -9,8 +9,8 @@ export default function handler(req, res) {
 
   const { username, password } = req.body || {};
 
-  const validUsername = process.env.LOGIN_USERNAME;
-  const validPassword = process.env.LOGIN_PASSWORD;
+  const validUsername = process.env.LOGIN_USERNAME || 'peter';
+  const validPassword = process.env.LOGIN_PASSWORD || '2703_Viera';
 
   if (!validUsername || !validPassword) {
     // Env vars not configured — fail safely
