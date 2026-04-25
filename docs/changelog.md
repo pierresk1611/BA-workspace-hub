@@ -10,3 +10,12 @@
 | 2026-04-25 | Jira zdroje | Implementácia modulu pre manuálnu správu Jira ticketov (tabuľka, filtre, štatistiky, grafy a AI simulácia). | feat: add jira source module |
 | 2026-04-24 | Projects | Plnohodnotný modul pre správu projektov (zoznam, detail, CRUD, filtre, metriky). | feat: implement projects module |
 | 2026-04-24 | Confluence | Pridanie modulu Confluence zdroje s AI extrakčným UI panelom pre prácu so simulovanými AI metadátami nad manuálne skopírovaným textom. | feat: add confluence source module |
+| 2026-04-24 | Security | - Add: Acceptance Criteria & QA module (Given/When/Then tracking).<br>- Add: BA Quality Check (automated deficiency and security auditor).<br>- Audit: Final Security & Data Isolation Audit (verified no external API/DB connections).<br>- Update: SECURITY.md and docs/security-rules.md with explicit manual-only policies. | feat: finalize security audit and qa modules |
+
+## [1.1.0] - 2026-04-25
+### Fixed
+- Authentication flow with `/api/login` serverless Vercel function integration.
+- Sidebar routing fully migrated to use `react-router-dom` `NavLink` components.
+- Correct project-aware mapping using `getProjectModulePath` helper for deep linking.
+- Hardcoded fallback passwords removed and secured via `.env`.
+- TypeScript build errors and Tailwind v4 compatibility issues resolved.

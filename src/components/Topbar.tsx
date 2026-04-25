@@ -1,68 +1,165 @@
-import React, { useState } from "react";
-import { Search, Plus, Bell, ChevronDown } from "lucide-react";
-import { useProject } from "../context/ProjectContext";
-import { ProjectFormModal } from "./ProjectFormModal";
+import { useNavigate, useLocation, useParams } from 'react-router-dom';
+import { Bell, ChevronRight, LogOut, ChevronDown } from 'lucide-react';
+import { useProject } from '../context/ProjectContext';
+import { useAuth } from '../context/AuthContext';
+import { GlobalSearch } from './GlobalSearch';
+
+const MODULE_LABELS: Record<string, string> = {
+  'requirements': 'Požiadavky',
+  'decisions': 'Decision Log',
+  'questions': 'Open Questions',
+  'risks': 'Riziká & Závislosti',
+  'sql': 'SQL Sandbox',
+  'diagrams': 'Diagramy',
+  'kafka': 'Kafka Flows',
+  'communications': 'Komunikácia',
+  'meetings': 'Meetingy',
+  'stakeholders': 'Stakeholders',
+  'ai-agent': 'AI Intelligence',
+  'exports': 'Exporty',
+  'traceability': 'Traceability',
+  'qa': 'QA & Akceptácie',
+  'quality-check': 'Quality Audit',
+  'calendar': 'Kalendár',
+  'linked-systems': 'Systémy',
+  'confluence': 'Confluence',
+  'jira': 'Jira',
+  'asana': 'Asana',
+};
 
 export function Topbar() {
-  const { projects, activeProjectId, setActiveProject } = useProject();
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const { activeProject, setActiveProject, projects } = useProject();
+  const { username, logout } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const params = useParams<{ projectId?: string; module?: string }>();
 
-  const handleProjectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setActiveProject(e.target.value);
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
   };
 
-  const activeProject = projects.find(p => p.id === activeProjectId);
+  // Build breadcrumbs based on current route
+  const buildBreadcrumbs = () => {
+    const segments = location.pathname.split('/').filter(Boolean);
+    const crumbs: { label: string; path: string }[] = [];
+
+    crumbs.push({ label: 'Dashboard', path: '/dashboard' });
+
+    if (segments[0] === 'projects') {
+      crumbs.push({ label: 'Projekty', path: '/projects' });
+
+      const projectId = segments[1];
+      if (projectId) {
+        const project = projects.find(p => p.id === projectId);
+        if (project) {
+          crumbs.push({ label: project.name, path: `/projects/${projectId}` });
+
+          const module = segments[2];
+          if (module && MODULE_LABELS[module]) {
+            crumbs.push({ label: MODULE_LABELS[module], path: location.pathname });
+          }
+        }
+      }
+    }
+
+    return crumbs;
+  };
+
+  const breadcrumbs = buildBreadcrumbs();
+  const currentProjectId = params.projectId;
 
   return (
-    <>
-      <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 sticky top-0 z-20">
-        <div className="flex items-center gap-4 flex-1">
-          
-          <div className="relative group flex items-center bg-slate-100 rounded-lg hover:bg-slate-200 transition-colors border border-slate-200 overflow-hidden">
-            <div className="flex items-center justify-center w-8 h-8 bg-blue-600 text-white text-xs font-bold shrink-0">
-              {activeProject?.name.substring(0, 2).toUpperCase() || 'PR'}
-            </div>
-            <select 
-              value={activeProjectId} 
-              onChange={handleProjectChange}
-              className="appearance-none bg-transparent py-1.5 pl-3 pr-8 text-sm font-semibold text-slate-800 outline-none cursor-pointer relative z-10 w-full"
-            >
-              {projects.map(p => (
-                <option key={p.id} value={p.id}>{p.name}</option>
-              ))}
-            </select>
-            <ChevronDown className="w-4 h-4 text-slate-500 absolute right-2 pointer-events-none" />
-          </div>
-          
-          <div className="max-w-md w-full relative group">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500" />
-            <input 
-              type="text" 
-              placeholder="Globálne vyhľadávanie (Projekty, tasky, dokumenty...)" 
-              className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all"
-            />
-          </div>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <button className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors relative">
-            <Bell className="w-5 h-5" />
-            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
-          </button>
-          <button 
-            onClick={() => setIsModalOpen(true)}
-            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm"
-          >
-            <Plus className="w-4 h-4" />
-            Vytvoriť projekt
-          </button>
-        </div>
-      </header>
+    <header className="h-16 bg-white/90 backdrop-blur-md border-b border-slate-200 px-6 flex items-center justify-between sticky top-0 z-40 shrink-0">
       
-      <ProjectFormModal 
-        isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
-      />
-    </>
+      {/* Left: Breadcrumbs */}
+      <div className="flex items-center gap-2 flex-1 min-w-0 mr-4">
+        {/* Breadcrumbs */}
+        <nav className="flex items-center gap-1 min-w-0">
+          {breadcrumbs.map((crumb, idx) => (
+            <div key={idx} className="flex items-center gap-1 min-w-0">
+              {idx > 0 && <ChevronRight className="w-3.5 h-3.5 text-slate-300 shrink-0" />}
+              {idx === breadcrumbs.length - 1 ? (
+                <span className="text-xs font-black text-slate-900 truncate max-w-[180px]">{crumb.label}</span>
+              ) : (
+                <button
+                  onClick={() => navigate(crumb.path)}
+                  className="text-xs font-black text-slate-400 hover:text-indigo-600 transition-colors whitespace-nowrap"
+                >
+                  {crumb.label}
+                </button>
+              )}
+            </div>
+          ))}
+        </nav>
+      </div>
+
+      {/* Center: Search */}
+      <div className="hidden lg:flex items-center flex-1 max-w-sm">
+        <GlobalSearch />
+      </div>
+
+      {/* Right: Project context + User */}
+      <div className="flex items-center gap-4 ml-4">
+        
+        {/* Project Selector */}
+        {currentProjectId && activeProject && (
+          <div className="hidden lg:flex items-center gap-2">
+            <select 
+              value={activeProject.id}
+              onChange={e => { 
+                setActiveProject(e.target.value); 
+                // navigate to same module for the new project if applicable
+                const currentModule = location.pathname.split('/')[3];
+                navigate(currentModule ? `/projects/${e.target.value}/${currentModule}` : `/projects/${e.target.value}`);
+              }}
+              className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-black text-slate-700 outline-none cursor-pointer hover:border-indigo-300 transition-all"
+            >
+              {projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+            </select>
+          </div>
+        )}
+
+        {/* Health */}
+        {activeProject && (
+          <div className="hidden xl:flex items-center gap-2 px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl">
+            <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Health</span>
+            <span className={`text-xs font-black ${activeProject.metrics.healthScore > 80 ? 'text-emerald-600' : 'text-amber-600'}`}>
+              {activeProject.metrics.healthScore}%
+            </span>
+          </div>
+        )}
+
+        {/* Notifications */}
+        <button className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all relative">
+          <Bell className="w-4 h-4" />
+          <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-rose-500 rounded-full border border-white" />
+        </button>
+
+        <div className="w-px h-6 bg-slate-200" />
+
+        {/* User + Logout */}
+        <div className="flex items-center gap-3">
+          <button className="flex items-center gap-2 p-1 hover:bg-slate-50 rounded-xl transition-all border border-transparent hover:border-slate-200 group">
+            <div className="flex flex-col items-end">
+              <span className="text-xs font-black text-slate-900 group-hover:text-indigo-600 transition-colors leading-none">{username || 'BA User'}</span>
+              <span className="text-[9px] font-black text-slate-400 uppercase tracking-tighter">Lead Analyst</span>
+            </div>
+            <div className="w-8 h-8 bg-gradient-to-tr from-slate-800 to-slate-900 rounded-xl flex items-center justify-center text-white font-black text-[10px] shadow-lg">
+              {username ? username.charAt(0).toUpperCase() : 'BA'}
+            </div>
+            <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+          </button>
+
+          <button 
+            onClick={handleLogout}
+            className="p-2 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-xl transition-all"
+            title="Odhlásiť sa"
+          >
+            <LogOut className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+    </header>
   );
 }

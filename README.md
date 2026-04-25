@@ -1,6 +1,16 @@
 # BA Workspace – Project Intelligence Hub
 
 ## Účel aplikácie
+### 🔐 Bezpečnosť a Izolácia Dát
+**Tento prototyp je navrhnutý ako maximálne bezpečný a izolovaný systém:**
+- **Žiadne API integrácie:** Aplikácia sa nepripája na Jira, Confluence, Teams ani iné externé systémy.
+- **Manuálny vstup:** Všetky dáta a texty (emaily, prepisy meetingov) musia byť vložené manuálne používateľom.
+- **Mock Sandbox:** SQL Workspace a AI Agent pracujú výhradne nad lokálne uloženými mock dátami.
+- **Žiadne Credentials:** Aplikácia neukladá heslá, tokeny ani reálne connection stringy.
+
+Podrobné pravidlá nájdete v [SECURITY.md](SECURITY.md) a [docs/security-rules.md](docs/security-rules.md).
+
+## Štruktúra Projektu
 Aplikácia je interný pracovný dashboard pre Business Analysta. Slúži na správu projektov, linkov, manuálne vložených textov, požiadaviek, rozhodnutí, otvorených otázok, rizík, závislostí, taskov, kalendára, deadlineov, meeting transcriptov, SQL dotazov, AI sumarizácie a exportov.
 
 ## Tech stack
@@ -13,8 +23,13 @@ Aplikácia je interný pracovný dashboard pre Business Analysta. Slúži na spr
 
 ## Ako spustiť lokálne
 1. Nainštalujte závislosti: `npm install`
-2. Spustite lokálny server: `npm run dev`
-3. Aplikácia beží štandardne na adrese `http://localhost:5173`
+2. Vytvorte kópiu environment súboru: `cp .env.example .env.local` a vyplňte prihlasovacie údaje.
+3. **Lokálne testovanie prihlásenia:** Keďže aplikácia využíva Vercel Serverless Functions (`/api/login`), na plnohodnotné lokálne testovanie auth flowu spustite:
+   `vercel dev`
+4. Ak používate iba Vite dev server (`npm run dev`), API endpoint nebude dostupný, preto sa odporúča vývoj cez Vercel CLI.
+5. Vytvorené testovacie údaje pre tento prototyp sú:
+   - Username: `peter`
+   - Password: `2703_Viera`
 
 ## Bezpečnostné obmedzenia a fungovanie
 - **UPOZORNENIE:** Prototyp pracuje **výhradne iba s manuálne vloženým linkom a textom** a mock dátami.

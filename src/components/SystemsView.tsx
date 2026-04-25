@@ -1,16 +1,17 @@
 import { useState } from 'react';
-import { Plus, Search, Filter, Network } from 'lucide-react';
+import { Plus, Search, Filter, Network, Globe, ShieldCheck, Activity, Database } from 'lucide-react';
 import { useProject } from '../context/ProjectContext';
 import { SystemCard } from './SystemCard';
 import { SystemFormModal } from './SystemFormModal';
 import { TextReaderModal } from './TextReaderModal';
+import { EmptyState } from './Badge';
 import type { LinkedSystem } from '../types';
+import { cn } from '../lib/utils';
 
 export function SystemsView() {
   const { activeProject } = useProject();
   const [search, setSearch] = useState('');
   
-  // Modals state
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingSystem, setEditingSystem] = useState<LinkedSystem | undefined>(undefined);
   
@@ -18,7 +19,7 @@ export function SystemsView() {
     isOpen: false, text: '', title: ''
   });
 
-  if (!activeProject) return <div className="p-6 text-center text-slate-500">Žiadny projekt nie je vybraný.</div>;
+  if (!activeProject) return null;
 
   const systems = activeProject.systems || [];
   
@@ -43,50 +44,81 @@ export function SystemsView() {
   };
 
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-6">
+    <div className="p-8 space-y-8 animate-in fade-in duration-500 bg-slate-50 min-h-full overflow-y-auto custom-scrollbar">
       
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Prepojené systémy</h1>
-          <p className="text-slate-500 text-sm mt-1">Zoznam všetkých manuálne prepojených systémov pre projekt {activeProject.name}</p>
+          <h1 className="text-4xl font-black text-slate-900 tracking-tight flex items-center gap-4">
+            <div className="p-3 bg-indigo-600 rounded-2xl text-white shadow-xl shadow-indigo-100">
+               <Globe className="w-8 h-8" />
+            </div>
+            Linked Systems Ecosystem
+          </h1>
+          <p className="text-slate-500 font-medium mt-2 max-w-2xl text-lg">
+            Správa prepojených systémov, dokumentácie a dátových zdrojov pre {activeProject.name}.
+          </p>
         </div>
-        <button 
-          onClick={handleOpenCreate}
-          className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm"
-        >
-          <Plus className="w-4 h-4" />
-          Pridať systém
-        </button>
+        <div className="flex items-center gap-3">
+          <button 
+            onClick={handleOpenCreate}
+            className="px-8 py-4 bg-indigo-600 text-white rounded-[1.5rem] font-black text-sm uppercase tracking-widest shadow-xl shadow-indigo-100 hover:bg-indigo-700 active:scale-95 transition-all flex items-center gap-2"
+          >
+            <Plus className="w-5 h-5" /> Pridať Systém
+          </button>
+        </div>
+      </div>
+
+      {/* Metrics Summary */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+         {[
+           { label: 'Active Systems', val: systems.length, icon: Globe, color: 'text-indigo-600', bg: 'bg-indigo-50' },
+           { label: 'Critical Assets', val: systems.filter(s => s.priority === 'Kritická' || s.priority === 'Vysoká').length, icon: ShieldCheck, color: 'text-rose-600', bg: 'bg-rose-50' },
+           { label: 'Documentation Hubs', val: systems.filter(s => s.type === 'Confluence').length, icon: Database, color: 'text-blue-600', bg: 'bg-blue-50' },
+           { label: 'System Health', val: '94%', icon: Activity, color: 'text-emerald-600', bg: 'bg-emerald-50' }
+         ].map((s, i) => (
+           <div key={i} className={cn("p-6 rounded-[2.5rem] border border-slate-200 shadow-sm flex items-center gap-6 bg-white")}>
+              <div className={cn("p-4 rounded-2xl", s.bg, s.color)}>
+                 <s.icon className="w-6 h-6" />
+              </div>
+              <div>
+                 <p className="text-3xl font-black text-slate-900 leading-none mb-1">{s.val}</p>
+                 <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{s.label}</p>
+              </div>
+           </div>
+         ))}
       </div>
 
       {/* Toolbar */}
-      <div className="flex items-center gap-4 bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-        <div className="flex-1 relative">
-          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+      <div className="flex flex-col md:flex-row items-center justify-between gap-4 bg-white p-4 rounded-[2rem] border border-slate-200 shadow-sm">
+        <div className="flex-1 relative w-full max-w-2xl">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           <input 
             type="text" 
-            placeholder="Hľadať podľa názvu, typu alebo tagu..." 
+            placeholder="Hľadať systém, typ, vlastníka alebo tag..."
             value={search}
-            onChange={e => setSearch(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-indigo-500 transition-all shadow-inner"
           />
         </div>
-        <button className="flex items-center gap-2 px-4 py-2 border border-slate-200 bg-white text-slate-700 rounded-lg text-sm font-medium hover:bg-slate-50">
-          <Filter className="w-4 h-4" />
-          Filtrovať
-        </button>
+        <div className="flex items-center gap-3">
+          <button className="flex items-center gap-2 px-6 py-3 border border-slate-200 bg-white text-slate-700 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-slate-50 transition-all">
+            <Filter className="w-4 h-4" /> Filtrovať
+          </button>
+        </div>
       </div>
 
       {/* Grid */}
       {filteredSystems.length === 0 ? (
-        <div className="bg-white p-12 text-center rounded-xl border border-slate-200">
-          <Network className="w-12 h-12 mx-auto text-slate-300 mb-4" />
-          <h3 className="text-lg font-medium text-slate-900 mb-1">Žiadne systémy neboli nájdené</h3>
-          <p className="text-slate-500 text-sm">Pridajte nový systém pomocou tlačidla vyššie.</p>
-        </div>
+        <EmptyState 
+          icon={Network}
+          title="Žiadne systémy"
+          description="Tento projekt nemá zatiaľ prepojené žiadne externé systémy ani dokumentáciu. Pridajte zdroje pre lepšiu traceability."
+          actionLabel="Pridať prvý systém"
+          onAction={handleOpenCreate}
+        />
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 pb-12">
           {filteredSystems.map(sys => (
             <SystemCard 
               key={sys.id} 

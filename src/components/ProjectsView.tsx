@@ -1,28 +1,27 @@
 import { useState } from 'react';
-import { Plus, Search, Filter, FolderKanban } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Plus, Search, FolderKanban } from 'lucide-react';
 import { useProject } from '../context/ProjectContext';
 import { ProjectCard } from './ProjectCard';
-import { ProjectDetail } from './ProjectDetail';
 import { ProjectFormModal } from './ProjectFormModal';
+import { EmptyState } from './Badge';
 import type { Project } from '../types';
+import { cn } from '../lib/utils';
 
 export function ProjectsView() {
   const { projects, setActiveProject } = useProject();
-  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
+  const navigate = useNavigate();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingProject, setEditingProject] = useState<Project | undefined>(undefined);
   
-  // Filters
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
-  const [priorityFilter, setPriorityFilter] = useState('');
 
   const filteredProjects = projects.filter(p => {
     const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase()) || 
                           p.team.businessAnalyst.toLowerCase().includes(search.toLowerCase());
     const matchesStatus = statusFilter ? p.status === statusFilter : true;
-    const matchesPriority = priorityFilter ? p.priority === priorityFilter : true;
-    return matchesSearch && matchesStatus && matchesPriority;
+    return matchesSearch && matchesStatus;
   });
 
   const handleOpenCreate = () => {
@@ -36,94 +35,68 @@ export function ProjectsView() {
   };
 
   const handleSelectProject = (projectId: string) => {
-    setSelectedProjectId(projectId);
-    setActiveProject(projectId); // Sync with global project selector
+    setActiveProject(projectId);
+    navigate(`/projects/${projectId}`);
   };
 
-  if (selectedProjectId) {
-    const project = projects.find(p => p.id === selectedProjectId);
-    if (project) {
-      return (
-        <ProjectDetail 
-          project={project} 
-          onBack={() => setSelectedProjectId(null)} 
-          onEdit={() => handleOpenEdit(project)}
-        />
-      );
-    }
-  }
-
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-6">
+    <div className="p-8 space-y-8 animate-in fade-in duration-500 bg-slate-50 min-h-full overflow-y-auto custom-scrollbar">
       
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
-            <FolderKanban className="w-6 h-6 text-blue-600" />
-            Správa projektov
-          </h1>
-          <p className="text-slate-500 text-sm mt-1">Prehľad všetkých projektov v BA Workspace</p>
+          <h1 className="text-4xl font-black text-slate-900 tracking-tight">Project Portfolio</h1>
+          <p className="text-slate-500 font-medium mt-2 max-w-2xl text-lg">
+            Správa všetkých aktívnych projektov, iniciatív a ich aktuálneho progresu.
+          </p>
         </div>
         <button 
           onClick={handleOpenCreate}
-          className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm"
+          className="flex items-center gap-2 bg-indigo-600 text-white px-8 py-4 rounded-[1.5rem] font-black text-sm uppercase tracking-widest shadow-xl shadow-indigo-100 hover:bg-indigo-700 active:scale-95 transition-all"
         >
-          <Plus className="w-4 h-4" />
-          Vytvoriť projekt
+          <Plus className="w-5 h-5" /> Nový Projekt
         </button>
       </div>
 
-      {/* Toolbar / Filters */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-        <div className="md:col-span-1 relative">
-          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+      {/* Toolbar */}
+      <div className="flex flex-col md:flex-row items-center gap-4 bg-white p-4 rounded-[2rem] border border-slate-200 shadow-sm">
+        <div className="relative flex-1 w-full">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           <input 
             type="text" 
-            placeholder="Hľadať projekt alebo BA..." 
+            placeholder="Hľadať projekt podľa názvu alebo BA..." 
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
           />
         </div>
-        <select 
-          value={statusFilter} 
-          onChange={e => setStatusFilter(e.target.value)}
-          className="bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
-          <option value="">Všetky statusy</option>
-          <option value="Idea">Idea</option>
-          <option value="Analýza">Analýza</option>
-          <option value="Vývoj">Vývoj</option>
-          <option value="UAT">UAT</option>
-          <option value="Done">Done</option>
-        </select>
-        <select 
-          value={priorityFilter} 
-          onChange={e => setPriorityFilter(e.target.value)}
-          className="bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
-          <option value="">Všetky priority</option>
-          <option value="Kritická">Kritická</option>
-          <option value="Vysoká">Vysoká</option>
-          <option value="Stredná">Stredná</option>
-          <option value="Nízka">Nízka</option>
-        </select>
-        <button className="flex items-center justify-center gap-2 px-4 py-2 border border-slate-200 bg-white text-slate-700 rounded-lg text-sm font-medium hover:bg-slate-50">
-          <Filter className="w-4 h-4" />
-          Rozšírené filtre
-        </button>
+        <div className="flex items-center gap-2">
+           {(['All', 'Analýza', 'Solution Design', 'Discovery', 'Vývoj', 'Done'] as const).map(status => (
+             <button
+               key={status}
+               onClick={() => setStatusFilter(status === 'All' ? '' : status)}
+               className={cn(
+                 "px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-tight transition-all whitespace-nowrap",
+                 (status === 'All' && !statusFilter) || statusFilter === status ? "bg-slate-900 text-white shadow-lg" : "bg-white text-slate-500 border border-slate-200 hover:bg-slate-50"
+               )}
+             >
+               {status}
+             </button>
+           ))}
+        </div>
       </div>
 
       {/* Grid */}
       {filteredProjects.length === 0 ? (
-        <div className="bg-white p-12 text-center rounded-xl border border-slate-200">
-          <FolderKanban className="w-12 h-12 mx-auto text-slate-300 mb-4" />
-          <h3 className="text-lg font-medium text-slate-900 mb-1">Žiadne projekty neboli nájdené</h3>
-          <p className="text-slate-500 text-sm">Skúste zmeniť filtre alebo vytvorte nový projekt.</p>
-        </div>
+        <EmptyState 
+          icon={FolderKanban}
+          title="Žiadne projekty"
+          description="Neboli nájdené žiadne projekty zodpovedajúce vašim filtrom."
+          actionLabel="Vytvoriť Projekt"
+          onAction={handleOpenCreate}
+        />
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {filteredProjects.map(project => (
             <ProjectCard 
               key={project.id} 
@@ -138,7 +111,6 @@ export function ProjectsView() {
         </div>
       )}
 
-      {/* Form Modal */}
       <ProjectFormModal 
         isOpen={isFormOpen}
         onClose={() => setIsFormOpen(false)}

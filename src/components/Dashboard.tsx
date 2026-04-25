@@ -1,276 +1,259 @@
-import { useState } from 'react';
 import { 
-  AlertCircle, Calendar, Clock, Database, CheckSquare, 
-  HelpCircle, MessageSquare, Plus, FileText, Kanban, Bot, ShieldCheck,
-  TrendingUp, Download, Network, Edit
-} from "lucide-react";
-import { useProject } from "../context/ProjectContext";
-import { ProjectFormModal } from "./ProjectFormModal";
-import { cn } from "../lib/utils";
-import { 
-  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  BarChart, Bar, Cell
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
+  AreaChart, Area
 } from 'recharts';
-
-function MetricCard({ title, value, icon: Icon, trend, className, valueClass }: any) {
-  return (
-    <div className={cn("bg-white p-5 rounded-xl border border-slate-200 shadow-sm", className)}>
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-sm font-medium text-slate-500">{title}</h3>
-        <div className="p-2 bg-slate-50 rounded-lg">
-          <Icon className="w-4 h-4 text-slate-400" />
-        </div>
-      </div>
-      <div className="flex items-baseline gap-2">
-        <h2 className={cn("text-2xl font-bold text-slate-800", valueClass)}>{value}</h2>
-        {trend && <span className="text-xs font-medium text-slate-500">{trend}</span>}
-      </div>
-    </div>
-  );
-}
-
-function QuickActionButton({ icon: Icon, label, primary }: any) {
-  return (
-    <button className={cn(
-      "flex flex-col items-center justify-center gap-2 p-4 rounded-xl border transition-all text-sm font-medium",
-      primary 
-        ? "bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100 shadow-sm"
-        : "bg-white border-slate-200 text-slate-600 hover:border-blue-300 hover:shadow-sm"
-    )}>
-      <Icon className={cn("w-5 h-5", primary ? "text-blue-600" : "text-slate-400")} />
-      <span className="text-center leading-tight">{label}</span>
-    </button>
-  );
-}
+import { 
+  Activity as ActivityIcon, Clock, 
+  Target, Flag, AlertTriangle, TrendingUp, ShieldCheck, ArrowRight
+} from 'lucide-react';
+import { useProject } from '../context/ProjectContext';
+import { calculateProjectProgress } from '../lib/projectUtils';
 
 export function Dashboard() {
   const { activeProject } = useProject();
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
-  if (!activeProject) return <div className="p-6 text-center text-slate-500">Žiadny projekt nie je vybraný.</div>;
+  if (!activeProject) return null;
 
-  const { metrics, charts, upcomingMeetings, recentActivities, team } = activeProject;
+  const stats = calculateProjectProgress(activeProject);
+
+  const colors = {
+    progress: '#4f46e5',
+    health: stats.health > 80 ? '#10b981' : stats.health > 50 ? '#f59e0b' : '#ef4444',
+    background: '#f8fafc'
+  };
+
+  const chartData = [
+    { name: 'Požiadavky', value: stats.reqProgress, color: '#4f46e5' },
+    { name: 'Jira', value: stats.jiraProgress, color: '#0ea5e9' },
+    { name: 'Asana', value: stats.asanaProgress, color: '#8b5cf6' },
+    { name: 'Milestony', value: stats.milestoneProgress, color: '#ec4899' }
+  ];
+
+  const timelineData = [
+    { date: '2026-03-01', progress: 5 },
+    { date: '2026-03-15', progress: 12 },
+    { date: '2026-04-01', progress: 22 },
+    { date: '2026-04-15', progress: 31 },
+    { date: '2026-04-25', progress: stats.progress }
+  ];
+
+  const currentMilestone = activeProject.milestones.find(m => m.status === 'In Progress') || 
+                           activeProject.milestones.find(m => m.status === 'Upcoming');
+
+  const blockers = [
+    { title: "Posila flow", owner: "Peter (BA)", status: "Blocking Analysis" },
+    { title: "XL integration scope", owner: "Katka (PO)", status: "Awaiting Stakeholder Decision" },
+    { title: "GPS rules", owner: "Marek (Tech Lead)", status: "Technical Verification" }
+  ];
 
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-6">
+    <div className="p-8 space-y-8 animate-in fade-in duration-500 bg-slate-50 min-h-full overflow-y-auto custom-scrollbar">
       
-      {/* Header Section */}
-      <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 bg-white p-6 rounded-xl border border-slate-200 shadow-sm relative">
-        <div className="flex-1">
-          <div className="flex items-center gap-3 mb-2 flex-wrap">
-            <h1 className="text-2xl font-bold text-slate-900">{activeProject.name}</h1>
-            <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-700 border border-blue-200">
-              {activeProject.status}
-            </span>
-            <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-700 border border-red-200">
-              Priorita: {activeProject.priority}
-            </span>
-            <button 
-              onClick={() => setIsEditModalOpen(true)}
-              className="ml-auto md:ml-4 text-xs flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors font-medium border border-slate-200"
-            >
-              <Edit className="w-3.5 h-3.5" />
-              Upraviť projekt
-            </button>
-          </div>
-          <p className="text-slate-500 text-sm max-w-3xl leading-relaxed">{activeProject.detailedDescription || activeProject.shortDescription}</p>
-          
-          {activeProject.tags && (
-            <div className="flex gap-2 mt-3">
-              {activeProject.tags.split(',').map(tag => (
-                <span key={tag} className="text-[10px] uppercase font-bold tracking-wider px-2 py-1 bg-slate-100 text-slate-500 rounded">{tag.trim()}</span>
-              ))}
+      {/* Hero Stats */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        {/* Main Progress Card */}
+        <div className="lg:col-span-2 bg-white rounded-[2.5rem] p-10 shadow-xl shadow-indigo-100/50 border border-indigo-50 relative overflow-hidden group">
+          <div className="absolute -top-24 -right-24 w-64 h-64 bg-indigo-50 rounded-full group-hover:scale-110 transition-transform duration-700"></div>
+          <div className="relative z-10 flex flex-col md:flex-row items-center gap-10">
+            <div className="relative w-48 h-48 flex items-center justify-center">
+              <svg className="w-full h-full transform -rotate-90">
+                <circle cx="96" cy="96" r="88" stroke="currentColor" strokeWidth="16" fill="transparent" className="text-slate-100" />
+                <circle 
+                  cx="96" cy="96" r="88" stroke="currentColor" strokeWidth="16" fill="transparent" 
+                  strokeDasharray={552.92}
+                  strokeDashoffset={552.92 * (1 - stats.progress / 100)}
+                  className="text-indigo-600 transition-all duration-1000 ease-out" 
+                  strokeLinecap="round"
+                />
+              </svg>
+              <div className="absolute inset-0 flex flex-col items-center justify-center">
+                <span className="text-5xl font-black text-slate-900">{stats.progress}%</span>
+                <span className="text-[10px] font-black text-indigo-500 uppercase tracking-widest">Progress</span>
+              </div>
             </div>
+            <div className="flex-1 space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-3xl font-black text-slate-900 tracking-tight">{activeProject.name}</h2>
+                  <p className="text-sm text-slate-500 font-medium mt-1">Status: {activeProject.status}</p>
+                </div>
+                <div className="p-3 bg-indigo-600 rounded-2xl text-white shadow-lg shadow-indigo-200">
+                  <Target className="w-6 h-6" />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                  <div className="flex items-center gap-2 mb-1">
+                    <TrendingUp className="w-4 h-4 text-emerald-500" />
+                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Velocity</span>
+                  </div>
+                  <span className="text-xl font-black text-slate-900">+12% / week</span>
+                </div>
+                <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Clock className="w-4 h-4 text-amber-500" />
+                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Target</span>
+                  </div>
+                  <span className="text-xl font-black text-slate-900">{activeProject.targetDate}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Health Score Card */}
+        <div className="bg-white rounded-[2.5rem] p-10 shadow-xl shadow-slate-200/50 border border-slate-100 flex flex-col justify-between overflow-hidden relative">
+          <div className="absolute top-0 right-0 p-8 opacity-5">
+            <ActivityIcon className="w-32 h-32" />
+          </div>
+          <div>
+            <div className="flex items-center justify-between mb-8">
+              <h3 className="text-sm font-black text-slate-400 uppercase tracking-widest">Project Health</h3>
+              <div className={`p-2 rounded-xl text-white shadow-lg`} style={{ backgroundColor: colors.health }}>
+                <ShieldCheck className="w-5 h-5" />
+              </div>
+            </div>
+            <div className="flex items-baseline gap-2">
+              <span className="text-7xl font-black tracking-tighter" style={{ color: colors.health }}>{stats.health}</span>
+              <span className="text-xl font-bold text-slate-300">/ 100</span>
+            </div>
+            <p className="text-sm text-slate-500 mt-4 font-medium italic">
+              Health score je ovplyvnený {stats.overdueCount} overdue položkami a kritickými rizikami.
+            </p>
+          </div>
+          <div className="mt-8 space-y-3">
+             <div className="flex items-center justify-between text-xs font-bold">
+               <span className="text-slate-400 uppercase tracking-tight">Stable Factors</span>
+               <span className="text-emerald-500">82%</span>
+             </div>
+             <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+               <div className="bg-emerald-500 h-full w-[82%] rounded-full"></div>
+             </div>
+          </div>
+        </div>
+
+      </div>
+
+      {/* Progress Over Time */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        <div className="lg:col-span-2 bg-white rounded-[2.5rem] p-10 shadow-xl border border-slate-100">
+          <div className="flex items-center justify-between mb-8">
+            <h3 className="text-sm font-black text-slate-400 uppercase tracking-widest">Progress Over Time</h3>
+            <div className="flex gap-2">
+              <button className="px-3 py-1 bg-slate-100 text-[10px] font-black uppercase rounded-lg">Week</button>
+              <button className="px-3 py-1 text-slate-400 text-[10px] font-black uppercase rounded-lg">Month</button>
+            </div>
+          </div>
+          <div className="h-[300px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={timelineData}>
+                <defs>
+                  <linearGradient id="colorProg" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#4f46e5" stopOpacity={0.1}/>
+                    <stop offset="95%" stopColor="#4f46e5" stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                <XAxis dataKey="date" stroke="#94a3b8" fontSize={10} axisLine={false} tickLine={false} />
+                <YAxis stroke="#94a3b8" fontSize={10} axisLine={false} tickLine={false} />
+                <Tooltip 
+                  contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '16px', color: '#fff' }}
+                  itemStyle={{ color: '#818cf8', fontWeight: 'bold' }}
+                />
+                <Area type="monotone" dataKey="progress" stroke="#4f46e5" strokeWidth={4} fillOpacity={1} fill="url(#colorProg)" />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* Areas Completion Bar Chart */}
+        <div className="bg-white rounded-[2.5rem] p-10 shadow-xl border border-slate-100">
+          <h3 className="text-sm font-black text-slate-400 uppercase tracking-widest mb-8">Areas Completion</h3>
+          <div className="h-[300px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={chartData} layout="vertical" margin={{ left: 20 }}>
+                <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f1f5f9" />
+                <XAxis type="number" hide />
+                <YAxis dataKey="name" type="category" stroke="#64748b" fontSize={10} axisLine={false} tickLine={false} width={80} />
+                <Tooltip 
+                   cursor={{ fill: '#f8fafc' }}
+                   contentStyle={{ backgroundColor: '#fff', borderRadius: '16px', border: '1px solid #f1f5f9' }}
+                />
+                <Bar dataKey="value" radius={[0, 8, 8, 0]} barSize={24}>
+                  {chartData.map((entry, index) => (
+                    <Bar key={index} dataKey="value" fill={entry.color} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+      </div>
+
+      {/* Footer Info Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 pb-8">
+        
+        {/* Next Milestone Card */}
+        <div className="bg-white rounded-3xl p-8 shadow-lg border border-slate-100 relative overflow-hidden">
+          <div className="absolute top-0 right-0 p-6 opacity-10">
+            <Flag className="w-16 h-16 text-indigo-600" />
+          </div>
+          <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-4">Next Milestone</h3>
+          {currentMilestone ? (
+            <div className="space-y-4">
+              <h4 className="text-xl font-black text-slate-900 leading-tight">{currentMilestone.title}</h4>
+              <div className="flex items-center justify-between text-[10px] font-black">
+                <span className="text-indigo-600 uppercase">{currentMilestone.progress}% DONE</span>
+                <span className="text-slate-400">{currentMilestone.dueDate}</span>
+              </div>
+              <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                <div className="bg-indigo-600 h-full transition-all duration-1000" style={{ width: `${currentMilestone.progress}%` }}></div>
+              </div>
+            </div>
+          ) : (
+            <p className="text-sm font-bold text-slate-400 italic">Všetky milestony dokončené.</p>
           )}
         </div>
-        
-        <div className="grid grid-cols-2 md:grid-cols-2 gap-x-6 gap-y-3 text-sm text-slate-600 bg-slate-50 p-4 rounded-xl border border-slate-100 min-w-[300px]">
-          <div>
-            <span className="block text-[10px] uppercase tracking-wider text-slate-400 font-bold mb-0.5">Business Analyst</span>
-            <span className="font-semibold">{team.businessAnalyst || '-'}</span>
-          </div>
-          <div>
-            <span className="block text-[10px] uppercase tracking-wider text-slate-400 font-bold mb-0.5">Product Owner</span>
-            <span className="font-semibold">{team.productOwner || '-'}</span>
-          </div>
-          <div>
-            <span className="block text-[10px] uppercase tracking-wider text-slate-400 font-bold mb-0.5">Tech Lead</span>
-            <span className="font-semibold">{team.techLead || '-'}</span>
-          </div>
-          <div>
-            <span className="block text-[10px] uppercase tracking-wider text-slate-400 font-bold mb-0.5">QA Owner</span>
-            <span className="font-semibold">{team.qaOwner || '-'}</span>
+
+        {/* Blockers Card */}
+        <div className="bg-rose-50 rounded-3xl p-8 shadow-lg border border-rose-100">
+          <h3 className="text-xs font-black text-rose-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+            <AlertTriangle className="w-4 h-4" /> Active Blockers
+          </h3>
+          <div className="space-y-4">
+            {blockers.map((b, i) => (
+              <div key={i} className="flex items-start gap-3">
+                <div className="mt-1.5 w-1.5 h-1.5 bg-rose-500 rounded-full shrink-0"></div>
+                <div>
+                  <h5 className="text-sm font-black text-slate-900">{b.title}</h5>
+                  <p className="text-[10px] font-bold text-rose-600 uppercase tracking-tighter">{b.status}</p>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
-      </div>
 
-      {/* Metrics Row */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <MetricCard title="Celkový progres" value={`${metrics.progress}%`} icon={TrendingUp} trend={`Cieľ: ${activeProject.release || '-'}`} />
-        <MetricCard title="Health Score" value={`${metrics.healthScore}%`} icon={ShieldCheck} valueClass={metrics.healthScore > 70 ? "text-green-600" : "text-amber-500"} />
-        <MetricCard title="Hlavný deadline" value={activeProject.mainDeadline || '-'} icon={Calendar} trend={`Štart: ${activeProject.startDate || '-'}`} />
-        <MetricCard 
-          title="Overdue položky" 
-          value={metrics.overdueItems} 
-          icon={AlertCircle} 
-          className={metrics.overdueItems > 0 ? "border-red-200 bg-red-50/50" : ""}
-          valueClass={metrics.overdueItems > 0 ? "text-red-600" : ""}
-          trend={metrics.overdueItems > 0 ? "Vyžaduje pozornosť" : "Všetko stíhame"}
-        />
-      </div>
-
-      {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
-        {/* Left Column - Charts & Details */}
-        <div className="col-span-1 lg:col-span-2 space-y-6">
-          
-          {/* Charts Row */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-              <h3 className="text-sm font-semibold text-slate-800 mb-4">Progres v čase</h3>
-              <div className="h-64">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={charts.progressOverTime}>
-                    <defs>
-                      <linearGradient id="colorProgress" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
-                        <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fontSize: 12, fill: '#64748b'}} />
-                    <YAxis axisLine={false} tickLine={false} tick={{fontSize: 12, fill: '#64748b'}} />
-                    <Tooltip contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
-                    <Area type="monotone" dataKey="progress" stroke="#3b82f6" strokeWidth={3} fillOpacity={1} fill="url(#colorProgress)" />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-
-            <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-              <h3 className="text-sm font-semibold text-slate-800 mb-4">Tasky podľa statusu</h3>
-              <div className="h-64">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={charts.tasksByStatus} layout="vertical" margin={{ top: 0, right: 0, left: 20, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#e2e8f0" />
-                    <XAxis type="number" axisLine={false} tickLine={false} tick={{fontSize: 12, fill: '#64748b'}} />
-                    <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{fontSize: 12, fill: '#64748b'}} />
-                    <Tooltip cursor={{fill: '#f1f5f9'}} contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
-                    <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={24}>
-                      {charts.tasksByStatus.map((entry: any, index: number) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-          </div>
-
-          {/* Quick Actions */}
-          <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-            <h3 className="text-sm font-semibold text-slate-800 mb-4">Rýchle akcie</h3>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
-              <QuickActionButton icon={FileText} label="Pridať Confluence text" primary />
-              <QuickActionButton icon={Kanban} label="Pridať Jira text" primary />
-              <QuickActionButton icon={Bot} label="Vygenerovať AI summary" primary />
-              <QuickActionButton icon={Database} label="Pridať SQL dotaz" />
-              <QuickActionButton icon={Network} label="Pridať Kafka link" />
-              <QuickActionButton icon={MessageSquare} label="Vložiť Teams/Mail" />
-              <QuickActionButton icon={Clock} label="Pridať deadline" />
-              <QuickActionButton icon={ShieldCheck} label="BA Quality Check" />
-              <QuickActionButton icon={Download} label="Export status report" />
-              <QuickActionButton icon={Plus} label="Pridať projekt" />
-            </div>
-          </div>
-
-        </div>
-
-        {/* Right Column - Lists & Summaries */}
-        <div className="col-span-1 space-y-6">
-          
-          {/* Summary Stats */}
-          <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-            <h3 className="text-sm font-semibold text-slate-800 mb-4">Otvorené položky a znalosti</h3>
-            <div className="space-y-3">
-              <div className="flex justify-between items-center p-3 bg-slate-50 rounded-lg border border-slate-100">
-                <div className="flex items-center gap-3"><CheckSquare className="w-4 h-4 text-blue-500" /><span className="text-sm font-medium">Otvorené Jira tasky</span></div>
-                <span className="font-bold text-slate-700">{metrics.openJira}</span>
-              </div>
-              <div className="flex justify-between items-center p-3 bg-slate-50 rounded-lg border border-slate-100">
-                <div className="flex items-center gap-3"><HelpCircle className="w-4 h-4 text-amber-500" /><span className="text-sm font-medium">Otvorené otázky</span></div>
-                <span className="font-bold text-slate-700">{metrics.openQuestions}</span>
-              </div>
-              <div className="flex justify-between items-center p-3 bg-slate-50 rounded-lg border border-slate-100">
-                <div className="flex items-center gap-3"><CheckSquare className="w-4 h-4 text-green-500" /><span className="text-sm font-medium">Potvrdené rozhodnutia</span></div>
-                <span className="font-bold text-slate-700">{metrics.decisions}</span>
-              </div>
-              <div className="flex justify-between items-center p-3 bg-slate-50 rounded-lg border border-slate-100">
-                <div className="flex items-center gap-3"><AlertCircle className="w-4 h-4 text-red-500" /><span className="text-sm font-medium">Vysoké riziká</span></div>
-                <span className="font-bold text-slate-700">{metrics.highRisks}</span>
-              </div>
-              <div className="grid grid-cols-2 gap-3 mt-4 pt-4 border-t border-slate-100">
-                <div className="text-center p-3 bg-indigo-50 rounded-lg border border-indigo-100">
-                  <div className="text-xl font-bold text-indigo-700">{metrics.sqlQueries}</div>
-                  <div className="text-xs font-medium text-indigo-600 mt-1">SQL Dotazov</div>
-                </div>
-                <div className="text-center p-3 bg-purple-50 rounded-lg border border-purple-100">
-                  <div className="text-xl font-bold text-purple-700">{metrics.sqlResults}</div>
-                  <div className="text-xs font-medium text-purple-600 mt-1">SQL Výsledkov</div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Upcoming Meetings */}
-          <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-            <h3 className="text-sm font-semibold text-slate-800 mb-4">Najbližšie mítingy</h3>
-            <div className="space-y-4">
-              {upcomingMeetings.map((meeting) => (
-                <div key={meeting.id} className="flex gap-3 items-start">
-                  <div className="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center flex-shrink-0 font-bold text-xs border border-blue-200">
-                    {meeting.type.substring(0, 2).toUpperCase()}
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-semibold text-slate-800">{meeting.title}</h4>
-                    <p className="text-xs text-slate-500 flex items-center gap-1 mt-1">
-                      <Clock className="w-3 h-3" />
-                      {meeting.date}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Recent Activities */}
-          <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm mt-6">
-            <h3 className="text-sm font-semibold text-slate-800 mb-4">Posledné aktivity</h3>
-            <div className="space-y-4">
-              {recentActivities.map((activity) => (
-                <div key={activity.id} className="flex gap-3 items-start">
-                  <div className="w-8 h-8 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center flex-shrink-0 font-bold text-xs border border-slate-200">
-                    {activity.user.substring(0, 2).toUpperCase()}
-                  </div>
-                  <div>
-                    <p className="text-sm text-slate-700">
-                      <span className="font-semibold">{activity.user}</span> {activity.action}
-                    </p>
-                    <p className="text-xs text-slate-400 mt-0.5">{activity.time}</p>
-                  </div>
-                </div>
-              ))}
+        {/* Deadlines Card */}
+        <div className="bg-amber-50 rounded-3xl p-8 shadow-lg border border-amber-100">
+          <h3 className="text-xs font-black text-amber-500 uppercase tracking-widest mb-4 flex items-center gap-2">
+            <Clock className="w-4 h-4" /> Overdue Deadlines
+          </h3>
+          <div className="flex items-center gap-6">
+            <span className="text-6xl font-black text-amber-600">{stats.overdueCount}</span>
+            <div className="space-y-1">
+              <p className="text-xs font-bold text-slate-700 leading-tight">Položky po deadline vyžadujú okamžitú akciu.</p>
+              <button className="text-[10px] font-black text-amber-600 uppercase hover:underline flex items-center gap-1">
+                Zobraziť v kalendári <ArrowRight className="w-3 h-3" />
+              </button>
             </div>
           </div>
         </div>
+
       </div>
 
-      <ProjectFormModal 
-        isOpen={isEditModalOpen} 
-        onClose={() => setIsEditModalOpen(false)} 
-        initialData={activeProject} 
-      />
     </div>
   );
 }

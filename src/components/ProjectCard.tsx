@@ -1,7 +1,9 @@
-import { MoreVertical, Calendar, Users, TrendingUp, AlertCircle, Edit, Trash2 } from 'lucide-react';
+import { MoreVertical, Calendar, Users, TrendingUp, AlertCircle, Edit, Trash2, ArrowRight } from 'lucide-react';
 import { useState } from 'react';
 import type { Project } from '../types';
 import { useProject } from '../context/ProjectContext';
+import { StatusBadge, PriorityBadge } from './Badge';
+import { cn } from '../lib/utils';
 
 interface ProjectCardProps {
   project: Project;
@@ -21,127 +23,133 @@ export function ProjectCard({ project, onClick, onEdit }: ProjectCardProps) {
     setShowMenu(false);
   };
 
-  const getStatusColor = (status: string) => {
-    const colors: Record<string, string> = {
-      'Analýza': 'bg-blue-100 text-blue-700',
-      'Vývoj': 'bg-indigo-100 text-indigo-700',
-      'Done': 'bg-green-100 text-green-700',
-      'Pozastavené': 'bg-red-100 text-red-700',
-      'Discovery': 'bg-purple-100 text-purple-700'
-    };
-    return colors[status] || 'bg-slate-100 text-slate-700';
-  };
-
-  const getPriorityColor = (priority: string) => {
-    const colors: Record<string, string> = {
-      'Kritická': 'bg-red-50 text-red-600 border-red-100',
-      'Vysoká': 'bg-orange-50 text-orange-600 border-orange-100',
-      'Stredná': 'bg-blue-50 text-blue-600 border-blue-100',
-      'Nízka': 'bg-slate-50 text-slate-600 border-slate-100'
-    };
-    return colors[priority] || 'bg-slate-50 text-slate-600 border-slate-100';
-  };
-
   const isOverdue = project.mainDeadline && new Date(project.mainDeadline) < new Date();
+  const hasIssue = !project.team.businessAnalyst || !project.mainDeadline;
 
   return (
     <div 
       onClick={onClick}
-      className="bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-md hover:border-blue-300 transition-all cursor-pointer group"
+      className={cn(
+        "bg-white rounded-[2.5rem] border border-slate-200 shadow-sm card-hover overflow-hidden flex flex-col relative",
+        isOverdue && "border-rose-300 ring-4 ring-rose-500/5"
+      )}
     >
-      <div className="p-5">
-        <div className="flex items-start justify-between mb-4">
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded-full ${getStatusColor(project.status)}`}>
-                {project.status}
-              </span>
-              <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded-full border ${getPriorityColor(project.priority)}`}>
-                {project.priority}
-              </span>
+      {/* Top Banner (Optional for priority) */}
+      <div className={cn(
+        "h-2 w-full",
+        project.priority === 'Kritická' ? "bg-rose-500" : 
+        project.priority === 'Vysoká' ? "bg-orange-500" : "bg-slate-100"
+      )}></div>
+
+      <div className="p-8 flex-1 space-y-6">
+        <div className="flex items-start justify-between">
+          <div className="space-y-2">
+            <div className="flex items-center gap-3">
+              <StatusBadge status={isOverdue ? 'Overdue' : project.status} />
+              <PriorityBadge priority={project.priority} />
             </div>
-            <h3 className="font-bold text-slate-900 text-lg group-hover:text-blue-600 transition-colors">{project.name}</h3>
-            <p className="text-xs text-slate-500 font-medium">{project.type}</p>
+            <h3 className="text-2xl font-black text-slate-900 group-hover:text-indigo-600 transition-colors leading-tight">
+              {project.name}
+            </h3>
+            <div className="flex items-center gap-2">
+               <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{project.type}</span>
+               <span className="text-slate-200 text-xs">|</span>
+               <span className="text-[10px] font-black text-indigo-500 uppercase tracking-widest">{project.release || 'v1.0.0'}</span>
+            </div>
           </div>
           <div className="relative">
             <button 
               onClick={(e) => { e.stopPropagation(); setShowMenu(!showMenu); }} 
-              className="p-1 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-50"
+              className="p-2 text-slate-400 hover:text-slate-600 rounded-xl hover:bg-slate-50 transition-all"
             >
               <MoreVertical className="w-5 h-5" />
             </button>
             {showMenu && (
-              <div className="absolute right-0 top-full mt-1 w-40 bg-white border border-slate-200 rounded-lg shadow-lg z-10 py-1">
-                <button onClick={(e) => { onEdit(e); setShowMenu(false); }} className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 flex items-center gap-2">
-                  <Edit className="w-4 h-4" /> Upraviť
+              <div className="absolute right-0 top-full mt-2 w-48 bg-white border border-slate-200 rounded-2xl shadow-2xl z-20 py-2 animate-in zoom-in-95 duration-200">
+                <button onClick={(e) => { onEdit(e); setShowMenu(false); }} className="w-full text-left px-4 py-2.5 text-sm font-bold text-slate-700 hover:bg-slate-50 flex items-center gap-3">
+                  <Edit className="w-4 h-4 text-indigo-500" /> Upraviť Projekt
                 </button>
-                <button onClick={handleDelete} className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-slate-50 flex items-center gap-2">
-                  <Trash2 className="w-4 h-4" /> Zmazať
+                <button onClick={handleDelete} className="w-full text-left px-4 py-2.5 text-sm font-bold text-red-600 hover:bg-rose-50 flex items-center gap-3">
+                  <Trash2 className="w-4 h-4" /> Zmazať Projekt
                 </button>
               </div>
             )}
           </div>
         </div>
 
-        <p className="text-sm text-slate-600 line-clamp-2 mb-4 h-10">
+        <p className="text-sm text-slate-500 font-medium line-clamp-2 h-10 leading-relaxed italic">
           {project.shortDescription}
         </p>
 
-        <div className="space-y-3 mb-4">
-          <div className="flex items-center justify-between text-xs">
-            <span className="text-slate-500 flex items-center gap-1">
-              <TrendingUp className="w-3.5 h-3.5" /> Progres
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+              <TrendingUp className="w-3.5 h-3.5" /> Celkový Progres
             </span>
-            <span className="font-bold text-slate-700">{project.metrics.progress}%</span>
+            <span className="text-sm font-black text-slate-900">{project.metrics.progress}%</span>
           </div>
-          <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+          <div className="w-full bg-slate-100 h-3 rounded-full overflow-hidden shadow-inner p-0.5">
             <div 
-              className="bg-blue-600 h-full transition-all duration-500" 
+              className="bg-gradient-to-r from-indigo-500 to-blue-600 h-full rounded-full transition-all duration-1000 shadow-sm" 
               style={{ width: `${project.metrics.progress}%` }}
             ></div>
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-3 pt-4 border-t border-slate-100">
+        <div className="grid grid-cols-2 gap-6 pt-6 border-t border-slate-100">
           <div className="flex flex-col">
-            <span className="text-[10px] uppercase text-slate-400 font-bold mb-0.5 flex items-center gap-1">
-              <Calendar className={`w-3 h-3 ${isOverdue ? 'text-red-500' : ''}`} /> Deadline
+            <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 flex items-center gap-1.5">
+              <Calendar className={cn("w-3.5 h-3.5", isOverdue ? "text-rose-500 animate-pulse" : "")} /> Deadline
             </span>
-            <span className={`text-xs font-bold ${isOverdue ? 'text-red-600' : 'text-slate-700'}`}>
-              {project.mainDeadline || 'N/A'}
+            <span className={cn("text-xs font-black", isOverdue ? "text-rose-600" : "text-slate-900")}>
+              {project.mainDeadline || 'NENASTAVENÝ'}
             </span>
           </div>
           <div className="flex flex-col">
-            <span className="text-[10px] uppercase text-slate-400 font-bold mb-0.5 flex items-center gap-1">
-              <Users className="w-3 h-3" /> BA
+            <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 flex items-center gap-1.5">
+              <Users className="w-3.5 h-3.5" /> BA Lead
             </span>
-            <span className={`text-xs font-bold ${!project.team.businessAnalyst ? 'text-orange-500 italic' : 'text-slate-700'}`}>
-              {project.team.businessAnalyst || 'Chýba'}
+            <span className={cn("text-xs font-black", !project.team.businessAnalyst ? "text-rose-600" : "text-slate-900")}>
+              {project.team.businessAnalyst || 'CHÝBA OWNER'}
             </span>
           </div>
         </div>
       </div>
 
-      <div className="px-5 py-3 bg-slate-50 rounded-b-xl border-t border-slate-100 flex items-center justify-between">
-        <div className="flex gap-3">
-          <div className="flex items-center gap-1" title="Otvorené otázky">
-            <AlertCircle className={`w-3.5 h-3.5 ${project.metrics.openQuestions > 0 ? 'text-amber-500' : 'text-slate-300'}`} />
-            <span className="text-[10px] font-bold text-slate-500">{project.metrics.openQuestions}</span>
+      <div className="px-8 py-5 bg-slate-50 rounded-b-[2.5rem] border-t border-slate-100 flex items-center justify-between">
+        <div className="flex gap-4">
+          <div className="flex items-center gap-1.5" title="Otvorené otázky">
+            <AlertCircle className={cn("w-4 h-4", project.metrics.openQuestions > 0 ? "text-amber-500" : "text-slate-300")} />
+            <span className="text-xs font-black text-slate-600">{project.metrics.openQuestions}</span>
           </div>
-          <div className="flex items-center gap-1" title="Riziká">
-            <AlertCircle className={`w-3.5 h-3.5 ${project.metrics.highRisks > 0 ? 'text-red-500' : 'text-slate-300'}`} />
-            <span className="text-[10px] font-bold text-slate-500">{project.metrics.highRisks}</span>
+          <div className="flex items-center gap-1.5" title="Kritické riziká">
+            <AlertCircle className={cn("w-4 h-4", project.metrics.highRisks > 0 ? "text-rose-500" : "text-slate-300")} />
+            <span className="text-xs font-black text-slate-600">{project.metrics.highRisks}</span>
           </div>
         </div>
-        <div className="flex items-center gap-1.5">
-          <span className="text-[10px] font-bold text-slate-400 uppercase">Health</span>
-          <div className={`w-2 h-2 rounded-full ${
-            project.metrics.healthScore > 80 ? 'bg-green-500' : 
-            project.metrics.healthScore > 50 ? 'bg-amber-500' : 'bg-red-500'
-          }`}></div>
-          <span className="text-xs font-bold text-slate-700">{project.metrics.healthScore}%</span>
+        <div className="flex items-center gap-3">
+          <div className="flex flex-col items-end">
+             <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Health</span>
+             <span className={cn(
+               "text-xs font-black",
+               project.metrics.healthScore > 80 ? "text-emerald-600" : 
+               project.metrics.healthScore > 50 ? "text-amber-600" : "text-rose-600"
+             )}>{project.metrics.healthScore}%</span>
+          </div>
+          <div className={cn(
+            "w-3 h-3 rounded-full shadow-sm",
+            project.metrics.healthScore > 80 ? "bg-emerald-500" : 
+            project.metrics.healthScore > 50 ? "bg-amber-500" : "bg-rose-500 animate-pulse"
+          )}></div>
+          <ArrowRight className="w-4 h-4 text-slate-300 group-hover:text-indigo-600 group-hover:translate-x-1 transition-all" />
         </div>
       </div>
+
+      {hasIssue && (
+        <div className="absolute top-4 left-4 flex items-center gap-2">
+           <AlertCircle className="w-3.5 h-3.5 text-rose-500" />
+        </div>
+      )}
     </div>
   );
 }

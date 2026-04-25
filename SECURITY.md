@@ -1,11 +1,27 @@
-# Bezpečnostné pravidlá projektu (Security Rules)
+# Security Policy - BA Workspace Prototype
 
-Tento projekt je prísny frontendový prototyp a dodržiava nasledujúce bezpečnostné pravidlá:
+## Bezpečnostný prísľub
+Tento prototyp je navrhnutý ako **izolované a bezpečné prostredie** pre Business Analystov. Aplikácia nepracuje so žiadnymi reálnymi produkčnými dátami a nepripája sa k žiadnym externým podnikovým systémom.
 
-- **Zákaz ukladania reálnych interných dát:** Všetky dáta v repozitári musia byť anonymizované mock dáta.
-- **Zákaz API tokenov v repozitári:** Žiadne secret kľúče, tokeny ani heslá nesmú byť súčasťou kódu.
-- **Zákaz connection stringov:** Je zakázané pripájať sa priamo na akékoľvek databázy a uchovávať connection stringy.
-- **Zákaz priameho čítania interných systémov:** Aplikácia sa nesmie nijako pripájať ani čítať systémy ako Confluence, Jira, Asana, Teams, Kafka, e-mail atď.
-- **Pravidlo link + manuálne vložený text:** Prepojenia na externé systémy sú realizované výhradne formou odkazov na dané systémy. Ak je nutné pracovať s obsahom týchto systémov (napríklad pre AI sumarizáciu), text sa vkladá manuálne (copy-paste).
-- **Pravidlo používania mock dát:** Celý beh aplikácie sa spolieha na lokálne, bezpečné mock dáta.
-- **Pravidlo anonymizácie dát:** Pri testovaní a ukážkach dbajte na to, aby texty alebo požiadavky neobsahovali žiadne skutočné produkčné dáta, osobné údaje alebo citlivé firemné informácie.
+## Kľúčové bezpečnostné pravidlá
+1. **Žiadna API integrácia:** Aplikácia neobsahuje kód pre pripojenie k Jira, Confluence, Teams, Asana, Outlook ani iným API. Všetky dáta sú vkladané manuálne používateľom.
+2. **Lokálny stav (Mock):** Všetky informácie sú uložené iba v lokálnom stave aplikácie a mock súboroch. Po obnovení stránky (v tejto verzii) sa dáta vracajú do predvoleného mock stavu.
+3. **Žiadna databáza:** Aplikácia nemá backendovú databázu ani connection stringy. SQL Workspace simuluje prácu s dátami v sandbox režime nad manuálne vloženými textami.
+4. **Linky vs Integrácia:** Externé linky (Jira, Confluence, Teams) slúžia výhradne ako statické odkazy, ktoré sa otvárajú v novom tabe prehliadača. Aplikácia tieto linky nečíta ani nesťahuje ich obsah.
+5. **Autentifikácia:** Aplikácia obsahuje bezpečný serverless prihlasovací flow (`/api/login`), kde sa heslo posiela šifrovane z klienta a porovnáva s bezpečným `.env` prostredím na strane servera.
+   - Vo frontendovom kóde sa nesmú nachádzať žiadne hardcoded heslá ani mená.
+   - Environment variables (`.env.local`) nie sú commitované do repozitára.
+6. **Ochrana pred únikom:** Aplikácia využíva `sessionStorage` pre uchovanie session tokenu, ktorý sa automaticky zmaže po zatvorení prehliadača.
+
+## Zákaz produkčných údajov
+Používateľom sa dôrazne odporúča nevkladať do prototypu:
+- Reálne heslá a tokeny.
+- Citlivé osobné údaje (GDPR).
+- Reálne produkčné connection stringy.
+- Obchodné tajomstvo v nekódovanej podobe.
+
+## Monitoring a Audit
+Aplikácia obsahuje modul **BA Quality Check**, ktorý proaktívne upozorňuje na prítomnosť podozrivých textov (napr. texty pripomínajúce credentials) v SQL dotazoch alebo poznámkach.
+
+---
+*Posledná aktualizácia: 2026-04-25*

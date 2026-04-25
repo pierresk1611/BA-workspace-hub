@@ -1,19 +1,28 @@
-# Security Rules
-*Tieto pravidlá dopĺňajú `SECURITY.md` v koreňovom priečinku.*
+# Business Analyst Security Rules
 
-- Žiadne priame čítanie Confluence
-- Žiadne priame čítanie Jira
-- Žiadne priame čítanie Asana
-- Žiadne priame čítanie Teams
-- Žiadne priame čítanie emailov
-- Žiadne priame čítanie Kafka dokumentácie
-- Žiadne priame pripojenie na databázu
-- Žiadne API tokeny
-- Žiadne connection stringy
-- Žiadne heslá
-- Žiadne cookies
-- Žiadne session údaje
-- Žiadne produkčné URL, ak nie sú explicitne mock alebo bezpečné referenčné odkazy
-- Všetky externé zdroje fungujú iba ako link + manuálne vložený text
-- AI agent pracuje iba s lokálnymi mock dátami alebo manuálne vloženým textom
-- SQL modul pracuje iba s mock schémou, mock dátami alebo manuálne vloženými výsledkami
+Tento dokument definuje záväzné pravidlá pre prácu s prototypom BA Workspace z pohľadu bezpečnosti a izolácie dát.
+
+## 1. Externá komunikácia
+- **Pravidlo:** Žiadne automatizované volania externých API.
+- **Implementácia:** Všetky polia pre "Zdrojový link" sú čisto textové. Tlačidlá "Analyzovať" pracujú iba s textom, ktorý používateľ manuálne skopíruje a vloží do textového poľa.
+- **Zakázané:** `fetch()`, `axios` alebo iné knižnice volajúce domény tretích strán (okrem CDN pre štýly/ikony).
+
+## 2. Spracovanie meetingov a prepisov
+- **Pravidlo:** Žiadne sťahovanie nahrávok alebo automatický prepis z Teams.
+- **Implementácia:** Používateľ vkladá odkaz na nahrávku pre vlastnú referenciu a manuálne vkladá textový prepis (transcript), z ktorého AI následne generuje summary.
+
+## 3. SQL a Dáta
+- **Pravidlo:** Žiadne reálne pripojenie k databáze (JDBC, ODBC, atď.).
+- **Implementácia:** SQL Workspace je čisto frontendový simulátor. "Spustenie" dotazu vráti vopred definované mock dáta priradené k danému projektu.
+- **Audit:** Modul Quality Check skenuje SQL texty na prítomnosť produkčných IP adries alebo connection stringov.
+
+## 4. AI Agent (BA Project Intelligence)
+- **Pravidlo:** Agent nesmie simulovať prístup k systémom, ktoré nie sú v jeho lokálnom kontexte.
+- **Implementácia:** Agentova prompt logika je nastavená tak, aby vždy uvádzal, že pracuje s "lokálnymi manuálne vloženými dátami".
+
+## 5. Prístupové údaje
+- **Pravidlo:** Nulová tolerancia pre ukladanie credentials.
+- **Implementácia:** Aplikácia nepoužíva žiadny systém prihlásenia (Auth). Všetky "Tokeny" v mock dátach sú generované náhodne a nemajú žiadnu funkčnú hodnotu.
+
+---
+**Bezpečnostný status: ISOLATED PROTOTYPE**
