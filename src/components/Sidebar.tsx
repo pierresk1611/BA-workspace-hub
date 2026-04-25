@@ -150,15 +150,19 @@ export function Sidebar() {
               const path = buildSidebarPath(item, currentProjectId);
               const active = isItemActive(item, path);
               
-              return (
+              return item.projectScoped && !currentProjectId ? (
+                <div
+                  key={item.key}
+                  title="Najprv vytvor alebo vyber projekt."
+                  className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold opacity-30 cursor-not-allowed group grayscale"
+                >
+                  <item.icon className="w-4 h-4 shrink-0 text-slate-500" />
+                  <span className="flex-1 text-left text-xs">{item.label}</span>
+                </div>
+              ) : (
                 <NavLink
                   key={item.key}
                   to={path}
-                  onClick={(e) => {
-                    if (item.projectScoped && !currentProjectId) {
-                      // Handled by buildSidebarPath
-                    }
-                  }}
                   className={cn(
                     "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all duration-200 relative group",
                     active

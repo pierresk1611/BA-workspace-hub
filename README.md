@@ -6,8 +6,9 @@
 - **Žiadne API integrácie:** Aplikácia sa nepripája na Jira, Confluence, Teams ani iné externé systémy.
 - **Manuálny vstup:** Všetky dáta, texty (emaily, prepisy meetingov) a Asana tasky (cez CSV/JSON/Text import) musia byť vložené manuálne používateľom.
 - **Asana Import:** Podporuje manuálny import z CSV súborov, JSON dát a Plain Textu bez pripojenia na Asana API. Súbory sa spracovávajú lokálne v prehliadači.
-- **Mock Sandbox:** SQL Workspace a AI Agent pracujú výhradne nad lokálne uloženými mock dátami.
-- **Žiadne Credentials:** Aplikácia neukladá heslá, tokeny ani reálne connection stringy.
+- **Lokálne úložisko:** Všetky dáta sú uložené výhradne vo vašom prehliadači (LocalStorage). Aplikácia neposiela vaše projektové dáta na žiaden server.
+- **Čistý Workspace:** Pri prvom prihlásení je workspace prázdny. Používateľ si môže manuálne načítať Demo dáta pre otestovanie funkcií.
+- **Správa dát:** V nastaveniach je možné kedykoľvek vymazať všetky lokálne uložené dáta alebo načítať demo projekty.
 
 Podrobné pravidlá nájdete v [SECURITY.md](SECURITY.md) a [docs/security-rules.md](docs/security-rules.md).
 

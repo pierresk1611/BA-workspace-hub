@@ -267,66 +267,68 @@ export function AsanaView() {
           </div>
 
           {/* Analytics Charts */}
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 pb-12">
-             <div className="bg-white p-10 rounded-[3rem] border border-slate-200 shadow-xl">
-                <h3 className="text-lg font-black text-slate-900 uppercase tracking-widest mb-10 flex items-center gap-3">
-                  <Zap className="w-6 h-6 text-rose-500" /> Milestone Distribution
-                </h3>
-                <div className="h-80">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={milestoneData}>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                      <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 800, fill: '#94a3b8' }} />
-                      <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 800, fill: '#94a3b8' }} domain={[0, 100]} />
-                      <Tooltip 
-                        cursor={{ fill: '#fff1f2' }} 
-                        contentStyle={{ borderRadius: '24px', border: 'none', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)', padding: '16px' }} 
-                      />
-                      <Bar dataKey="progress" fill="#f43f5e" radius={[12, 12, 0, 0]} barSize={50} />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-             </div>
+          {tasks.length > 0 && (
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 pb-12">
+               <div className="bg-white p-10 rounded-[3rem] border border-slate-200 shadow-xl">
+                  <h3 className="text-lg font-black text-slate-900 uppercase tracking-widest mb-10 flex items-center gap-3">
+                    <Zap className="w-6 h-6 text-rose-500" /> Milestone Distribution
+                  </h3>
+                  <div className="h-80">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={milestoneData}>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                        <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 800, fill: '#94a3b8' }} />
+                        <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 800, fill: '#94a3b8' }} domain={[0, 100]} />
+                        <Tooltip 
+                          cursor={{ fill: '#fff1f2' }} 
+                          contentStyle={{ borderRadius: '24px', border: 'none', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)', padding: '16px' }} 
+                        />
+                        <Bar dataKey="progress" fill="#f43f5e" radius={[12, 12, 0, 0]} barSize={50} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+               </div>
 
-             <div className="bg-slate-900 p-10 rounded-[3.5rem] text-white shadow-2xl relative overflow-hidden group">
-                <Kanban className="absolute -right-12 -bottom-12 w-64 h-64 text-rose-500 opacity-5 group-hover:scale-110 transition-transform duration-1000" />
-                <h3 className="text-lg font-black text-white uppercase tracking-widest mb-10 flex items-center gap-3 relative z-10">
-                  <Zap className="w-6 h-6 text-rose-400" /> Status Analytics
-                </h3>
-                <div className="flex items-center gap-12 relative z-10">
-                   <div className="h-64 flex-1">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <ReChartsPieChart>
-                          <Pie 
-                            data={statusData} 
-                            innerRadius={60} 
-                            outerRadius={90} 
-                            paddingAngle={8} 
-                            dataKey="value"
-                            stroke="none"
-                          >
-                            {statusData.map((entry, index) => <Cell key={`cell-${index}`} fill={entry.color} />)}
-                          </Pie>
-                          <Tooltip 
-                            contentStyle={{ borderRadius: '20px', border: 'none', backgroundColor: '#1e293b', color: '#fff' }}
-                          />
-                        </ReChartsPieChart>
-                      </ResponsiveContainer>
-                   </div>
-                   <div className="flex-1 space-y-4">
-                      {statusData.map(s => (
-                        <div key={s.name} className="flex items-center justify-between p-3 bg-white/5 rounded-2xl border border-white/5 hover:bg-white/10 transition-all">
-                          <div className="flex items-center gap-3">
-                             <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: s.color }}></div>
-                             <span className="text-xs font-black uppercase tracking-widest text-slate-400">{s.name}</span>
+               <div className="bg-slate-900 p-10 rounded-[3.5rem] text-white shadow-2xl relative overflow-hidden group">
+                  <Kanban className="absolute -right-12 -bottom-12 w-64 h-64 text-rose-500 opacity-5 group-hover:scale-110 transition-transform duration-1000" />
+                  <h3 className="text-lg font-black text-white uppercase tracking-widest mb-10 flex items-center gap-3 relative z-10">
+                    <Zap className="w-6 h-6 text-rose-400" /> Status Analytics
+                  </h3>
+                  <div className="flex items-center gap-12 relative z-10">
+                     <div className="h-64 flex-1">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <ReChartsPieChart>
+                            <Pie 
+                              data={statusData} 
+                              innerRadius={60} 
+                              outerRadius={90} 
+                              paddingAngle={8} 
+                              dataKey="value"
+                              stroke="none"
+                            >
+                              {statusData.map((entry, index) => <Cell key={`cell-${index}`} fill={entry.color} />)}
+                            </Pie>
+                            <Tooltip 
+                              contentStyle={{ borderRadius: '20px', border: 'none', backgroundColor: '#1e293b', color: '#fff' }}
+                            />
+                          </ReChartsPieChart>
+                        </ResponsiveContainer>
+                     </div>
+                     <div className="flex-1 space-y-4">
+                        {statusData.map(s => (
+                          <div key={s.name} className="flex items-center justify-between p-3 bg-white/5 rounded-2xl border border-white/5 hover:bg-white/10 transition-all">
+                            <div className="flex items-center gap-3">
+                               <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: s.color }}></div>
+                               <span className="text-xs font-black uppercase tracking-widest text-slate-400">{s.name}</span>
+                            </div>
+                            <span className="text-lg font-black">{s.value}</span>
                           </div>
-                          <span className="text-lg font-black">{s.value}</span>
-                        </div>
-                      ))}
-                   </div>
-                </div>
-             </div>
-          </div>
+                        ))}
+                     </div>
+                  </div>
+               </div>
+            </div>
+          )}
 
         </div>
 
@@ -376,7 +378,7 @@ export function AsanaView() {
                        </div>
                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-4">AI Insight & Risk Assessment</p>
                        <p className="text-sm font-bold text-slate-700 leading-relaxed italic">
-                          Úloha je v stave **{activeTask.status}** s progresom **{activeTask.progress}%**. {activeTask.status === 'Blocked' ? 'Detekované kritické blokátory v Asane vyžadujú okamžitú eskaláciu na Tech Leada.' : 'Aktuálny progress indikuje bezproblémové doručenie k deadlinu.'}
+                          Úloha je v stave **{activeTask.status}** s progresom **{activeTask.progress}%**. {activeTask.status === 'Blocked' ? 'Detekované blokátory vyžadujú vašu pozornosť.' : 'Aktuálny progres indikuje bezproblémové doručenie k deadlinu.'}
                        </p>
                     </div>
                   </div>

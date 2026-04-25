@@ -9,7 +9,7 @@ interface AsanaImportModalProps {
   onClose: () => void;
 }
 
-type ImportType = 'CSV' | 'JSON' | 'Plain Text' | 'Mock';
+type ImportType = 'CSV' | 'JSON' | 'Plain Text' | 'Demo';
 
 interface ColumnMapping {
   source: string;
@@ -133,20 +133,20 @@ export function AsanaImportModal({ isOpen, onClose }: AsanaImportModalProps) {
         });
         setPreviewTasks(textTasks);
         setStep(4);
-      } else if (type === 'Mock') {
-        const mockData = [
-          { title: 'Login + 2FA Integration', owner: 'Peter', status: 'In progress', priority: 'Vysoká', dueDate: '2026-05-10', asanaUrl: 'https://app.asana.com/1' },
-          { title: 'GPS Ping Optimization', owner: 'Marek', status: 'Not started', priority: 'Stredná', dueDate: '2026-06-15', asanaUrl: 'https://app.asana.com/2' },
-          { title: 'Customer ETA Calculation', owner: 'Nepriradené', status: 'Blocked', priority: 'Vysoká', dueDate: '', asanaUrl: 'https://app.asana.com/3' }
+      } else if (type === 'Demo') {
+        const demoData = [
+          { title: 'User Interface Design', owner: 'Analyst', status: 'In progress', priority: 'Vysoká', dueDate: '2026-05-10', asanaUrl: 'https://app.asana.com/demo1' },
+          { title: 'API Integration Layer', owner: 'Developer', status: 'Not started', priority: 'Stredná', dueDate: '2026-06-15', asanaUrl: 'https://app.asana.com/demo2' },
+          { title: 'Database Schema Migration', owner: 'Nepriradené', status: 'Blocked', priority: 'Vysoká', dueDate: '', asanaUrl: 'https://app.asana.com/demo3' }
         ];
-        const tasks = mockData.map((d, i) => ({
+        const tasks = demoData.map((d, i) => ({
           ...d,
-          id: `AS-MOCK-${Date.now()}-${i}`,
-          description: 'Demo mock task',
+          id: `AS-DEMO-${Date.now()}-${i}`,
+          description: 'Automaticky vygenerovaný demo task.',
           progress: 0,
           milestone: '',
           lastUpdated: new Date().toISOString().split('T')[0],
-          sourceImportType: 'Mock' as any,
+          sourceImportType: 'Demo' as any,
           importedAt: new Date().toISOString(),
           projectId: activeProject?.id,
           warnings: d.dueDate ? [] : ['chýba deadline']
@@ -290,11 +290,11 @@ export function AsanaImportModal({ isOpen, onClose }: AsanaImportModalProps) {
                 { type: 'CSV', icon: Upload, desc: 'Nahrať alebo vložiť CSV export', color: 'bg-indigo-50 text-indigo-600 border-indigo-100' },
                 { type: 'JSON', icon: FileJson, desc: 'Vložiť JSON pole objektov', color: 'bg-amber-50 text-amber-600 border-amber-100' },
                 { type: 'Plain Text', icon: Type, desc: 'Vložiť zoznam alebo odrážky', color: 'bg-emerald-50 text-emerald-600 border-emerald-100' },
-                { type: 'Mock', icon: Database, desc: 'Vyskúšať s demo dátami', color: 'bg-rose-50 text-rose-600 border-rose-100' }
+                { type: 'Demo', icon: Database, desc: 'Vyskúšať s demo dátami', color: 'bg-rose-50 text-rose-600 border-rose-100' }
               ].map(t => (
                 <button 
                   key={t.type}
-                  onClick={() => { setImportType(t.type as any); setStep(t.type === 'Mock' ? 4 : 2); if(t.type === 'Mock') processInput('', 'Mock'); }}
+                  onClick={() => { setImportType(t.type as any); setStep(t.type === 'Demo' ? 4 : 2); if(t.type === 'Demo') processInput('', 'Demo'); }}
                   className="p-8 bg-white border border-slate-200 rounded-[2.5rem] text-left hover:border-indigo-500 hover:shadow-2xl hover:-translate-y-1 transition-all group"
                 >
                   <div className={cn("w-14 h-14 rounded-2xl flex items-center justify-center mb-6 shadow-sm", t.color)}>
@@ -499,7 +499,7 @@ export function AsanaImportModal({ isOpen, onClose }: AsanaImportModalProps) {
               </div>
 
               <div className="flex justify-between items-center pt-4">
-                <button onClick={() => setStep(importType === 'Mock' ? 1 : 3)} className="text-slate-400 font-bold hover:text-slate-600">Späť</button>
+                <button onClick={() => setStep(importType === 'Demo' ? 1 : 3)} className="text-slate-400 font-bold hover:text-slate-600">Späť</button>
                 <div className="flex gap-4">
                    <button 
                     onClick={resetImport}

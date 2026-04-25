@@ -557,4 +557,4 @@ export const mockDropshipment: Project = {
   tasks: []
 };
 
-export const allMockProjects = [initialMockProject, mockLabelRedesign, mockDropshipment];
+export const demoProjectsData = [initialMockProject, mockLabelRedesign, mockDropshipment];

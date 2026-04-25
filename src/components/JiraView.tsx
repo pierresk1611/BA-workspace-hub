@@ -87,14 +87,17 @@ export function JiraView() {
                      <p className="text-3xl font-black text-rose-600">{stats.blocked}</p>
                   </div>
                </div>
-               <div className="p-6 bg-blue-600 rounded-[2rem] text-white shadow-xl shadow-blue-100 relative overflow-hidden group">
-                  <Bot className="absolute -right-4 -bottom-4 w-24 h-24 opacity-10 group-hover:scale-110 transition-transform" />
-                  <p className="text-[10px] font-black text-blue-200 uppercase tracking-widest mb-2">AI Summary</p>
-                  <p className="text-sm font-bold leading-relaxed italic relative z-10">
-                    Na základe ticketov je progres v súlade s plánom, pozor však na blokovaný ticket LOG-1002.
-                  </p>
-               </div>
+                {jiraItems.length > 0 && (
+                   <div className="p-6 bg-blue-600 rounded-[2rem] text-white shadow-xl shadow-blue-100 relative overflow-hidden group">
+                      <Bot className="absolute -right-4 -bottom-4 w-24 h-24 opacity-10 group-hover:scale-110 transition-transform" />
+                      <p className="text-[10px] font-black text-blue-200 uppercase tracking-widest mb-2">AI Summary</p>
+                      <p className="text-sm font-bold leading-relaxed italic relative z-10">
+                        Zistených {jiraItems.length} ticketov. {stats.blocked > 0 ? `Pozor na ${stats.blocked} blokovaných ticketov.` : 'Všetky tickety sú v pohybe.'}
+                      </p>
+                   </div>
+                )}
             </div>
+            {jiraItems.length > 0 && (
             <div className="w-full md:w-48 h-48">
               <ResponsiveContainer width="100%" height="100%">
                 <RechartsPie>
@@ -123,6 +126,7 @@ export function JiraView() {
                  ))}
               </div>
             </div>
+            )}
          </div>
 
          <div className="bg-white rounded-[3rem] p-8 border border-slate-200 shadow-sm flex flex-col justify-between">

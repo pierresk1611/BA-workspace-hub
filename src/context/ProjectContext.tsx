@@ -1,7 +1,7 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 import type { ReactNode } from "react";
 import type { Project, LinkedSystem, ConfluenceSource, JiraItem, DataFlow, SQLQuery, SQLResult, Deadline, Requirement, Decision, Question, Risk, Dependency, AsanaTask, Communication, Meeting } from "../types";
-import { allMockProjects } from "../data/mockProject";
+import { demoProjectsData } from "../data/mockProject";
 
 interface ProjectContextType {
   projects: Project[];
@@ -59,13 +59,37 @@ interface ProjectContextType {
   deleteMeeting: (projectId: string, meetingId: string) => void;
   closeProject: (id: string, reason: string, note: string) => void;
   reopenProject: (id: string) => void;
+  loadDemoData: () => void;
+  clearAllData: () => void;
 }
 
 const ProjectContext = createContext<ProjectContextType | undefined>(undefined);
+const STORAGE_KEY = "ba_workspace_projects";
 
 export function ProjectProvider({ children }: { children: ReactNode }) {
-  const [projects, setProjects] = useState<Project[]>(allMockProjects);
+  const [projects, setProjects] = useState<Project[]>(() => {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) return JSON.parse(stored);
+      
+      // Default behavior: empty unless explicitly enabled
+      const enableDemo = import.meta.env.VITE_ENABLE_DEMO_DATA === 'true';
+      return enableDemo ? demoProjectsData : [];
+    } catch (e) {
+      return [];
+    }
+  });
+
   const [activeProjectId, setActiveProjectId] = useState<string>(''); // No project selected at startup
+
+  // Persist projects to localStorage whenever they change
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
+    } catch (e) {
+      console.error("Failed to save projects to localStorage", e);
+    }
+  }, [projects]);
 
   const activeProject = projects.find(p => p.id === activeProjectId);
 
@@ -606,6 +630,20 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
     }));
   };
 
+  const loadDemoData = () => {
+    setProjects(prev => {
+      const existingIds = new Set(prev.map(p => p.id));
+      const newDemoData = demoProjectsData.filter(p => !existingIds.has(p.id));
+      return [...prev, ...newDemoData];
+    });
+  };
+
+  const clearAllData = () => {
+    setProjects([]);
+    setActiveProjectId('');
+    localStorage.removeItem(STORAGE_KEY);
+  };
+
   return (
     <ProjectContext.Provider value={{
       projects,
@@ -662,7 +700,9 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
       updateMeeting,
       deleteMeeting,
       closeProject,
-      reopenProject
+      reopenProject,
+      loadDemoData,
+      clearAllData
     }}>
       {children}
     </ProjectContext.Provider>

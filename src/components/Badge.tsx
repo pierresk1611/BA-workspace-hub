@@ -101,9 +101,19 @@ interface EmptyStateProps {
   description: string;
   actionLabel?: string;
   onAction?: () => void;
+  secondaryActionLabel?: string;
+  onSecondaryAction?: () => void;
 }
 
-export function EmptyState({ icon: Icon, title, description, actionLabel, onAction }: EmptyStateProps) {
+export function EmptyState({ 
+  icon: Icon, 
+  title, 
+  description, 
+  actionLabel, 
+  onAction,
+  secondaryActionLabel,
+  onSecondaryAction 
+}: EmptyStateProps) {
   return (
     <div className="flex flex-col items-center justify-center text-center p-20 bg-white rounded-[3rem] border-2 border-dashed border-slate-100 animate-in fade-in zoom-in-95 duration-500">
       <div className="p-8 bg-slate-50 rounded-full mb-6 shadow-inner">
@@ -111,15 +121,25 @@ export function EmptyState({ icon: Icon, title, description, actionLabel, onActi
       </div>
       <h3 className="text-2xl font-black text-slate-900 mb-2">{title}</h3>
       <p className="text-slate-400 font-medium max-w-sm mb-10 text-lg leading-relaxed">{description}</p>
-      {actionLabel && onAction && (
-        <button 
-          onClick={onAction}
-          className="px-8 py-4 bg-indigo-600 text-white rounded-[1.5rem] font-black text-sm uppercase tracking-widest shadow-xl shadow-indigo-100 hover:bg-indigo-700 active:scale-95 transition-all flex items-center gap-2"
-        >
-          <Zap className="w-5 h-5 fill-current" />
-          {actionLabel}
-        </button>
-      )}
+      <div className="flex flex-col sm:flex-row items-center gap-4">
+        {actionLabel && onAction && (
+          <button 
+            onClick={onAction}
+            className="px-8 py-4 bg-indigo-600 text-white rounded-[1.5rem] font-black text-sm uppercase tracking-widest shadow-xl shadow-indigo-100 hover:bg-indigo-700 active:scale-95 transition-all flex items-center gap-2"
+          >
+            <Zap className="w-5 h-5 fill-current" />
+            {actionLabel}
+          </button>
+        )}
+        {secondaryActionLabel && onSecondaryAction && (
+          <button 
+            onClick={onSecondaryAction}
+            className="px-8 py-4 bg-white border-2 border-slate-200 text-slate-600 rounded-[1.5rem] font-black text-sm uppercase tracking-widest hover:bg-slate-50 active:scale-95 transition-all flex items-center gap-2"
+          >
+            {secondaryActionLabel}
+          </button>
+        )}
+      </div>
     </div>
   );
 }

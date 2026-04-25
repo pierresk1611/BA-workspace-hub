@@ -113,18 +113,25 @@ export function Topbar() {
               value={params.projectId || activeProject?.id || ''}
               onChange={e => { 
                 const selectedId = e.target.value;
+                if (selectedId === 'create') {
+                  navigate('/projects');
+                  return;
+                }
                 setActiveProject(selectedId); 
                 const currentModule = location.pathname.split('/')[3];
                 navigate(currentModule ? `/projects/${selectedId}/${currentModule}` : `/projects/${selectedId}`);
               }}
               className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-black text-slate-700 outline-none cursor-pointer hover:border-indigo-300 transition-all"
             >
+              <option value="" disabled>Vyber projekt...</option>
+              {projects.length === 0 && <option value="" disabled>Žiadne projekty</option>}
               <optgroup label="AKTÍVNE PROJEKTY">
                 {projects.filter(p => !p.isClosed).map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
               </optgroup>
               <optgroup label="UKONČENÉ PROJEKTY">
                 {projects.filter(p => p.isClosed).map(p => <option key={p.id} value={p.id}>{p.name} (Ukončené)</option>)}
               </optgroup>
+              <option value="create">+ Vytvoriť projekt...</option>
             </select>
           </div>
         )}

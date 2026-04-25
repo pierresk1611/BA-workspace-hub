@@ -174,18 +174,7 @@ export function NotificationCenter() {
       });
     });
 
-    // Add some static examples if none generated for preview
-    if (items.length === 0) {
-       items.push({
-          id: 'static-1',
-          title: 'Asana import warning',
-          message: '2 tasky nemajú nastavený deadline',
-          type: 'Warning',
-          severity: 'warning',
-          createdAt: new Date().toISOString()
-       });
-    }
-
+    // No static examples anymore - only real data
     return items.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   }, [projects]);
 

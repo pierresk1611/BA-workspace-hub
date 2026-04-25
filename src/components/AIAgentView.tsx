@@ -37,7 +37,7 @@ export function AIAgentView() {
     {
       id: '1',
       role: 'assistant',
-      content: 'Ahoj! Ja som BA Project Intelligence Agent. Pracujem výhradne s dátami, ktoré si vložil do tohto projektu. Ako ti môžem dnes pomôcť?',
+      content: 'Ahoj! Ja som BA Project Intelligence Agent. Pracujem výhradne s dátami, ktoré sú v tomto projekte. Ako ti môžem dnes pomôcť?',
     }
   ]);
   const [inputText, setInputText] = useState('');
@@ -51,7 +51,30 @@ export function AIAgentView() {
     }
   }, [messages, isTyping]);
 
-  if (!activeProject) return null;
+  if (!activeProject) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full bg-slate-50 p-8 text-center animate-in fade-in">
+        <div className="w-20 h-20 bg-white rounded-[2rem] shadow-xl flex items-center justify-center text-slate-300 mb-6">
+          <Bot className="w-10 h-10" />
+        </div>
+        <h2 className="text-2xl font-black text-slate-900 mb-2">Žiadny aktívny projekt</h2>
+        <p className="text-slate-500 font-medium max-w-sm">
+          Vyber projekt a pridaj zdroje alebo texty, aby som mohol pripraviť summary.
+        </p>
+      </div>
+    );
+  }
+
+  const hasData = 
+    (activeProject.requirements?.length || 0) > 0 || 
+    (activeProject.risks?.length || 0) > 0 || 
+    (activeProject.decisions?.length || 0) > 0 ||
+    (activeProject.asanaTasks?.length || 0) > 0;
+
+  if (!hasData && messages.length === 1 && messages[0].role === 'assistant') {
+    // Initial state with no data
+    messages[0].content = "Projekt zatiaľ neobsahuje žiadne dáta. Pridaj požiadavky, riziká alebo importuj Asana tasky, aby som mohol začať analyzovať.";
+  }
 
   const suggestedActions = [
     "Zhrň aktuálny stav projektu",
@@ -137,8 +160,8 @@ export function AIAgentView() {
       res.details = `Máme ${project.asanaTasks?.filter((t:any) => t.status === 'Done').length || 0} dokončených úloh. Najbližší termín je ${project.asanaTasks?.find((t:any) => t.status !== 'Done')?.dueDate || 'nedefinovaný'}.`;
       res.nextSteps = ["Doplniť chýbajúcich ownerov k 3 taskom", "Preveriť blokovaný task 'GPS Rules'"];
       res.suggestedEntities = [
-        { type: "Draft správy", title: "Follow-up na Mareka", content: "Ahoj Marek, v Asane vidím, že task GPS Rules je blokovaný..." },
-        { type: "Jira Návrh", title: "Nová Jira Story z Asany", content: "Na základe Asana tasku 'Login Flow' odporúčam vytvoriť Jira User Story." }
+        { type: "Draft správy", title: "Follow-up", content: "Ahoj, k tasku..." },
+        { type: "Jira Návrh", title: "Nová Jira Story z Asany", content: "Na základe Asana tasku odporúčam vytvoriť Jira User Story." }
       ];
     } else if (q.includes('quality') || mode === 'BA Quality') {
       res.shortAnswer = "BA Quality Check dokončený. Skóre: 85/100.";

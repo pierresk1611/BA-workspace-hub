@@ -41,20 +41,20 @@ export function SQLWorkspace() {
       setIsRunning(false);
       const mockResult: SQLResult = {
         id: `res_${Date.now()}`,
-        name: `Mock Run: ${activeQuery.name}`,
+        name: `Analýza: ${activeQuery.name}`,
         queryId: activeQuery.id,
         dateRun: new Date().toLocaleString(),
         inputCriteria: activeQuery.businessCriteria.goal,
         resultTable: [
-          { status: 'Aktívny', count: 124, avg_response: '0.4s' },
-          { status: 'Offline', count: 18, avg_response: 'N/A' },
-          { status: 'Chyba', count: 3, avg_response: '5.2s' },
+          { status: 'Aktívny', count: 100, metric: '0.5' },
+          { status: 'Neaktívny', count: 20, metric: '0.0' },
+          { status: 'Error', count: 5, metric: '1.0' },
         ],
-        summary: "Dotaz prebehol úspešne v mock sandboxe nad 145 záznamami.",
-        baInterpretation: activeQuery.businessCriteria.interpretation || "Výsledky indikujú stabilnú prevádzku.",
+        summary: "Dotaz prebehol úspešne v lokálnom sandboxe.",
+        baInterpretation: activeQuery.businessCriteria.interpretation || "Výsledky sú v súlade s očakávaním.",
         dataOwner: activeQuery.owner,
         reviewDeadline: activeQuery.reviewDeadline,
-        dataSource: "Mock Sandbox (driver_sessions)",
+        dataSource: "Local Sandbox (production_replica)",
         isMock: true
       };
       setActiveResult(mockResult);
@@ -162,7 +162,7 @@ export function SQLWorkspace() {
                       <div className="space-y-6 relative z-10">
                         <div className="p-6 bg-white/5 rounded-3xl border border-white/10 italic">
                           <p className="text-sm text-slate-300 leading-relaxed font-medium">
-                            "Tento dotaz identifikuje anomálie v prihlasovaní vodičov. AI navrhuje pridať JOIN na tabuľku <code>network_status</code>, aby sme vedeli vylúčiť technické výpadky konektivity v reálnom čase."
+                            "Analýza dotazu naznačuje potenciál pre optimalizáciu výkonu. AI navrhuje preveriť indexy na filtrovaných poliach pre rýchlejšiu odozvu v produkcii."
                           </p>
                         </div>
                         <button className="flex items-center gap-2 text-[10px] font-black text-indigo-400 hover:text-indigo-300 uppercase tracking-widest transition-colors">
@@ -357,7 +357,7 @@ export function SQLWorkspace() {
             <div className="space-y-6">
               <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Mock Schema Registry</h4>
               <div className="space-y-3">
-                {['driver_sessions', 'alzabox_access_logs', 'parcel_history', 'eta_predictions'].map(t => (
+                {['users', 'orders', 'transactions', 'logs'].map(t => (
                   <div key={t} className="p-4 bg-slate-50 rounded-2xl border border-slate-200 flex items-center justify-between group cursor-help hover:bg-white transition-all">
                     <span className="text-xs font-mono font-bold text-slate-500 group-hover:text-indigo-600 transition-colors">{t}</span>
                     <Info className="w-4 h-4 text-slate-300 group-hover:text-indigo-400" />

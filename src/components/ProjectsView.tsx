@@ -9,7 +9,7 @@ import type { Project } from '../types';
 import { cn } from '../lib/utils';
 
 export function ProjectsView() {
-  const { projects, setActiveProject } = useProject();
+  const { projects, setActiveProject, loadDemoData } = useProject();
   const navigate = useNavigate();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingProject, setEditingProject] = useState<Project | undefined>(undefined);
@@ -94,6 +94,12 @@ export function ProjectsView() {
           description="Neboli nájdené žiadne projekty zodpovedajúce vašim filtrom."
           actionLabel="Vytvoriť Projekt"
           onAction={handleOpenCreate}
+          secondaryActionLabel="Načítať demo dáta"
+          onSecondaryAction={() => {
+            if (confirm('Naozaj chcete načítať demo dáta?')) {
+              loadDemoData();
+            }
+          }}
         />
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
