@@ -29,35 +29,35 @@ export function CommunicationView() {
     // Simulate AI Analysis
     setTimeout(() => {
       const mockAnalysis: CommunicationAnalysis = {
-        shortSummary: "Potvrdenie architektúry Driver App a rozsahu integrácie.",
-        detailedSummary: "Z komunikácie vyplýva, že Driver App bude slúžiť primárne ako podporný cockpit pre vodičov, zatiaľ čo jadro logistiky a ovládanie boxov zostáva v AlzaBox Core. Integrácia XL a Posila flowu bude zastrešená jednotným loginom.",
+        shortSummary: "Potvrdenie architektúry a rozsahu integrácie v rámci projektu.",
+        detailedSummary: "Z komunikácie vyplýva, že systém bude slúžiť primárne ako podporný nástroj pre používateľov, zatiaľ čo jadro logistiky zostáva v centrálnych komponentoch. Integrácia bude zastrešená jednotným prístupom.",
         decisions: [
-          "Driver App bude mať rolu helper aplikácie",
-          "Logistika balíkov sa nemení v AlzaBoxe",
-          "XL integrácia cez jednotné prihlásenie"
+          "Systém bude mať rolu podpornej aplikácie",
+          "Základná logika procesov sa nemení",
+          "Integrácia prebehne cez jednotné prihlásenie"
         ],
         requirements: [
-          "Jednotný login pre XL modul",
-          "Samostatný proces pre Posila flow"
+          "Jednotný login pre nové moduly",
+          "Samostatný proces pre vybrané flowy"
         ],
         questions: [
-          "Presná frekvencia GPS pingu",
+          "Presná frekvencia aktualizácie dát",
           "Spôsob autorizácie v offline režime"
         ],
         risks: [
-          "Závislosť na legacy API AlzaBoxu",
-          "Možné konflikty v notifikáciách medzi systémami"
+          "Závislosť na legacy API komponentoch",
+          "Možné konflikty v notifikáciách"
         ],
         actionSteps: [
           "Navrhnúť UI pre jednotný login",
-          "Stretnutie s GPS tímom k pravidlám trackingu"
+          "Stretnutie s tímom k pravidlám trackingu"
         ],
         suggestedJiraTasks: [
-          "DRIVER-101: Unified Login Design",
-          "DRIVER-102: GPS rules specification"
+          "PROJ-101: Unified Login Design",
+          "PROJ-102: Rules specification"
         ],
         suggestedDeadlines: [
-          { title: "Review login flowu", date: "2026-04-30" }
+          { title: "Review flowov", date: "2026-04-30" }
         ],
         stakeholders: ["Katka (PO)", "Marek (Tech Lead)", "Peter (BA)"]
       };
@@ -128,7 +128,7 @@ export function CommunicationView() {
                   <input 
                     value={title}
                     onChange={e => setTitle(e.target.value)}
-                    placeholder="napr. Teams: Scope Driver App"
+                    placeholder="napr. Teams: Scope projektu"
                     className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
                   />
                 </div>

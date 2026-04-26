@@ -98,7 +98,7 @@ export function KafkaView() {
                 <Network className="w-6 h-6 text-indigo-400" />
                 Integration Architecture Map
               </h3>
-              <p className="text-slate-400 text-sm font-medium mt-1">Vizuálna reprezentácia tokov medzi kľúčovými komponentami Driver App.</p>
+              <p className="text-slate-400 text-sm font-medium mt-1">Vizuálna reprezentácia tokov medzi kľúčovými komponentami systému.</p>
             </div>
             <button className="px-6 py-2 bg-white/10 hover:bg-white/20 text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all border border-white/10 flex items-center gap-2">
                <Share2 className="w-4 h-4" /> Expand Map
@@ -123,7 +123,7 @@ export function KafkaView() {
               <div className="w-24 h-24 rounded-[2.5rem] bg-indigo-600 border-4 border-indigo-400 flex items-center justify-center text-white shadow-2xl shadow-indigo-500/40 animate-pulse-slow">
                 <Zap className="w-12 h-12" />
               </div>
-              <span className="text-xs font-black text-white uppercase tracking-widest">Driver App Kafka</span>
+               <span className="text-xs font-black text-white uppercase tracking-widest">Core System Stream</span>
             </div>
             <div className="flex-1 h-1 bg-gradient-to-r from-transparent via-blue-500 to-transparent relative mx-12">
               <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1.5 bg-blue-600 rounded-full text-[9px] font-black text-white uppercase tracking-widest shadow-lg shadow-blue-500/20 whitespace-nowrap">

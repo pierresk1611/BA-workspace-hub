@@ -24,7 +24,7 @@ export function JiraDetail({ item, onClose }: JiraDetailProps) {
       if (type === 'summary') {
         setAiAnalysis({
           title: "AI Sumarizácia",
-          content: `Tento Jira ticket (${item.key}) sa zameriava na ${item.title}. Z manuálne vloženého textu vyplýva, že ide o ${item.priority} prioritu s termínom do ${item.deadline}. Hlavným cieľom je zabezpečiť správnu funkčnosť modulu pre projekt Driver App.`,
+          content: `Tento Jira ticket (${item.key}) sa zameriava na ${item.title}. Z manuálne vloženého textu vyplýva, že ide o ${item.priority} prioritu s termínom do ${item.deadline}. Hlavným cieľom je zabezpečiť správnu funkčnosť a implementáciu požiadaviek v rámci aktuálneho projektu.`,
           type: 'summary'
         });
       } else if (type === 'acceptance') {
@@ -34,7 +34,7 @@ export function JiraDetail({ item, onClose }: JiraDetailProps) {
             `AC-1: Funkcionalita '${item.title}' musí byť plne otestovaná v UAT prostredí.`,
             `AC-2: Všetky prepojené systémy musia správne prijímať dáta z ${item.key}.`,
             `AC-3: Dokumentácia v Confluence musí byť aktualizovaná o zmeny z tohto ticketu.`,
-            `AC-4: Vodič/používateľ musí dostať jasnú spätnú väzbu o výsledku akcie.`
+            `AC-4: Používateľ musí dostať jasnú spätnú väzbu o výsledku akcie.`
           ],
           type: 'list'
         });

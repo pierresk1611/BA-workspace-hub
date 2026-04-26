@@ -99,7 +99,7 @@ export function DependencyFormModal({ isOpen, onClose, initialData }: Dependency
                   <Server className="w-4 h-4 text-blue-500" />
                   Cieľový systém
                 </label>
-                <input name="targetSystem" value={formData.targetSystem} onChange={handleChange} className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none" placeholder="Driver App" />
+                <input name="targetSystem" value={formData.targetSystem} onChange={handleChange} className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none" placeholder="napr. Systém B" />
               </div>
             </div>
 

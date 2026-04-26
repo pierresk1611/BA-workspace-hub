@@ -27,6 +27,10 @@ Tento dokument definuje záväzné pravidlá pre prácu s prototypom BA Workspac
 ## 6. Mazanie a čistenie dát
 - **Pravidlo:** Používateľ musí mať plnú kontrolu nad lokálnymi dátami.
 - **Implementácia:** Funkcia "Vymazať projekt" vykoná hard delete objektu projektu a všetkých jeho vnorených polí (požiadavky, tasky...) z lokálneho stavu.
+## 7. Clean Workspace Policy
+- **Pravidlo:** Žiadne automatické seedovanie demo dát do produkčného prostredia.
+- **Implementácia:** Aplikácia štartuje s `[]` projektmi. Demo dáta sú v izolovanom súbore a načítavajú sa výhradne cez dynamic import po manuálnom potvrdení používateľom.
+- **Dôvod:** Zamedzenie náhodnému zobrazeniu testovacích/vzorových dát pri práci s reálnymi analýzami.
 
 ---
 **Bezpečnostný status: ISOLATED PROTOTYPE**

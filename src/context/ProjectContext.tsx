@@ -1,7 +1,8 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import type { ReactNode } from "react";
 import type { Project, LinkedSystem, ConfluenceSource, JiraItem, DataFlow, SQLQuery, SQLResult, Deadline, Requirement, Decision, Question, Risk, Dependency, AsanaTask, Communication, Meeting, Stakeholder, AcceptanceCriteria } from "../types";
-import { demoProjectsData } from "../demo/demoSeedData";
+// Static demo data imports removed to enforce Clean Workspace Policy
+// demoProjectsData is now loaded dynamically in loadDemoData()
 
 interface ProjectContextType {
   projects: Project[];
@@ -65,7 +66,7 @@ interface ProjectContextType {
   deleteAcceptanceCriteria: (projectId: string, criteriaId: string) => void;
   closeProject: (id: string, reason: string, note: string) => void;
   reopenProject: (id: string) => void;
-  loadDemoData: () => void;
+   loadDemoData: () => Promise<void>;
   clearAllData: () => void;
 }
 
@@ -706,13 +707,19 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
     }));
   };
 
-  const loadDemoData = () => {
-    setProjects(prev => {
-      const existingIds = new Set(prev.map(p => p.id));
+  const loadDemoData = async () => {
+    try {
+      // Dynamic import to keep runtime bundle clean
+      const { demoProjectsData } = await import("../demo/demoSeedData");
+      const existingIds = new Set(projects.map(p => p.id));
       const newDemoData = demoProjectsData.filter(p => !existingIds.has(p.id));
-      localStorage.setItem(CLEAN_MODE_KEY, "true"); // Still set it just in case
-      return [...prev, ...newDemoData];
-    });
+      
+      if (newDemoData.length > 0) {
+        setProjects(prev => [...prev, ...newDemoData]);
+      }
+    } catch (error) {
+      console.error("Failed to load demo data:", error);
+    }
   };
 
   const clearAllData = () => {

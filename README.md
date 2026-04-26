@@ -57,7 +57,7 @@ Vďaka Service Workeru je aplikácia **Offline Ready**:
    - Password: `2703_Viera`
 
 ## Bezpečnostné obmedzenia a fungovanie
-- **UPOZORNENIE:** Prototyp pracuje **výhradne iba s manuálne vloženým linkom a textom** a mock dátami.
+- **UPOZORNENIE:** Prototyp pracuje **výhradne iba s manuálne vloženým linkom, textom a lokálne vytvorenými dátami**.
 - **Žiadne priame integrácie:** Neexistujú a nesmú sa implementovať žiadne priame integrácie na Confluence, Jira, Asana, Teams, Kafka, email ani databázu.
 - Všetky externé zdroje sú prístupné iba formou odkazov (URL) a texty z nich je potrebné do aplikácie vložiť manuálne.
 - PWA a Service Worker sú konfigurované tak, aby rešpektovali izoláciu dát a neukladali žiadne tajomstvá do systémovej cache.

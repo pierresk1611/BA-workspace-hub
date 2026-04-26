@@ -13,7 +13,7 @@ Všetky projektové dáta sú izolované v lokálnom úložisku vášho prehliad
 Od verzie 2.1.0 je automatické seedovanie demo dát trvalo zakázané. Workspace pri prvom spustení alebo po vymazaní dát ostáva prázdny.
 
 ### 🧪 Demo Data Policy
-Demo dáta (Driver App, Delivery 2.0, atď.) slúžia výhradne na testovacie účely a ich načítanie je možné len manuálnym potvrdením v Nastaveniach. Tieto dáta sú uložené v statických súboroch, ktoré sa neimportujú do runtime aplikácie, pokiaľ nie sú výslovne vyžiadané používateľom.
+Demo dáta (Driver App, Delivery 2.0, atď.) slúžia výhradne na testovacie účely a ich načítanie je možné len manuálnym potvrdením. Tieto dáta sú izolované v súbore `src/demo/demoSeedData.ts` a nie sú importované do runtime bundle aplikácie pri bežnom spustení (využíva sa dynamic import).
 4. **Linky vs Integrácia:** Externé linky (Jira, Confluence, Teams) slúžia výhradne ako statické odkazy, ktoré sa otvárajú v novom tabe prehliadača. Aplikácia tieto linky nečíta ani nesťahuje ich obsah.
 5. **Autentifikácia:** Aplikácia obsahuje bezpečný serverless prihlasovací flow (`/api/login`), kde sa heslo posiela šifrovane z klienta a porovnáva s bezpečným `.env` prostredím na strane servera.
    - Vo frontendovom kóde sa nesmú nachádzať žiadne hardcoded heslá ani mená.

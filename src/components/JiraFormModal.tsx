@@ -96,7 +96,7 @@ export function JiraFormModal({ isOpen, onClose, initialData }: JiraFormModalPro
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-semibold text-slate-700 mb-1">Jira Key <span className="text-red-500">*</span></label>
-                <input required name="key" value={formData.key} onChange={handleChange} placeholder="napr. LOG-1001" className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
+                <input required name="key" value={formData.key} onChange={handleChange} placeholder="napr. PROJ-101" className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
               </div>
               <div>
                 <label className="block text-sm font-semibold text-slate-700 mb-1">Názov položky <span className="text-red-500">*</span></label>
