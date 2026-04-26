@@ -9,9 +9,11 @@ import { UsersTab } from './settings/UsersTab';
 import { ProfileTab } from './settings/ProfileTab';
 import { DataTab } from './settings/DataTab';
 import { SecurityTab } from './settings/SecurityTab';
+import { HandoverTabs } from './settings/HandoverTabs';
 import { useSettings } from '../context/SettingsContext';
+import { ArrowRightLeft } from 'lucide-react';
 
-type TabType = 'workspace' | 'users' | 'profile' | 'data' | 'security';
+type TabType = 'workspace' | 'users' | 'profile' | 'data' | 'security' | 'handover';
 
 export function SettingsView() {
   const [activeTab, setActiveTab] = useState<TabType>('workspace');
@@ -21,6 +23,7 @@ export function SettingsView() {
     { id: 'workspace', label: 'Workspace', icon: Building2 },
     { id: 'users', label: 'Používatelia', icon: Users, hidden: !isAdmin },
     { id: 'profile', label: 'Môj Profil', icon: UserCircle },
+    { id: 'handover', label: 'Handover', icon: ArrowRightLeft },
     { id: 'data', label: 'Správa Dát', icon: Database },
     { id: 'security', label: 'Bezpečnosť', icon: ShieldCheck },
   ].filter(t => !t.hidden);
@@ -32,6 +35,7 @@ export function SettingsView() {
       case 'profile': return <ProfileTab />;
       case 'data': return <DataTab />;
       case 'security': return <SecurityTab />;
+      case 'handover': return <HandoverTabs />;
       default: return <WorkspaceTab />;
     }
   };

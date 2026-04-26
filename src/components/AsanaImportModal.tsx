@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { X, Upload, FileJson, Type, Database, CheckCircle2, AlertTriangle, ArrowRight, Save, Clipboard, Trash2, Search, Filter } from 'lucide-react';
 import type { AsanaTask, AsanaTaskStatus, ProjectPriority } from '../types';
 import { useProject } from '../context/ProjectContext';
+import { useAuth } from '../context/AuthContext';
 import { cn } from '../lib/utils';
 
 interface AsanaImportModalProps {
@@ -18,6 +19,7 @@ interface ColumnMapping {
 
 export function AsanaImportModal({ isOpen, onClose }: AsanaImportModalProps) {
   const { activeProject, importAsanaTasks } = useProject();
+  const { currentUser } = useAuth();
   const [step, setStep] = useState(1);
   const [importType, setImportType] = useState<ImportType>('CSV');
   const [inputText, setInputText] = useState('');
@@ -109,7 +111,9 @@ export function AsanaImportModal({ isOpen, onClose }: AsanaImportModalProps) {
           const dueDate = parts[2]?.trim().match(/\d{4}-\d{2}-\d{2}/)?.[0] || '';
           
           const task: AsanaTask = {
-            id: `AS-IMPORT-${Date.now()}-${i}`,
+            ownerUserId: currentUser?.id || 'peter',
+            createdByUserId: currentUser?.id || 'peter',
+            id: `AS-${Date.now()}-${i}`,
             title,
             description: line,
             owner,

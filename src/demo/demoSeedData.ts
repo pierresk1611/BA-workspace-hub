@@ -1,8 +1,8 @@
 import type { Project } from "../types";
 
 export const initialMockProject: Project = {
-  id: "driver-app",
-  name: "Driver App",
+  ownerUserId: "demo", createdByUserId: "demo", id: "driver-app",
+  visibility: "private", name: "Driver App",
   shortDescription: "Zjednotená vodičská aplikácia pre AlzaBox, Posila flow a XL integráciu.",
   detailedDescription: "Projekt rieši frontendový pracovný cockpit pre vodičov. Zahŕňa jednotný login, 2FA, online/offline check, AlzaBox helper flow, Posila flow, XL integráciu, GPS ping, zákaznícke ETA a bezpečnostné fallback mechanizmy.",
   status: "Analýza",
@@ -66,7 +66,7 @@ export const initialMockProject: Project = {
   ],
   requirements: [
     {
-      id: "REQ-001",
+      ownerUserId: "demo", createdByUserId: "demo", id: "REQ-001",
       title: "Jednotný login pre vodiča",
       description: "Možnosť prihlásiť sa jedným kontom do všetkých logistických modulov (AlzaBox, XL, Posila).",
       type: "Business",
@@ -84,7 +84,7 @@ export const initialMockProject: Project = {
   decisions: [],
   risks: [
     {
-      id: "RSK-001",
+      ownerUserId: "demo", createdByUserId: "demo", id: "RSK-001",
       title: "GPS presnosť nemusí byť dostatočná pre geofencing",
       description: "V mestskom prostredí s vysokou zástavbou môže GPS signál kolísať, čo ovplyvní automatické otváranie boxov.",
       category: "Technical",
@@ -101,7 +101,7 @@ export const initialMockProject: Project = {
   ],
   questions: [
     {
-      id: "Q-001",
+      ownerUserId: "demo", createdByUserId: "demo", id: "Q-001",
       title: "Má Posila skenovať jednotlivé balíky alebo iba tote?",
       context: "Pri nakladaní Posily v depe je nejasné, či stačí hromadný scan prepravky (tote) alebo každého balíka zvlášť.",
       owner: "Peter (BA)",
@@ -115,7 +115,7 @@ export const initialMockProject: Project = {
   ],
   dependencies: [
     {
-      id: "DEP-001",
+      ownerUserId: "demo", createdByUserId: "demo", id: "DEP-001",
       title: "Auth Server v3 API",
       sourceSystem: "Identity Management",
       targetSystem: "Driver App Backend",
@@ -128,7 +128,7 @@ export const initialMockProject: Project = {
   ],
   asanaTasks: [
     {
-      id: "AS-001",
+      ownerUserId: "demo", createdByUserId: "demo", id: "AS-001",
       title: "Pripraviť frontend flow pre login",
       description: "Návrh a implementácia základných obrazoviek pre jednotný login vodiča.",
       owner: "Peter (BA)",
@@ -142,7 +142,7 @@ export const initialMockProject: Project = {
       lastUpdated: "2026-04-24"
     },
     {
-      id: "AS-002",
+      ownerUserId: "demo", createdByUserId: "demo", id: "AS-002",
       title: "Overiť Posila flow s prevádzkou",
       description: "Stretnutie s logistikou pre potvrdenie špecifík doručovania cez externých kuriérov.",
       owner: "Katka (PO)",
@@ -156,7 +156,7 @@ export const initialMockProject: Project = {
       lastUpdated: "2026-04-20"
     },
     {
-      id: "AS-003",
+      ownerUserId: "demo", createdByUserId: "demo", id: "AS-003",
       title: "Potvrdiť XL integration scope",
       description: "Finálne rozhodnutie o rozsahu integrácie legacy XL aplikácie.",
       owner: "Marek (Tech Lead)",
@@ -170,7 +170,7 @@ export const initialMockProject: Project = {
       lastUpdated: "2026-04-25"
     },
     {
-      id: "AS-004",
+      ownerUserId: "demo", createdByUserId: "demo", id: "AS-004",
       title: "Doplniť GPS ping pravidlá",
       description: "Definícia frekvencie a presnosti GPS trackingu pre potreby fleet managementu.",
       owner: "Peter (BA)",
@@ -184,7 +184,7 @@ export const initialMockProject: Project = {
       lastUpdated: "2026-04-22"
     },
     {
-      id: "AS-005",
+      ownerUserId: "demo", createdByUserId: "demo", id: "AS-005",
       title: "Pripraviť acceptance criteria",
       description: "Dokončenie AC pre všetky kľúčové user stories v backlogu.",
       owner: "Peter (BA)",
@@ -197,7 +197,7 @@ export const initialMockProject: Project = {
       lastUpdated: "2026-04-24"
     },
     {
-      id: "AS-006",
+      ownerUserId: "demo", createdByUserId: "demo", id: "AS-006",
       title: "Pripraviť Miro diagram",
       description: "Vizuálne zmapovanie celého flowu vodiča v novej aplikácii.",
       owner: "Peter (BA)",
@@ -210,7 +210,7 @@ export const initialMockProject: Project = {
       lastUpdated: "2026-04-25"
     },
     {
-      id: "AS-007",
+      ownerUserId: "demo", createdByUserId: "demo", id: "AS-007",
       title: "Potvrdiť notification ownership",
       description: "Dohoda medzi Track & Trace a Driver App tímom o tom, kto posiela push notifikácie.",
       owner: "Katka (PO)",
@@ -226,7 +226,7 @@ export const initialMockProject: Project = {
   ],
   communications: [
     {
-      id: "COM-001",
+      ownerUserId: "demo", createdByUserId: "demo", id: "COM-001",
       title: "Teams: Scope Driver App vs AlzaBox Helper",
       type: "Teams chat",
       date: "2026-04-20",
@@ -270,7 +270,7 @@ export const initialMockProject: Project = {
   ],
   meetings: [
     {
-      id: "MTG-001",
+      ownerUserId: "demo", createdByUserId: "demo", id: "MTG-001",
       title: "Driver App Scope Alignment Meeting",
       date: "2026-04-22",
       startTime: "10:00",
@@ -333,27 +333,27 @@ export const initialMockProject: Project = {
   ],
   diagrams: [],
   stakeholders: [
-    { id: "S1", name: "Peter", role: "Business Analyst", team: "BA Team", responsibilityArea: "Requirements & Logic", decisionPower: "Contributor", contactNote: "Teams", notes: "Core analyst" },
-    { id: "S2", name: "Katka", role: "Product Owner", team: "Product", responsibilityArea: "Vision & Priority", decisionPower: "Decision maker", contactNote: "Email", notes: "Primary stakeholder" },
-    { id: "S3", name: "Marek", role: "Tech Lead", team: "Development", responsibilityArea: "Architecture", decisionPower: "Decision maker", contactNote: "Teams", notes: "Technical authority" },
-    { id: "S4", name: "Martin", role: "Operations", team: "Logistics", responsibilityArea: "Operational Flow", decisionPower: "Consulted", contactNote: "Meeting only", notes: "Ops feedback" },
-    { id: "S5", name: "Václav", role: "Delivery Expert", team: "Last Mile", responsibilityArea: "Courier Experience", decisionPower: "Consulted", contactNote: "Teams", notes: "Subject matter expert" },
-    { id: "S6", name: "Mára", role: "AlzaBox Tech Expert", team: "Infrastructure", responsibilityArea: "Box Hardware", decisionPower: "Consulted", contactNote: "Teams", notes: "Hardware constraints" },
-    { id: "S7", name: "QA Owner", role: "QA Lead", team: "Quality", responsibilityArea: "Testing & UAT", decisionPower: "Contributor", contactNote: "Teams", notes: "Quality gate" },
-    { id: "S8", name: "Security Owner", role: "Security Architect", team: "Security", responsibilityArea: "Access & Auth", decisionPower: "Decision maker", contactNote: "Email", notes: "Security sign-off" }
+    { ownerUserId: "demo", createdByUserId: "demo", id: "S1", name: "Peter", role: "Business Analyst", team: "BA Team", responsibilityArea: "Requirements & Logic", decisionPower: "Contributor", contactNote: "Teams", notes: "Core analyst" },
+    { ownerUserId: "demo", createdByUserId: "demo", id: "S2", name: "Katka", role: "Product Owner", team: "Product", responsibilityArea: "Vision & Priority", decisionPower: "Decision maker", contactNote: "Email", notes: "Primary stakeholder" },
+    { ownerUserId: "demo", createdByUserId: "demo", id: "S3", name: "Marek", role: "Tech Lead", team: "Development", responsibilityArea: "Architecture", decisionPower: "Decision maker", contactNote: "Teams", notes: "Technical authority" },
+    { ownerUserId: "demo", createdByUserId: "demo", id: "S4", name: "Martin", role: "Operations", team: "Logistics", responsibilityArea: "Operational Flow", decisionPower: "Consulted", contactNote: "Meeting only", notes: "Ops feedback" },
+    { ownerUserId: "demo", createdByUserId: "demo", id: "S5", name: "Václav", role: "Delivery Expert", team: "Last Mile", responsibilityArea: "Courier Experience", decisionPower: "Consulted", contactNote: "Teams", notes: "Subject matter expert" },
+    { ownerUserId: "demo", createdByUserId: "demo", id: "S6", name: "Mára", role: "AlzaBox Tech Expert", team: "Infrastructure", responsibilityArea: "Box Hardware", decisionPower: "Consulted", contactNote: "Teams", notes: "Hardware constraints" },
+    { ownerUserId: "demo", createdByUserId: "demo", id: "S7", name: "QA Owner", role: "QA Lead", team: "Quality", responsibilityArea: "Testing & UAT", decisionPower: "Contributor", contactNote: "Teams", notes: "Quality gate" },
+    { ownerUserId: "demo", createdByUserId: "demo", id: "S8", name: "Security Owner", role: "Security Architect", team: "Security", responsibilityArea: "Access & Auth", decisionPower: "Decision maker", contactNote: "Email", notes: "Security sign-off" }
   ],
   acceptanceCriteria: [
-    { id: "AC1", requirementId: "REQ-001", title: "Login + 2FA", given: "Používateľ je na login obrazovke a zadal správne heslo", when: "Zadá 6-miestny kód z Google Authenticatora", then: "Systém ho prihlási a presmeruje na online check", priority: "Vysoká", status: "Approved", qaOwner: "QA Owner", testDeadline: "2026-05-10", notes: "Kľúčový bezpečnostný krok" },
-    { id: "AC2", requirementId: "REQ-002", title: "Online/offline check", given: "Aplikácia je spustená", when: "Dôjde k výpadku signálu na viac ako 30 sekúnd", then: "Aplikácia prepne do offline režimu s lokálnou cache", priority: "Stredná", status: "In testing", qaOwner: "QA Owner", testDeadline: "2026-05-15", notes: "Overiť synchronizáciu po návrate online" },
-    { id: "AC3", requirementId: "REQ-001", title: "Dynamic QR access", given: "Kuriér je pri AlzaBoxe a má aktívnu doručovaciu reláciu", when: "Klikne na 'Otvoriť box'", then: "Systém vygeneruje jednorazový QR kód s platnosťou 60s", priority: "Vysoká", status: "Draft", qaOwner: "Security Owner", testDeadline: "2026-06-01", notes: "Vyžaduje integráciu s Box API" },
-    { id: "AC4", requirementId: "REQ-003", title: "Posila mode", given: "Používateľ je v režime Posila", when: "Skenuje balík, ktorý nie je priradený k jeho trase", then: "Systém zobrazí varovanie a neumožní balík naložiť", priority: "Vysoká", status: "Ready for review", qaOwner: "QA Owner", testDeadline: "2026-05-20", notes: "Validácia voči Kafka streamu" }
+    { ownerUserId: "demo", createdByUserId: "demo", id: "AC1", requirementId: "REQ-001", title: "Login + 2FA", given: "Používateľ je na login obrazovke a zadal správne heslo", when: "Zadá 6-miestny kód z Google Authenticatora", then: "Systém ho prihlási a presmeruje na online check", priority: "Vysoká", status: "Approved", qaOwner: "QA Owner", testDeadline: "2026-05-10", notes: "Kľúčový bezpečnostný krok" },
+    { ownerUserId: "demo", createdByUserId: "demo", id: "AC2", requirementId: "REQ-002", title: "Online/offline check", given: "Aplikácia je spustená", when: "Dôjde k výpadku signálu na viac ako 30 sekúnd", then: "Aplikácia prepne do offline režimu s lokálnou cache", priority: "Stredná", status: "In testing", qaOwner: "QA Owner", testDeadline: "2026-05-15", notes: "Overiť synchronizáciu po návrate online" },
+    { ownerUserId: "demo", createdByUserId: "demo", id: "AC3", requirementId: "REQ-001", title: "Dynamic QR access", given: "Kuriér je pri AlzaBoxe a má aktívnu doručovaciu reláciu", when: "Klikne na 'Otvoriť box'", then: "Systém vygeneruje jednorazový QR kód s platnosťou 60s", priority: "Vysoká", status: "Draft", qaOwner: "Security Owner", testDeadline: "2026-06-01", notes: "Vyžaduje integráciu s Box API" },
+    { ownerUserId: "demo", createdByUserId: "demo", id: "AC4", requirementId: "REQ-003", title: "Posila mode", given: "Používateľ je v režime Posila", when: "Skenuje balík, ktorý nie je priradený k jeho trase", then: "Systém zobrazí varovanie a neumožní balík naložiť", priority: "Vysoká", status: "Ready for review", qaOwner: "QA Owner", testDeadline: "2026-05-20", notes: "Validácia voči Kafka streamu" }
   ],
   confluenceSources: [],
   jiraItems: [],
   dataFlows: [],
   systems: [
     { 
-      id: "sys_1", 
+      ownerUserId: "demo", createdByUserId: "demo", id: "sys_1", 
       name: "Identity Management", 
       type: "Interná aplikácia", 
       status: "Aktuálne", 
@@ -374,8 +374,8 @@ export const initialMockProject: Project = {
 };
 
 export const mockLabelRedesign: Project = {
-  id: "label-redesign",
-  name: "Delivery 2.0 Label Redesign",
+  ownerUserId: "demo", createdByUserId: "demo", id: "label-redesign",
+  visibility: "private", name: "Delivery 2.0 Label Redesign",
   shortDescription: "Redesign doručovacích štítkov pre novú generáciu balíkových automatov a kuriérov.",
   detailedDescription: "Projekt sa zameriava na unifikáciu dizajnu štítkov pre všetky distribučné kanály. Zahŕňa technickú štandardizáciu formátov, integráciu so systémom tlačiarní a schválenie zo strany Brand tímu.",
   status: "Solution Design",
@@ -435,14 +435,14 @@ export const mockLabelRedesign: Project = {
     { id: 2, user: "Petra", action: "otvorila QA scenár pre termálnu tlačiareň", time: "Pred 2 dňami" },
   ],
   requirements: [
-    { id: "LR-001", title: "Unifikovaný formát štítku", description: "Jeden štítok pre všetky doručovacie kanály.", type: "Business", priority: "Vysoká", status: "Potvrdené", owner: "Peter (BA)", source: "Workshop", dateCreated: "2026-02-10", dateUpdated: "2026-04-01", deadline: "2026-05-01", acceptanceCriteria: "Štítok obsahuje QR kód, čiarový kód a adresu.", relatedJiraKey: "LBL-001", relatedMilestone: "Štítok v2.0", notes: "" },
+    { ownerUserId: "demo", createdByUserId: "demo", id: "LR-001", title: "Unifikovaný formát štítku", description: "Jeden štítok pre všetky doručovacie kanály.", type: "Business", priority: "Vysoká", status: "Potvrdené", owner: "Peter (BA)", source: "Workshop", dateCreated: "2026-02-10", dateUpdated: "2026-04-01", deadline: "2026-05-01", acceptanceCriteria: "Štítok obsahuje QR kód, čiarový kód a adresu.", relatedJiraKey: "LBL-001", relatedMilestone: "Štítok v2.0", notes: "" },
   ],
   decisions: [
-    { id: "LD-001", title: "Termálna tlač ako štandard", date: "2026-03-15", context: "Nižšie náklady na tonery.", decisionText: "Termálna tlač je štandard od 2026-Q2.", impact: "Nutná výmena starých tlačiarní.", status: "Potvrdené", owner: "Lukáš", approvedBy: "Michal", sourceType: "Tech Review", relatedRequirementId: "LR-001", notes: "" },
+    { ownerUserId: "demo", createdByUserId: "demo", id: "LD-001", title: "Termálna tlač ako štandard", date: "2026-03-15", context: "Nižšie náklady na tonery.", decisionText: "Termálna tlač je štandard od 2026-Q2.", impact: "Nutná výmena starých tlačiarní.", status: "Potvrdené", owner: "Lukáš", approvedBy: "Michal", sourceType: "Tech Review", relatedRequirementId: "LR-001", notes: "" },
   ],
   questions: [],
   risks: [
-    { id: "LR-001", title: "Zlyhanie dodávky tlačiarní", description: "Dodávateľ má sklz.", category: "Operational", impact: 3, probability: 3, severity: "Stredná", owner: "Peter", mitigationPlan: "Záložný dodávateľ.", mitigationDeadline: "2026-05-01", status: "Open", notes: "" },
+    { ownerUserId: "demo", createdByUserId: "demo", id: "LR-001", title: "Zlyhanie dodávky tlačiarní", description: "Dodávateľ má sklz.", category: "Operational", impact: 3, probability: 3, severity: "Stredná", owner: "Peter", mitigationPlan: "Záložný dodávateľ.", mitigationDeadline: "2026-05-01", status: "Open", notes: "" },
   ],
   milestones: [
     { id: "lm1", title: "Brand Approval", status: "In Progress", dueDate: "2026-04-30", progress: 70 },
@@ -466,8 +466,8 @@ export const mockLabelRedesign: Project = {
 };
 
 export const mockDropshipment: Project = {
-  id: "dropshipment-matrix",
-  name: "Dropshipment Delivery Matrix",
+  ownerUserId: "demo", createdByUserId: "demo", id: "dropshipment-matrix",
+  visibility: "private", name: "Dropshipment Delivery Matrix",
   shortDescription: "Mapovanie a optimalizácia doručovacích matíc pre dropshipmentové objednávky.",
   detailedDescription: "Analýza aktuálnych doručovacích pravidiel pre dropshipment partnerov. Cieľom je zjednotiť routing, SLA pravidlá a prepoistiť doručenie cez záložné trasy.",
   status: "Discovery",
@@ -525,16 +525,16 @@ export const mockDropshipment: Project = {
     { id: 2, user: "Radek", action: "pridal partnerov do scope dokumentu", time: "Pred 4 dňami" },
   ],
   requirements: [
-    { id: "DS-001", title: "Routing matrix definícia", description: "Definícia routingových pravidiel pre každého dropshipment partnera.", type: "Business", priority: "Vysoká", status: "Draft", owner: "Peter (BA)", source: "Discovery Workshop", dateCreated: "2026-03-10", dateUpdated: "2026-04-15", deadline: "2026-05-15", acceptanceCriteria: "Matrix pokrýva všetkých 12 partnerov.", relatedJiraKey: "DS-100", relatedMilestone: "Discovery", notes: "" },
+    { ownerUserId: "demo", createdByUserId: "demo", id: "DS-001", title: "Routing matrix definícia", description: "Definícia routingových pravidiel pre každého dropshipment partnera.", type: "Business", priority: "Vysoká", status: "Draft", owner: "Peter (BA)", source: "Discovery Workshop", dateCreated: "2026-03-10", dateUpdated: "2026-04-15", deadline: "2026-05-15", acceptanceCriteria: "Matrix pokrýva všetkých 12 partnerov.", relatedJiraKey: "DS-100", relatedMilestone: "Discovery", notes: "" },
   ],
   decisions: [
-    { id: "DD-001", title: "SLA tier model", date: "2026-04-01", context: "Diferenciácia podľa hodnoty objednávky.", decisionText: "Zavedenie 3-tierového SLA modelu (Standard, Express, Premium).", impact: "Nutná aktualizácia zmlúv.", status: "Navrhnuté", owner: "Peter", approvedBy: "TBD", sourceType: "Internal", notes: "Čaká na právnu kontrolu." },
+    { ownerUserId: "demo", createdByUserId: "demo", id: "DD-001", title: "SLA tier model", date: "2026-04-01", context: "Diferenciácia podľa hodnoty objednávky.", decisionText: "Zavedenie 3-tierového SLA modelu (Standard, Express, Premium).", impact: "Nutná aktualizácia zmlúv.", status: "Navrhnuté", owner: "Peter", approvedBy: "TBD", sourceType: "Internal", notes: "Čaká na právnu kontrolu." },
   ],
   questions: [
-    { id: "DQ-001", title: "Aký je maximálny počet zastávok na trasu?", context: "Nie je jasné, či je limit 15 alebo 20 zastávok.", priority: "Vysoká", status: "Open", owner: "Peter", respondent: "Operations", relatedRequirementId: "DS-001", sourceType: "Internal", dueDate: "2026-05-01", notes: "Eskalovať na Operations." },
+    { ownerUserId: "demo", createdByUserId: "demo", id: "DQ-001", title: "Aký je maximálny počet zastávok na trasu?", context: "Nie je jasné, či je limit 15 alebo 20 zastávok.", priority: "Vysoká", status: "Open", owner: "Peter", respondent: "Operations", relatedRequirementId: "DS-001", sourceType: "Internal", dueDate: "2026-05-01", notes: "Eskalovať na Operations." },
   ],
   risks: [
-    { id: "DR-001", title: "Zmena partnerských zmlúv", description: "Zmena SLA môže vyžadovať renegociáciu zmlúv.", category: "Business", impact: 4, probability: 3, severity: "Vysoká", owner: "Jozef", mitigationPlan: "Zapojenie Legal tímu.", mitigationDeadline: "2026-05-15", status: "Open", notes: "" },
+    { ownerUserId: "demo", createdByUserId: "demo", id: "DR-001", title: "Zmena partnerských zmlúv", description: "Zmena SLA môže vyžadovať renegociáciu zmlúv.", category: "Business", impact: 4, probability: 3, severity: "Vysoká", owner: "Jozef", mitigationPlan: "Zapojenie Legal tímu.", mitigationDeadline: "2026-05-15", status: "Open", notes: "" },
   ],
   milestones: [
     { id: "dm1", title: "Partner Discovery", status: "In Progress", dueDate: "2026-04-30", progress: 40 },

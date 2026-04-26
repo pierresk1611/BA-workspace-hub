@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { User, Mail, Briefcase, Users, BadgeCheck, Save, AlertCircle } from 'lucide-react';
+import { useAuth } from "../../context/AuthContext";
 import { useSettings } from '../../context/SettingsContext';
 
 export function ProfileTab() {
-  const { currentUser, updateUser } = useSettings();
+  const { currentUser } = useAuth();
+  const { updateUser } = useSettings();
   const [formData, setFormData] = useState({
     displayName: '',
     email: '',

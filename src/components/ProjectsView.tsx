@@ -4,6 +4,7 @@ import { Plus, Search, FolderKanban } from 'lucide-react';
 import { useProject } from '../context/ProjectContext';
 import { ProjectCard } from './ProjectCard';
 import { ProjectFormModal } from './ProjectFormModal';
+import { HandoverModal } from './HandoverModal';
 import { EmptyState } from './Badge';
 import type { Project } from '../types';
 import { cn } from '../lib/utils';
@@ -13,6 +14,7 @@ export function ProjectsView() {
   const navigate = useNavigate();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingProject, setEditingProject] = useState<Project | undefined>(undefined);
+  const [handoverProject, setHandoverProject] = useState<Project | null>(null);
   
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
@@ -114,6 +116,10 @@ export function ProjectsView() {
                 e.stopPropagation();
                 handleOpenEdit(project);
               }}
+              onHandover={(e) => {
+                e.stopPropagation();
+                setHandoverProject(project);
+              }}
             />
           ))}
         </div>
@@ -123,6 +129,12 @@ export function ProjectsView() {
         isOpen={isFormOpen}
         onClose={() => setIsFormOpen(false)}
         initialData={editingProject}
+      />
+
+      <HandoverModal 
+        isOpen={!!handoverProject}
+        onClose={() => setHandoverProject(null)}
+        project={handoverProject!}
       />
     </div>
   );

@@ -1,26 +1,25 @@
 import { createContext, useContext, useState, useCallback } from 'react';
 import type { ReactNode } from 'react';
 
+import type { User } from '../types';
+
 interface AuthContextType {
   isAuthenticated: boolean;
   username: string | null;
+  currentUser: User | null;
   login: (username: string, password: string) => Promise<{ ok: boolean; error?: string }>;
   logout: () => void;
 }
 
-const SESSION_KEY = 'ba_workspace_auth';
+import { authService } from '../services/authService';
 
-function getInitialAuth(): { isAuthenticated: boolean; username: string | null } {
-  try {
-    const stored = sessionStorage.getItem(SESSION_KEY);
-    if (stored) {
-      const parsed = JSON.parse(stored);
-      return { isAuthenticated: true, username: parsed.username || null };
-    }
-  } catch {
-    // ignore
-  }
-  return { isAuthenticated: false, username: null };
+function getInitialAuth(): { isAuthenticated: boolean; username: string | null; currentUser: User | null } {
+  const user = authService.getCurrentUser();
+  return { 
+    isAuthenticated: !!user, 
+    username: user?.username || null,
+    currentUser: user || null
+  };
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -29,39 +28,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const initial = getInitialAuth();
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(initial.isAuthenticated);
   const [username, setUsername] = useState<string | null>(initial.username);
+  const [currentUser, setCurrentUser] = useState<User | null>(initial.currentUser);
 
   const login = useCallback(async (user: string, password: string): Promise<{ ok: boolean; error?: string }> => {
-    try {
-      const response = await fetch('/api/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: user, password }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok && data.ok) {
-        sessionStorage.setItem(SESSION_KEY, JSON.stringify({ token: data.token, username: data.username }));
-        setIsAuthenticated(true);
-        setUsername(data.username);
-        return { ok: true };
-      } else {
-        return { ok: false, error: data.error || 'Invalid credentials' };
-      }
-    } catch {
-      // Network error or serverless not available locally — dev fallback handled in LoginPage
-      return { ok: false, error: 'Network error. Check server connection.' };
+    const result = await authService.login(user, password);
+    if (result.ok && result.user) {
+      setIsAuthenticated(true);
+      setUsername(result.user.username);
+      setCurrentUser(result.user);
+      return { ok: true };
     }
+    return { ok: false, error: result.error };
   }, []);
 
   const logout = useCallback(() => {
-    sessionStorage.removeItem(SESSION_KEY);
+    authService.logout();
     setIsAuthenticated(false);
     setUsername(null);
+    setCurrentUser(null);
   }, []);
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, username, login, logout }}>
+    <AuthContext.Provider value={{ isAuthenticated, username, currentUser, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

@@ -6,10 +6,12 @@ import {
   HelpCircle, Clock, PlusCircle
 } from 'lucide-react';
 import { useProject } from '../context/ProjectContext';
+import { useAuth } from '../context/AuthContext';
 import type { Communication, CommunicationType, CommunicationAnalysis } from '../types';
 
 export function CommunicationView() {
   const { activeProject, addCommunication, deleteCommunication } = useProject();
+  const { currentUser } = useAuth();
   const [inputText, setInputText] = useState('');
   const [title, setTitle] = useState('');
   const [type, setType] = useState<CommunicationType>('Teams chat');
@@ -70,6 +72,8 @@ export function CommunicationView() {
     if (!title || !inputText || !analysis) return;
 
     const newComm: Communication = {
+      ownerUserId: currentUser?.id || 'peter',
+      createdByUserId: currentUser?.id || 'peter',
       id: `COM-${Math.floor(100 + Math.random() * 900)}`,
       title,
       type,

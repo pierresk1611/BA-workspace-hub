@@ -1,4 +1,4 @@
-import { MoreVertical, Calendar, Users, TrendingUp, AlertCircle, Edit, Trash2, ArrowRight, Archive, RotateCcw } from 'lucide-react';
+import { MoreVertical, Calendar, Users, TrendingUp, AlertCircle, Edit, Trash2, ArrowRight, Archive, RotateCcw, ArrowRightLeft } from 'lucide-react';
 import { useState } from 'react';
 import type { Project } from '../types';
 import { useProject } from '../context/ProjectContext';
@@ -10,9 +10,10 @@ interface ProjectCardProps {
   project: Project;
   onClick: () => void;
   onEdit: (e: React.MouseEvent) => void;
+  onHandover: (e: React.MouseEvent) => void;
 }
 
-export function ProjectCard({ project, onClick, onEdit }: ProjectCardProps) {
+export function ProjectCard({ project, onClick, onEdit, onHandover }: ProjectCardProps) {
   const { deleteProject, closeProject, reopenProject } = useProject();
   const [showMenu, setShowMenu] = useState(false);
 
@@ -98,6 +99,11 @@ export function ProjectCard({ project, onClick, onEdit }: ProjectCardProps) {
                 ) : (
                   <button onClick={handleClose} className="w-full text-left px-4 py-2.5 text-sm font-bold text-amber-600 hover:bg-amber-50 flex items-center gap-3">
                     <Archive className="w-4 h-4" /> Ukončiť projekt
+                  </button>
+                )}
+                {!isClosed && (
+                  <button onClick={(e) => { onHandover(e); setShowMenu(false); }} className="w-full text-left px-4 py-2.5 text-sm font-bold text-indigo-600 hover:bg-indigo-50 flex items-center gap-3">
+                    <ArrowRightLeft className="w-4 h-4" /> Odovzdať projekt
                   </button>
                 )}
                 <button onClick={handleDelete} className="w-full text-left px-4 py-2.5 text-sm font-bold text-red-600 hover:bg-rose-50 flex items-center gap-3">

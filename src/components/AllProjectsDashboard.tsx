@@ -16,6 +16,8 @@ import { useProject } from '../context/ProjectContext';
 import { calculateProjectProgress, calculateProjectHealth } from '../lib/projectUtils';
 import { cn } from '../lib/utils';
 import { LoadDemoModal } from './LoadDemoModal';
+import { HandoverModal } from './HandoverModal';
+import { ArrowRightLeft } from 'lucide-react';
 
 const STATUS_COLORS: Record<string, string> = {
   'Idea': '#94a3b8',
@@ -46,6 +48,7 @@ export function AllProjectsDashboard() {
   const [priorityFilter, setPriorityFilter] = useState('all');
   const [viewMode, setViewMode] = useState<'cards' | 'table'>('cards');
   const [isDemoModalOpen, setIsDemoModalOpen] = useState(false);
+  const [handoverProject, setHandoverProject] = useState<any>(null);
 
   const handleOpenProject = (projectId: string) => {
     setActiveProject(projectId);
@@ -540,6 +543,18 @@ export function AllProjectsDashboard() {
                       </div>
                     </div>
 
+                    <div className="absolute top-6 right-6 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                       {!project.isClosed && (
+                         <button 
+                           onClick={(e) => { e.stopPropagation(); setHandoverProject(project); }}
+                           className="p-2 bg-white border border-slate-200 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition-all shadow-sm"
+                           title="Odovzdať projekt"
+                         >
+                           <ArrowRightLeft className="w-4 h-4" />
+                         </button>
+                       )}
+                    </div>
+
                     <p className="text-xs text-slate-500 font-medium leading-relaxed line-clamp-2 italic h-8">
                       "{project.shortDescription}"
                     </p>
@@ -724,6 +739,12 @@ export function AllProjectsDashboard() {
             </div>
          </div>
       </div>
+
+      <HandoverModal 
+        isOpen={!!handoverProject}
+        onClose={() => setHandoverProject(null)}
+        project={handoverProject}
+      />
     </div>
   );
 }

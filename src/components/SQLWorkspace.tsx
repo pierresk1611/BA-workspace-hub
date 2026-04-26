@@ -7,12 +7,14 @@ import {
 } from 'lucide-react';
 import { useProject } from '../context/ProjectContext';
 import { SQLQueryForm } from './SQLQueryForm';
+import { useAuth } from '../context/AuthContext';
 import { StatusBadge, EmptyState } from './Badge';
 import type { SQLQuery, SQLResult } from '../types';
 import { cn } from '../lib/utils';
 
 export function SQLWorkspace() {
   const { activeProject, deleteSQLQuery, addSQLResult } = useProject();
+  const { currentUser } = useAuth();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingQuery, setEditingQuery] = useState<SQLQuery | undefined>(undefined);
   const [activeQuery, setActiveQuery] = useState<SQLQuery | undefined>(undefined);
@@ -41,6 +43,8 @@ export function SQLWorkspace() {
       setIsRunning(false);
       const mockResult: SQLResult = {
         id: `res_${Date.now()}`,
+        ownerUserId: currentUser?.id || 'system',
+        createdByUserId: currentUser?.id || 'system',
         name: `Analýza: ${activeQuery.name}`,
         queryId: activeQuery.id,
         dateRun: new Date().toLocaleString(),

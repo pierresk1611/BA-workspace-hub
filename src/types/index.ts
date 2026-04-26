@@ -17,7 +17,13 @@ export interface AISummaryData {
   docUpdates?: string[];
 }
 
-export interface ConfluenceSource {
+export interface OwnedEntity {
+  ownerUserId: string;
+  createdByUserId: string;
+  workspaceId?: string;
+}
+
+export interface ConfluenceSource extends OwnedEntity {
   id: string;
   name: string;
   url: string;
@@ -34,7 +40,7 @@ export interface ConfluenceSource {
 
 export type SystemType = "Confluence" | "Jira" | "Kafka" | "Asana" | "Teams" | "Email" | "Miro" | "Figma" | "Git repository" | "API dokumentácia" | "Monitoring" | "Interná aplikácia" | "SQL / databázový zdroj" | "Iné";
 
-export interface LinkedSystem {
+export interface LinkedSystem extends OwnedEntity {
   id: string;
   type: SystemType;
   customTypeName?: string;
@@ -75,7 +81,7 @@ export interface ProjectMetrics {
 export type JiraItemType = "Epic" | "Story" | "Task" | "Bug" | "Spike" | "Sub-task";
 export type JiraStatus = "Backlog" | "To Do" | "In Progress" | "Blocked" | "In Review" | "Done" | "Cancelled";
 
-export interface JiraItem {
+export interface JiraItem extends OwnedEntity {
   id: string;
   key: string;
   title: string;
@@ -95,7 +101,7 @@ export interface JiraItem {
 
 export type DataFlowType = "Kafka topic" | "API" | "DB view" | "Event stream" | "Manual export" | "Iné";
 
-export interface DataFlow {
+export interface DataFlow extends OwnedEntity {
   id: string;
   name: string;
   type: DataFlowType;
@@ -121,7 +127,7 @@ export interface DataFlow {
 export type SQLDialect = "PostgreSQL" | "MySQL" | "MS SQL" | "Oracle" | "Hive" | "Snowflake" | "Iné";
 export type SQLStatus = "Draft" | "Validovaný" | "Zastaraný" | "Archivovaný";
 
-export interface SQLQuery {
+export interface SQLQuery extends OwnedEntity {
   id: string;
   name: string;
   description: string;
@@ -153,7 +159,7 @@ export interface SQLQuery {
   };
 }
 
-export interface SQLResult {
+export interface SQLResult extends OwnedEntity {
   id: string;
   name: string;
   queryId: string;
@@ -186,7 +192,7 @@ export type DeadlineType =
 
 export type DeadlineStatus = "Planned" | "In progress" | "Waiting" | "Done" | "Overdue" | "Cancelled";
 
-export interface Deadline {
+export interface Deadline extends OwnedEntity {
   id: string;
   title: string;
   type: DeadlineType;
@@ -221,7 +227,7 @@ export type RequirementStatus =
   | "Done" 
   | "Obsolete";
 
-export interface Requirement {
+export interface Requirement extends OwnedEntity {
   id: string;
   title: string;
   description: string;
@@ -244,7 +250,7 @@ export interface Requirement {
 
 export type DecisionStatus = "Draft" | "Navrhnuté" | "Potvrdené" | "Zmenené" | "Zastarané" | "Zrušené";
 
-export interface Decision {
+export interface Decision extends OwnedEntity {
   id: string;
   title: string;
   date: string;
@@ -266,7 +272,7 @@ export interface Decision {
 
 export type QuestionStatus = "Open" | "Waiting for answer" | "Answered" | "Blocked" | "Cancelled";
 
-export interface Question {
+export interface Question extends OwnedEntity {
   id: string;
   title: string;
   context: string;
@@ -303,7 +309,7 @@ export type RiskStatus =
   | "Accepted" 
   | "Closed";
 
-export interface Risk {
+export interface Risk extends OwnedEntity {
   id: string;
   title: string;
   description: string;
@@ -325,7 +331,7 @@ export interface Risk {
 
 export type DependencyStatus = "Plánované" | "Prebieha" | "Blokované" | "Hotové" | "Oneskorené";
 
-export interface Dependency {
+export interface Dependency extends OwnedEntity {
   id: string;
   title: string;
   sourceSystem: string;
@@ -340,7 +346,7 @@ export interface Dependency {
 
 export type AsanaTaskStatus = "Not started" | "In progress" | "Blocked" | "Done" | "Cancelled";
 
-export interface AsanaTask {
+export interface AsanaTask extends OwnedEntity {
   id: string;
   title: string;
   description: string;
@@ -377,7 +383,7 @@ export interface CommunicationAnalysis {
   stakeholders: string[];
 }
 
-export interface Communication {
+export interface Communication extends OwnedEntity {
   id: string;
   title: string;
   type: CommunicationType;
@@ -416,7 +422,7 @@ export interface MeetingAISummary {
   suggestedFollowUpMeeting: string;
 }
 
-export interface Meeting {
+export interface Meeting extends OwnedEntity {
   id: string;
   title: string;
   date: string;
@@ -445,7 +451,7 @@ export interface Milestone {
 
 export type DecisionPower = "Decision maker" | "Contributor" | "Consulted" | "Informed" | "Blocker risk";
 
-export interface Stakeholder {
+export interface Stakeholder extends OwnedEntity {
   id: string;
   name: string;
   role: string;
@@ -465,7 +471,7 @@ export interface Stakeholder {
 
 export type ACStatus = "Draft" | "Ready for review" | "Approved" | "In testing" | "Passed" | "Failed" | "Obsolete";
 
-export interface AcceptanceCriteria {
+export interface AcceptanceCriteria extends OwnedEntity {
   id: string;
   requirementId: string;
   title: string;
@@ -488,7 +494,7 @@ export interface Diagram {
   dateCreated: string;
 }
 
-export interface Project {
+export interface Project extends OwnedEntity {
   id: string;
   name: string;
   shortDescription: string;
@@ -535,13 +541,52 @@ export interface Project {
   closureNote?: string;
   reopenedAt?: string;
   reopenedBy?: string;
+  
+  // Handover fields
+  previousOwnerUserId?: string;
+  handoverCompletedAt?: string;
+  sourceProjectId?: string;
+  copiedFromHandoverId?: string;
+  visibility: "private" | "handover_pending" | "transferred" | "copied_snapshot";
+  handoverHistory?: ProjectHandover[];
 }
 
-export type UserStatus = "active" | "pending_profile" | "disabled";
+export type HandoverStatus = "draft" | "pending" | "accepted" | "declined" | "cancelled" | "expired";
+export type HandoverMode = "transfer_ownership" | "copy_snapshot";
+
+export interface ProjectHandover {
+  id: string;
+  projectId: string;
+  projectName: string;
+  fromUserId: string;
+  fromUsername: string;
+  toUserId: string;
+  toUsername: string;
+  status: HandoverStatus;
+  mode: HandoverMode;
+  message?: string;
+  checklist: {
+    documentationReady: boolean;
+    openQuestionsReviewed: boolean;
+    risksReviewed: boolean;
+    deadlinesReviewed: boolean;
+    accessNotesAdded: boolean;
+  };
+  createdAt: string;
+  expiresAt: string;
+  acceptedAt?: string;
+  declinedAt?: string;
+  cancelledAt?: string;
+  completedAt?: string;
+  declineReason?: string;
+}
+
+export type UserStatus = "active" | "pending_invite" | "pending_profile" | "disabled";
 
 export interface User {
   id: string;
   username: string;
+  passwordHash?: string; // For prototype only, never in plaintext
   displayName?: string;
   email?: string;
   role?: string;
@@ -555,6 +600,22 @@ export interface User {
   updatedAt?: string;
   lastLoginAt?: string;
   profileCompletedAt?: string;
+}
+
+export type InviteStatus = "active" | "used" | "expired" | "revoked";
+
+export interface Invite {
+  id: string;
+  userId: string;
+  username: string;
+  email?: string;
+  tokenHash: string;
+  status: InviteStatus;
+  createdAt: string;
+  createdBy: string;
+  expiresAt: string;
+  usedAt?: string;
+  revokedAt?: string;
 }
 
 export interface WorkspaceSettings {

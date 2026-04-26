@@ -2,23 +2,31 @@ import React, { useState } from 'react';
 import { 
   UserPlus, Search, Edit, Trash2, 
   UserCheck, UserX, Shield, Clock,
-  MoreVertical, ChevronRight, X, AlertCircle
+  MoreVertical, ChevronRight, X, AlertCircle,
+  Copy, Check, Link as LinkIcon, RefreshCw, XCircle
 } from 'lucide-react';
 import { useSettings } from '../../context/SettingsContext';
 import { cn } from '../../lib/utils';
-import type { User } from '../../types';
+import type { User, Invite } from '../../types';
 
 export function UsersTab() {
-  const { users, isAdmin, addUser, updateUser, deleteUser, currentUser } = useSettings();
+  const { 
+    users, invites, isAdmin, addUser, updateUser, 
+    deleteUser, createInvite, revokeInvite 
+  } = useSettings();
+  
   const [search, setSearch] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [inviteResult, setInviteResult] = useState<{ invite: Invite; token: string } | null>(null);
+  
   const [formData, setFormData] = useState({
     username: '',
     displayName: '',
     email: '',
     isAdmin: false
   });
+
+  const [copied, setCopied] = useState(false);
 
   if (!isAdmin) {
     return (
@@ -37,34 +45,41 @@ export function UsersTab() {
     u.displayName?.toLowerCase().includes(search.toLowerCase())
   );
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (editingUser) {
-      updateUser(editingUser.id, formData);
-    } else {
-      addUser(formData);
+    const result = await addUser(formData);
+    if (result.inviteToken) {
+      setInviteResult({ invite: result.user as any, token: result.inviteToken }); // result.user is simplified here
     }
     setIsModalOpen(false);
-    setEditingUser(null);
     setFormData({ username: '', displayName: '', email: '', isAdmin: false });
   };
 
-  const openEdit = (user: User) => {
-    setEditingUser(user);
-    setFormData({
-      username: user.username,
-      displayName: user.displayName || '',
-      email: user.email || '',
-      isAdmin: user.isAdmin
-    });
-    setIsModalOpen(true);
+  const copyInviteLink = (token: string) => {
+    const link = `${window.location.origin}/accept-invite?token=${token}`;
+    navigator.clipboard.writeText(link);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'active': return <span className="px-2 py-1 bg-emerald-100 text-emerald-700 text-[8px] font-black uppercase rounded">Aktívny</span>;
-      case 'pending_profile': return <span className="px-2 py-1 bg-amber-100 text-amber-700 text-[8px] font-black uppercase rounded">Čaká na profil</span>;
+      case 'pending_invite': return <span className="px-2 py-1 bg-amber-100 text-amber-700 text-[8px] font-black uppercase rounded">Čaká na pozvánku</span>;
       case 'disabled': return <span className="px-2 py-1 bg-slate-100 text-slate-500 text-[8px] font-black uppercase rounded">Deaktivovaný</span>;
+      default: return null;
+    }
+  };
+
+  const getInviteStatus = (username: string) => {
+    const invite = invites.find(i => i.username === username);
+    if (!invite) return null;
+
+    switch (invite.status) {
+      case 'active': return <span className="text-[10px] font-bold text-amber-600 flex items-center gap-1"><Clock className="w-3 h-3" /> Aktívna pozvánka</span>;
+      case 'used': return <span className="text-[10px] font-bold text-emerald-600 flex items-center gap-1"><Check className="w-3 h-3" /> Použitá</span>;
+      case 'expired': return <span className="text-[10px] font-bold text-rose-600 flex items-center gap-1"><AlertCircle className="w-3 h-3" /> Expirovaná</span>;
+      case 'revoked': return <span className="text-[10px] font-bold text-slate-400 flex items-center gap-1"><XCircle className="w-3 h-3" /> Zrušená</span>;
       default: return null;
     }
   };
@@ -85,21 +100,22 @@ export function UsersTab() {
           />
         </div>
         <button 
-          onClick={() => { setEditingUser(null); setIsModalOpen(true); }}
+          onClick={() => { setInviteResult(null); setIsModalOpen(true); }}
           className="w-full md:w-auto px-6 py-3 bg-indigo-600 text-white rounded-xl font-black text-xs uppercase tracking-widest shadow-xl shadow-indigo-100 flex items-center justify-center gap-2 hover:bg-indigo-700 active:scale-95 transition-all"
         >
           <UserPlus className="w-4 h-4" /> Vytvoriť používateľa
         </button>
       </div>
 
-      {/* Warning Box */}
-      <div className="p-4 bg-amber-50 border border-amber-100 rounded-2xl flex items-start gap-4">
-        <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+      {/* Security Warning */}
+      <div className="p-4 bg-rose-50 border border-rose-100 rounded-2xl flex items-start gap-4">
+        <Shield className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
         <div className="space-y-1">
-          <p className="text-[10px] font-black text-amber-800 uppercase tracking-widest">Bezpečnostné upozornenie</p>
-          <p className="text-[11px] text-amber-700/80 font-medium leading-relaxed">
-            Toto je prototypová správa používateľov. Novému používateľovi sa vytvorí iba profil. 
-            Heslo a ďalšie údaje si používateľ doplní v ďalšej fáze onboardingu.
+          <p className="text-[10px] font-black text-rose-800 uppercase tracking-widest">Multi-User Security Notice</p>
+          <p className="text-[11px] text-rose-700/80 font-medium leading-relaxed">
+            Toto je prototypová izolácia dát. Každý používateľ vidí iba svoje projekty. 
+            Všimnite si, že <strong>localStorage</strong> režim nie je bezpečný pre reálnu multi-user izoláciu citlivých dát. 
+            Pre produkciu je potrebný backend.
           </p>
         </div>
       </div>
@@ -111,7 +127,7 @@ export function UsersTab() {
             <thead>
               <tr className="bg-slate-50/50 border-b border-slate-100">
                 <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Používateľ</th>
-                <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Status</th>
+                <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Status / Pozvánka</th>
                 <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Rola</th>
                 <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Akcie</th>
               </tr>
@@ -131,7 +147,10 @@ export function UsersTab() {
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    {getStatusBadge(user.status)}
+                    <div className="flex flex-col gap-1">
+                      {getStatusBadge(user.status)}
+                      {getInviteStatus(user.username)}
+                    </div>
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-2">
@@ -141,34 +160,44 @@ export function UsersTab() {
                   </td>
                   <td className="px-6 py-4 text-right">
                     <div className="flex items-center justify-end gap-1">
-                      {user.id !== 'peter' && user.username !== 'peter' && (
-                        <button 
-                          onClick={() => {
-                            const newStatus = user.status === 'disabled' ? (user.profileCompletedAt ? 'active' : 'pending_profile') : 'disabled';
-                            updateUser(user.id, { status: newStatus });
-                          }}
-                          title={user.status === 'disabled' ? 'Aktivovať' : 'Deaktivovať'}
-                          className={cn(
-                            "p-2 rounded-lg transition-all",
-                            user.status === 'disabled' ? "text-emerald-500 hover:bg-emerald-50" : "text-amber-500 hover:bg-amber-50"
+                      {user.id !== 'peter' && (
+                        <>
+                          <button 
+                            onClick={() => {
+                              const newStatus = user.status === 'disabled' ? 'active' : 'disabled';
+                              updateUser(user.id, { status: newStatus });
+                            }}
+                            title={user.status === 'disabled' ? 'Aktivovať' : 'Deaktivovať'}
+                            className={cn(
+                              "p-2 rounded-lg transition-all",
+                              user.status === 'disabled' ? "text-emerald-500 hover:bg-emerald-50" : "text-amber-500 hover:bg-amber-50"
+                            )}
+                          >
+                            {user.status === 'disabled' ? <UserCheck className="w-4 h-4" /> : <UserX className="w-4 h-4" />}
+                          </button>
+                          {user.status === 'pending_invite' && (
+                            <button 
+                              onClick={async () => {
+                                const invite = invites.find(i => i.username === user.username && i.status === 'active');
+                                if (invite) revokeInvite(invite.id);
+                                const result = await createInvite(user.username, user.email);
+                                setInviteResult(result);
+                              }}
+                              title="Regenerovať pozvánku"
+                              className="p-2 text-indigo-500 hover:bg-indigo-50 rounded-lg transition-all"
+                            >
+                              <RefreshCw className="w-4 h-4" />
+                            </button>
                           )}
-                        >
-                          {user.status === 'disabled' ? <UserCheck className="w-4 h-4" /> : <UserX className="w-4 h-4" />}
-                        </button>
+                        </>
                       )}
-                      <button 
-                        onClick={() => openEdit(user)}
-                        className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"
-                      >
-                        <Edit className="w-4 h-4" />
-                      </button>
                       <button 
                         onClick={() => {
                           if (confirm(`Naozaj chcete vymazať používateľa @${user.username}?`)) {
                             deleteUser(user.id);
                           }
                         }}
-                        disabled={user.id === 'peter' || user.username === 'peter'}
+                        disabled={user.id === 'peter'}
                         className="p-2 text-slate-300 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all disabled:opacity-0"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -182,17 +211,15 @@ export function UsersTab() {
         </div>
       </div>
 
-      {/* Create/Edit Modal */}
+      {/* Create User Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setIsModalOpen(false)} />
           <div className="bg-white w-full max-w-md rounded-[2.5rem] shadow-2xl relative overflow-hidden animate-in zoom-in-95 duration-300">
             <div className="p-8 border-b border-slate-100 flex items-center justify-between">
               <div>
-                <h3 className="text-2xl font-black text-slate-900 tracking-tight">
-                  {editingUser ? 'Upraviť používateľa' : 'Nový používateľ'}
-                </h3>
-                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Prototype User Management</p>
+                <h3 className="text-2xl font-black text-slate-900 tracking-tight">Nový používateľ</h3>
+                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Invite-based Onboarding</p>
               </div>
               <button onClick={() => setIsModalOpen(false)} className="p-2 text-slate-400 hover:text-slate-600"><X className="w-6 h-6" /></button>
             </div>
@@ -203,11 +230,11 @@ export function UsersTab() {
                   <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Username *</label>
                   <input 
                     required
-                    disabled={!!editingUser}
                     type="text" 
                     value={formData.username}
-                    onChange={(e) => setFormData({ ...formData, username: e.target.value.toLowerCase() })}
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none transition-all disabled:opacity-50"
+                    onChange={(e) => setFormData({ ...formData, username: e.target.value.toLowerCase().replace(/\s/g, '') })}
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                    placeholder="napr. jana.analyst"
                   />
                 </div>
                 <div className="space-y-2">
@@ -241,9 +268,9 @@ export function UsersTab() {
               </div>
 
               <div className="p-4 bg-indigo-50 rounded-2xl border border-indigo-100 flex items-center gap-3">
-                <Shield className="w-5 h-5 text-indigo-600 shrink-0" />
+                <Clock className="w-5 h-5 text-indigo-600 shrink-0" />
                 <p className="text-[10px] text-indigo-700 font-bold leading-tight">
-                  Používateľ si doplní heslo a dokončí profil pri prvom prihlásení v ďalšej fáze prototypu.
+                  Používateľovi bude vygenerovaný jednorazový pozývací link, cez ktorý si sám nastaví heslo.
                 </p>
               </div>
 
@@ -259,10 +286,60 @@ export function UsersTab() {
                   type="submit"
                   className="flex-1 px-6 py-4 bg-indigo-600 text-white rounded-xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-indigo-100 hover:bg-indigo-700 transition-all"
                 >
-                  {editingUser ? 'Uložiť zmeny' : 'Vytvoriť používateľa'}
+                  Vytvoriť a Pozvať
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Invite Result Modal */}
+      {inviteResult && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-slate-900/80 backdrop-blur-md" onClick={() => setInviteResult(null)} />
+          <div className="bg-white w-full max-w-lg rounded-[2.5rem] shadow-2xl relative overflow-hidden animate-in zoom-in-95 duration-300">
+            <div className="p-8 text-center space-y-6">
+              <div className="w-20 h-20 bg-emerald-50 text-emerald-500 rounded-3xl flex items-center justify-center mx-auto shadow-inner">
+                <LinkIcon className="w-10 h-10" />
+              </div>
+              <div className="space-y-2">
+                <h3 className="text-2xl font-black text-slate-900">Pozvánka vytvorená</h3>
+                <p className="text-slate-500 text-sm font-medium">Skopírujte tento link a pošlite ho používateľovi <strong>@{inviteResult.invite.username}</strong> bezpečným kanálom.</p>
+              </div>
+
+              <div className="p-6 bg-slate-50 border border-slate-200 rounded-3xl relative group">
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest text-left mb-2">Pozývací Link</p>
+                <div className="flex items-center gap-3 bg-white p-3 border border-slate-200 rounded-xl">
+                  <code className="text-xs font-bold text-indigo-600 truncate flex-1">
+                    {`${window.location.origin}/accept-invite?token=${inviteResult.token}`}
+                  </code>
+                  <button 
+                    onClick={() => copyInviteLink(inviteResult.token)}
+                    className={cn(
+                      "p-2 rounded-lg transition-all",
+                      copied ? "bg-emerald-50 text-emerald-600" : "bg-slate-50 text-slate-500 hover:bg-indigo-50 hover:text-indigo-600"
+                    )}
+                  >
+                    {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 p-4 bg-amber-50 rounded-2xl border border-amber-100 text-left">
+                <AlertCircle className="w-5 h-5 text-amber-600 shrink-0" />
+                <p className="text-[10px] text-amber-700 font-bold leading-tight">
+                  Pozor: Link sa zobrazí iba teraz. Po zatvorení okna sa k nemu už nedostanete (iba regeneráciou). Platnosť je 72 hodín.
+                </p>
+              </div>
+
+              <button 
+                onClick={() => setInviteResult(null)}
+                className="w-full py-4 bg-slate-900 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-black transition-all"
+              >
+                Hotovo
+              </button>
+            </div>
           </div>
         </div>
       )}

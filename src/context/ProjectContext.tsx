@@ -1,6 +1,7 @@
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useState, useEffect, useMemo } from "react";
 import type { ReactNode } from "react";
-import type { Project, LinkedSystem, ConfluenceSource, JiraItem, DataFlow, SQLQuery, SQLResult, Deadline, Requirement, Decision, Question, Risk, Dependency, AsanaTask, Communication, Meeting, Stakeholder, AcceptanceCriteria } from "../types";
+import type { Project, LinkedSystem, ConfluenceSource, JiraItem, DataFlow, SQLQuery, SQLResult, Deadline, Requirement, Decision, Question, Risk, Dependency, AsanaTask, Communication, Meeting, Stakeholder, AcceptanceCriteria, ProjectHandover, HandoverMode } from "../types";
+import { useAuth } from "./AuthContext";
 // Static demo data imports removed to enforce Clean Workspace Policy
 // demoProjectsData is now loaded dynamically in loadDemoData()
 
@@ -66,11 +67,19 @@ interface ProjectContextType {
   deleteAcceptanceCriteria: (projectId: string, criteriaId: string) => void;
   closeProject: (id: string, reason: string, note: string) => void;
   reopenProject: (id: string) => void;
-   loadDemoData: () => Promise<void>;
+  loadDemoData: () => Promise<void>;
   clearAllData: () => void;
+  readIds: Set<string>;
+  setReadIds: (ids: Set<string> | ((prev: Set<string>) => Set<string>)) => void;
+  handovers: ProjectHandover[];
+  sendHandover: (handover: Omit<ProjectHandover, 'id' | 'createdAt' | 'status'>) => void;
+  acceptHandover: (handoverId: string) => Promise<void>;
+  declineHandover: (handoverId: string, reason?: string) => void;
+  cancelHandover: (handoverId: string) => void;
 }
 
 const STORAGE_KEY = "baWorkspace.projects";
+const HANDOVER_STORAGE_KEY = "baWorkspace.handovers";
 const CLEAN_POLICY_VERSION = "3"; // Increment this to force-clean legacy demo data
 const CLEAN_MODE_KEY = "baWorkspace.cleanMode";
 const CLEAN_VERSION_KEY = "baWorkspace.cleanPolicyVersion";
@@ -78,7 +87,8 @@ const CLEAN_VERSION_KEY = "baWorkspace.cleanPolicyVersion";
 const ProjectContext = createContext<ProjectContextType | undefined>(undefined);
 
 export function ProjectProvider({ children }: { children: ReactNode }) {
-  const [projects, setProjects] = useState<Project[]>(() => {
+  const { currentUser } = useAuth();
+  const [allProjects, setAllProjects] = useState<Project[]>(() => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       const currentPolicyVersion = localStorage.getItem(CLEAN_VERSION_KEY);
@@ -115,30 +125,79 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
     }
   });
 
-  const [activeProjectId, setActiveProjectId] = useState<string>(''); // No project selected at startup
+  const [handovers, setHandovers] = useState<ProjectHandover[]>(() => {
+    try {
+      const stored = localStorage.getItem(HANDOVER_STORAGE_KEY);
+      return stored ? JSON.parse(stored) : [];
+    } catch (e) {
+      return [];
+    }
+  });
 
-  // Persist projects to localStorage whenever they change
+  // Data Isolation: Only show projects belonging to the current user
+  const projects = useMemo(() => {
+    if (!currentUser) return [];
+    return allProjects.filter(p => p.ownerUserId === currentUser.id);
+  }, [allProjects, currentUser]);
+
+  const [activeProjectId, setActiveProjectId] = useState<string>('');
+
+  // Scoped notifications read status
+  const [readIds, setReadIds] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    if (currentUser) {
+      const saved = localStorage.getItem(`ba_hub_read_notifications_${currentUser.id}`);
+      if (saved) {
+        try {
+          setReadIds(new Set(JSON.parse(saved)));
+        } catch (e) {
+          setReadIds(new Set());
+        }
+      } else {
+        setReadIds(new Set());
+      }
+    }
+  }, [currentUser]);
+
+  useEffect(() => {
+    if (currentUser) {
+      localStorage.setItem(`ba_hub_read_notifications_${currentUser.id}`, JSON.stringify(Array.from(readIds)));
+    }
+  }, [readIds, currentUser]); // No project selected at startup
+
   useEffect(() => {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
-      // If we have projects, it's not "clean" in the sense of being empty, 
-      // but cleanMode flag prevents AUTO-SEEDING, which is what we want.
-      // We keep cleanMode = true to ensure no automatic seeding ever happens again.
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(allProjects));
       localStorage.setItem(CLEAN_MODE_KEY, "true");
     } catch (e) {
       console.error("Failed to save projects to localStorage", e);
     }
-  }, [projects]);
+  }, [allProjects]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(HANDOVER_STORAGE_KEY, JSON.stringify(handovers));
+    } catch (e) {
+      console.error("Failed to save handovers to localStorage", e);
+    }
+  }, [handovers]);
 
   const activeProject = projects.find(p => p.id === activeProjectId);
 
   const addProject = (project: Project) => {
-    setProjects(prev => [...prev, project]);
+    if (!currentUser) return;
+    const projectWithOwner = { 
+      ...project, 
+      ownerUserId: currentUser.id, 
+      createdByUserId: currentUser.id 
+    };
+    setAllProjects(prev => [...prev, projectWithOwner]);
     setActiveProjectId(project.id);
   };
 
   const updateProject = (id: string, updatedFields: Partial<Project>) => {
-    setProjects(prev => 
+    setAllProjects(prev => 
       prev.map(p => p.id === id ? { ...p, ...updatedFields } : p)
     );
   };
@@ -148,16 +207,18 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
   };
 
   const addSystem = (projectId: string, system: LinkedSystem) => {
-    setProjects(prev => prev.map(p => {
+    if (!currentUser) return;
+    const systemWithOwner = { ...system, ownerUserId: currentUser.id, createdByUserId: currentUser.id };
+    setAllProjects(prev => prev.map(p => {
       if (p.id === projectId) {
-        return { ...p, systems: [...p.systems, system] };
+        return { ...p, systems: [...p.systems, systemWithOwner] };
       }
       return p;
     }));
   };
 
   const updateSystem = (projectId: string, systemId: string, updatedFields: Partial<LinkedSystem>) => {
-    setProjects(prev => prev.map(p => {
+    setAllProjects(prev => prev.map(p => {
       if (p.id === projectId) {
         return {
           ...p,
@@ -169,7 +230,7 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
   };
 
   const deleteSystem = (projectId: string, systemId: string) => {
-    setProjects(prev => prev.map(p => {
+    setAllProjects(prev => prev.map(p => {
       if (p.id === projectId) {
         return { ...p, systems: p.systems.filter(sys => sys.id !== systemId) };
       }
@@ -178,16 +239,18 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
   };
 
   const addConfluenceSource = (projectId: string, source: ConfluenceSource) => {
-    setProjects(prev => prev.map(p => {
+    if (!currentUser) return;
+    const sourceWithOwner = { ...source, ownerUserId: currentUser.id, createdByUserId: currentUser.id };
+    setAllProjects(prev => prev.map(p => {
       if (p.id === projectId) {
-        return { ...p, confluenceSources: [...p.confluenceSources, source] };
+        return { ...p, confluenceSources: [...p.confluenceSources, sourceWithOwner] };
       }
       return p;
     }));
   };
 
   const updateConfluenceSource = (projectId: string, sourceId: string, updatedFields: Partial<ConfluenceSource>) => {
-    setProjects(prev => prev.map(p => {
+    setAllProjects(prev => prev.map(p => {
       if (p.id === projectId) {
         return {
           ...p,
@@ -199,7 +262,7 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
   };
 
   const deleteConfluenceSource = (projectId: string, sourceId: string) => {
-    setProjects(prev => prev.map(p => {
+    setAllProjects(prev => prev.map(p => {
       if (p.id === projectId) {
         return { ...p, confluenceSources: p.confluenceSources.filter(src => src.id !== sourceId) };
       }
@@ -208,16 +271,18 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
   };
 
   const addJiraItem = (projectId: string, item: JiraItem) => {
-    setProjects(prev => prev.map(p => {
+    if (!currentUser) return;
+    const itemWithOwner = { ...item, ownerUserId: currentUser.id, createdByUserId: currentUser.id };
+    setAllProjects(prev => prev.map(p => {
       if (p.id === projectId) {
-        return { ...p, jiraItems: [...p.jiraItems, item] };
+        return { ...p, jiraItems: [...p.jiraItems, itemWithOwner] };
       }
       return p;
     }));
   };
 
   const updateJiraItem = (projectId: string, itemId: string, updatedFields: Partial<JiraItem>) => {
-    setProjects(prev => prev.map(p => {
+    setAllProjects(prev => prev.map(p => {
       if (p.id === projectId) {
         return {
           ...p,
@@ -229,7 +294,7 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
   };
 
   const deleteJiraItem = (projectId: string, itemId: string) => {
-    setProjects(prev => prev.map(p => {
+    setAllProjects(prev => prev.map(p => {
       if (p.id === projectId) {
         return { ...p, jiraItems: p.jiraItems.filter(item => item.id !== itemId) };
       }
@@ -238,16 +303,18 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
   };
 
   const addDataFlow = (projectId: string, flow: DataFlow) => {
-    setProjects(prev => prev.map(p => {
+    if (!currentUser) return;
+    const flowWithOwner = { ...flow, ownerUserId: currentUser.id, createdByUserId: currentUser.id };
+    setAllProjects(prev => prev.map(p => {
       if (p.id === projectId) {
-        return { ...p, dataFlows: [...p.dataFlows, flow] };
+        return { ...p, dataFlows: [...p.dataFlows, flowWithOwner] };
       }
       return p;
     }));
   };
 
   const updateDataFlow = (projectId: string, flowId: string, updatedFields: Partial<DataFlow>) => {
-    setProjects(prev => prev.map(p => {
+    setAllProjects(prev => prev.map(p => {
       if (p.id === projectId) {
         return {
           ...p,
@@ -259,7 +326,7 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
   };
 
   const deleteDataFlow = (projectId: string, flowId: string) => {
-    setProjects(prev => prev.map(p => {
+    setAllProjects(prev => prev.map(p => {
       if (p.id === projectId) {
         return { ...p, dataFlows: p.dataFlows.filter(flow => flow.id !== flowId) };
       }
@@ -268,16 +335,18 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
   };
 
   const addSQLQuery = (projectId: string, query: SQLQuery) => {
-    setProjects(prev => prev.map(p => {
+    if (!currentUser) return;
+    const queryWithOwner = { ...query, ownerUserId: currentUser.id, createdByUserId: currentUser.id };
+    setAllProjects(prev => prev.map(p => {
       if (p.id === projectId) {
-        return { ...p, sqlQueries: [...p.sqlQueries, query] };
+        return { ...p, sqlQueries: [...p.sqlQueries, queryWithOwner] };
       }
       return p;
     }));
   };
 
   const updateSQLQuery = (projectId: string, queryId: string, updatedFields: Partial<SQLQuery>) => {
-    setProjects(prev => prev.map(p => {
+    setAllProjects(prev => prev.map(p => {
       if (p.id === projectId) {
         return {
           ...p,
@@ -289,7 +358,7 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
   };
 
   const deleteSQLQuery = (projectId: string, queryId: string) => {
-    setProjects(prev => prev.map(p => {
+    setAllProjects(prev => prev.map(p => {
       if (p.id === projectId) {
         return { ...p, sqlQueries: p.sqlQueries.filter(q => q.id !== queryId) };
       }
@@ -298,16 +367,18 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
   };
 
   const addSQLResult = (projectId: string, result: SQLResult) => {
-    setProjects(prev => prev.map(p => {
+    if (!currentUser) return;
+    const resultWithOwner = { ...result, ownerUserId: currentUser.id, createdByUserId: currentUser.id };
+    setAllProjects(prev => prev.map(p => {
       if (p.id === projectId) {
-        return { ...p, sqlResults: [...p.sqlResults, result] };
+        return { ...p, sqlResults: [...p.sqlResults, resultWithOwner] };
       }
       return p;
     }));
   };
 
   const updateSQLResult = (projectId: string, resultId: string, updatedFields: Partial<SQLResult>) => {
-    setProjects(prev => prev.map(p => {
+    setAllProjects(prev => prev.map(p => {
       if (p.id === projectId) {
         return {
           ...p,
@@ -319,7 +390,7 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
   };
 
   const deleteSQLResult = (projectId: string, resultId: string) => {
-    setProjects(prev => prev.map(p => {
+    setAllProjects(prev => prev.map(p => {
       if (p.id === projectId) {
         return { ...p, sqlResults: p.sqlResults.filter(r => r.id !== resultId) };
       }
@@ -328,16 +399,18 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
   };
 
   const addDeadline = (projectId: string, deadline: Deadline) => {
-    setProjects(prev => prev.map(p => {
+    if (!currentUser) return;
+    const deadlineWithOwner = { ...deadline, ownerUserId: currentUser.id, createdByUserId: currentUser.id };
+    setAllProjects(prev => prev.map(p => {
       if (p.id === projectId) {
-        return { ...p, deadlines: [...p.deadlines, deadline] };
+        return { ...p, deadlines: [...p.deadlines, deadlineWithOwner] };
       }
       return p;
     }));
   };
 
   const updateDeadline = (projectId: string, deadlineId: string, updatedFields: Partial<Deadline>) => {
-    setProjects(prev => prev.map(p => {
+    setAllProjects(prev => prev.map(p => {
       if (p.id === projectId) {
         return {
           ...p,
@@ -349,7 +422,7 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
   };
 
   const deleteDeadline = (projectId: string, deadlineId: string) => {
-    setProjects(prev => prev.map(p => {
+    setAllProjects(prev => prev.map(p => {
       if (p.id === projectId) {
         return { ...p, deadlines: p.deadlines.filter(d => d.id !== deadlineId) };
       }
@@ -358,16 +431,18 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
   };
 
   const addRequirement = (projectId: string, requirement: Requirement) => {
-    setProjects(prev => prev.map(p => {
+    if (!currentUser) return;
+    const reqWithOwner = { ...requirement, ownerUserId: currentUser.id, createdByUserId: currentUser.id };
+    setAllProjects(prev => prev.map(p => {
       if (p.id === projectId) {
-        return { ...p, requirements: [...p.requirements, requirement] };
+        return { ...p, requirements: [...p.requirements, reqWithOwner] };
       }
       return p;
     }));
   };
 
   const updateRequirement = (projectId: string, requirementId: string, updatedFields: Partial<Requirement>) => {
-    setProjects(prev => prev.map(p => {
+    setAllProjects(prev => prev.map(p => {
       if (p.id === projectId) {
         return {
           ...p,
@@ -379,7 +454,7 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
   };
 
   const deleteRequirement = (projectId: string, requirementId: string) => {
-    setProjects(prev => prev.map(p => {
+    setAllProjects(prev => prev.map(p => {
       if (p.id === projectId) {
         return { ...p, requirements: p.requirements.filter(r => r.id !== requirementId) };
       }
@@ -388,16 +463,18 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
   };
 
   const addDecision = (projectId: string, decision: Decision) => {
-    setProjects(prev => prev.map(p => {
+    if (!currentUser) return;
+    const decWithOwner = { ...decision, ownerUserId: currentUser.id, createdByUserId: currentUser.id };
+    setAllProjects(prev => prev.map(p => {
       if (p.id === projectId) {
-        return { ...p, decisions: [...p.decisions, decision] };
+        return { ...p, decisions: [...p.decisions, decWithOwner] };
       }
       return p;
     }));
   };
 
   const updateDecision = (projectId: string, decisionId: string, updatedFields: Partial<Decision>) => {
-    setProjects(prev => prev.map(p => {
+    setAllProjects(prev => prev.map(p => {
       if (p.id === projectId) {
         return {
           ...p,
@@ -409,7 +486,7 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
   };
 
   const deleteDecision = (projectId: string, decisionId: string) => {
-    setProjects(prev => prev.map(p => {
+    setAllProjects(prev => prev.map(p => {
       if (p.id === projectId) {
         return { ...p, decisions: p.decisions.filter(d => d.id !== decisionId) };
       }
@@ -418,16 +495,18 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
   };
 
   const addQuestion = (projectId: string, question: Question) => {
-    setProjects(prev => prev.map(p => {
+    if (!currentUser) return;
+    const qWithOwner = { ...question, ownerUserId: currentUser.id, createdByUserId: currentUser.id };
+    setAllProjects(prev => prev.map(p => {
       if (p.id === projectId) {
-        return { ...p, questions: [...p.questions, question] };
+        return { ...p, questions: [...p.questions, qWithOwner] };
       }
       return p;
     }));
   };
 
   const updateQuestion = (projectId: string, questionId: string, updatedFields: Partial<Question>) => {
-    setProjects(prev => prev.map(p => {
+    setAllProjects(prev => prev.map(p => {
       if (p.id === projectId) {
         return {
           ...p,
@@ -439,7 +518,7 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
   };
 
   const deleteQuestion = (projectId: string, questionId: string) => {
-    setProjects(prev => prev.map(p => {
+    setAllProjects(prev => prev.map(p => {
       if (p.id === projectId) {
         return { ...p, questions: p.questions.filter(q => q.id !== questionId) };
       }
@@ -448,16 +527,18 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
   };
 
   const addRisk = (projectId: string, risk: Risk) => {
-    setProjects(prev => prev.map(p => {
+    if (!currentUser) return;
+    const riskWithOwner = { ...risk, ownerUserId: currentUser.id, createdByUserId: currentUser.id };
+    setAllProjects(prev => prev.map(p => {
       if (p.id === projectId) {
-        return { ...p, risks: [...p.risks, risk] };
+        return { ...p, risks: [...p.risks, riskWithOwner] };
       }
       return p;
     }));
   };
 
   const updateRisk = (projectId: string, riskId: string, updatedFields: Partial<Risk>) => {
-    setProjects(prev => prev.map(p => {
+    setAllProjects(prev => prev.map(p => {
       if (p.id === projectId) {
         return {
           ...p,
@@ -469,7 +550,7 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
   };
 
   const deleteRisk = (projectId: string, riskId: string) => {
-    setProjects(prev => prev.map(p => {
+    setAllProjects(prev => prev.map(p => {
       if (p.id === projectId) {
         return { ...p, risks: p.risks.filter(r => r.id !== riskId) };
       }
@@ -478,16 +559,18 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
   };
 
   const addDependency = (projectId: string, dependency: Dependency) => {
-    setProjects(prev => prev.map(p => {
+    if (!currentUser) return;
+    const depWithOwner = { ...dependency, ownerUserId: currentUser.id, createdByUserId: currentUser.id };
+    setAllProjects(prev => prev.map(p => {
       if (p.id === projectId) {
-        return { ...p, dependencies: [...p.dependencies, dependency] };
+        return { ...p, dependencies: [...p.dependencies, depWithOwner] };
       }
       return p;
     }));
   };
 
   const updateDependency = (projectId: string, dependencyId: string, updatedFields: Partial<Dependency>) => {
-    setProjects(prev => prev.map(p => {
+    setAllProjects(prev => prev.map(p => {
       if (p.id === projectId) {
         return {
           ...p,
@@ -499,7 +582,7 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
   };
 
   const deleteDependency = (projectId: string, dependencyId: string) => {
-    setProjects(prev => prev.map(p => {
+    setAllProjects(prev => prev.map(p => {
       if (p.id === projectId) {
         return { ...p, dependencies: p.dependencies.filter(d => d.id !== dependencyId) };
       }
@@ -508,16 +591,18 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
   };
 
   const addAsanaTask = (projectId: string, task: AsanaTask) => {
-    setProjects(prev => prev.map(p => {
+    if (!currentUser) return;
+    const taskWithOwner = { ...task, ownerUserId: currentUser.id, createdByUserId: currentUser.id };
+    setAllProjects(prev => prev.map(p => {
       if (p.id === projectId) {
-        return { ...p, asanaTasks: [...p.asanaTasks, task] };
+        return { ...p, asanaTasks: [...p.asanaTasks, taskWithOwner] };
       }
       return p;
     }));
   };
 
   const updateAsanaTask = (projectId: string, taskId: string, updatedFields: Partial<AsanaTask>) => {
-    setProjects(prev => prev.map(p => {
+    setAllProjects(prev => prev.map(p => {
       if (p.id === projectId) {
         return {
           ...p,
@@ -529,7 +614,7 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
   };
 
   const deleteAsanaTask = (projectId: string, taskId: string) => {
-    setProjects(prev => prev.map(p => {
+    setAllProjects(prev => prev.map(p => {
       if (p.id === projectId) {
         return { ...p, asanaTasks: p.asanaTasks.filter(t => t.id !== taskId) };
       }
@@ -538,10 +623,12 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
   };
 
   const importAsanaTasks = (projectId: string, tasks: AsanaTask[]) => {
-    setProjects(prev => prev.map(p => {
+    if (!currentUser) return;
+    const tasksWithOwner = tasks.map(t => ({ ...t, ownerUserId: currentUser.id, createdByUserId: currentUser.id }));
+    setAllProjects(prev => prev.map(p => {
       if (p.id === projectId) {
         const existingTasks = [...(p.asanaTasks || [])];
-        const tasksToProcess = [...tasks];
+        const tasksToProcess = [...tasksWithOwner];
         
         // Match and update existing tasks, then add remaining new ones
         const updatedExisting = existingTasks.map(et => {
@@ -564,16 +651,18 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
   };
 
   const addCommunication = (projectId: string, comm: Communication) => {
-    setProjects(prev => prev.map(p => {
+    if (!currentUser) return;
+    const commWithOwner = { ...comm, ownerUserId: currentUser.id, createdByUserId: currentUser.id };
+    setAllProjects(prev => prev.map(p => {
       if (p.id === projectId) {
-        return { ...p, communications: [...p.communications, comm] };
+        return { ...p, communications: [...p.communications, commWithOwner] };
       }
       return p;
     }));
   };
 
   const updateCommunication = (projectId: string, commId: string, updatedFields: Partial<Communication>) => {
-    setProjects(prev => prev.map(p => {
+    setAllProjects(prev => prev.map(p => {
       if (p.id === projectId) {
         return {
           ...p,
@@ -585,7 +674,7 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
   };
 
   const deleteCommunication = (projectId: string, commId: string) => {
-    setProjects(prev => prev.map(p => {
+    setAllProjects(prev => prev.map(p => {
       if (p.id === projectId) {
         return { ...p, communications: p.communications.filter(c => c.id !== commId) };
       }
@@ -594,16 +683,18 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
   };
 
   const addMeeting = (projectId: string, meeting: Meeting) => {
-    setProjects(prev => prev.map(p => {
+    if (!currentUser) return;
+    const meetingWithOwner = { ...meeting, ownerUserId: currentUser.id, createdByUserId: currentUser.id };
+    setAllProjects(prev => prev.map(p => {
       if (p.id === projectId) {
-        return { ...p, meetings: [...p.meetings, meeting] };
+        return { ...p, meetings: [...p.meetings, meetingWithOwner] };
       }
       return p;
     }));
   };
 
   const updateMeeting = (projectId: string, meetingId: string, updatedFields: Partial<Meeting>) => {
-    setProjects(prev => prev.map(p => {
+    setAllProjects(prev => prev.map(p => {
       if (p.id === projectId) {
         return {
           ...p,
@@ -615,7 +706,7 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
   };
 
   const deleteMeeting = (projectId: string, meetingId: string) => {
-    setProjects(prev => prev.map(p => {
+    setAllProjects(prev => prev.map(p => {
       if (p.id === projectId) {
         return { ...p, meetings: p.meetings.filter(m => m.id !== meetingId) };
       }
@@ -624,16 +715,18 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
   };
 
   const addStakeholder = (projectId: string, stakeholder: Stakeholder) => {
-    setProjects(prev => prev.map(p => {
+    if (!currentUser) return;
+    const shWithOwner = { ...stakeholder, ownerUserId: currentUser.id, createdByUserId: currentUser.id };
+    setAllProjects(prev => prev.map(p => {
       if (p.id === projectId) {
-        return { ...p, stakeholders: [...(p.stakeholders || []), stakeholder] };
+        return { ...p, stakeholders: [...(p.stakeholders || []), shWithOwner] };
       }
       return p;
     }));
   };
 
   const updateStakeholder = (projectId: string, stakeholderId: string, updatedFields: Partial<Stakeholder>) => {
-    setProjects(prev => prev.map(p => {
+    setAllProjects(prev => prev.map(p => {
       if (p.id === projectId) {
         return {
           ...p,
@@ -645,7 +738,7 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
   };
 
   const deleteStakeholder = (projectId: string, stakeholderId: string) => {
-    setProjects(prev => prev.map(p => {
+    setAllProjects(prev => prev.map(p => {
       if (p.id === projectId) {
         return { ...p, stakeholders: (p.stakeholders || []).filter(s => s.id !== stakeholderId) };
       }
@@ -654,16 +747,18 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
   };
 
   const addAcceptanceCriteria = (projectId: string, criteria: AcceptanceCriteria) => {
-    setProjects(prev => prev.map(p => {
+    if (!currentUser) return;
+    const acWithOwner = { ...criteria, ownerUserId: currentUser.id, createdByUserId: currentUser.id };
+    setAllProjects(prev => prev.map(p => {
       if (p.id === projectId) {
-        return { ...p, acceptanceCriteria: [...(p.acceptanceCriteria || []), criteria] };
+        return { ...p, acceptanceCriteria: [...(p.acceptanceCriteria || []), acWithOwner] };
       }
       return p;
     }));
   };
 
   const updateAcceptanceCriteria = (projectId: string, criteriaId: string, updatedFields: Partial<AcceptanceCriteria>) => {
-    setProjects(prev => prev.map(p => {
+    setAllProjects(prev => prev.map(p => {
       if (p.id === projectId) {
         return {
           ...p,
@@ -675,7 +770,7 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
   };
 
   const deleteAcceptanceCriteria = (projectId: string, criteriaId: string) => {
-    setProjects(prev => prev.map(p => {
+    setAllProjects(prev => prev.map(p => {
       if (p.id === projectId) {
         return { ...p, acceptanceCriteria: (p.acceptanceCriteria || []).filter(ac => ac.id !== criteriaId) };
       }
@@ -684,7 +779,7 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
   };
 
   const deleteProject = (id: string) => {
-    setProjects(prev => {
+    setAllProjects(prev => {
       const updated = prev.filter(p => p.id !== id);
       if (activeProjectId === id) {
         setActiveProjectId('');
@@ -694,14 +789,15 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
   };
 
   const closeProject = (id: string, reason: string, note: string) => {
-    setProjects(prev => prev.map(p => {
+    if (!currentUser) return;
+    setAllProjects(prev => prev.map(p => {
       if (p.id === id) {
         return {
           ...p,
           status: 'Ukončené',
           isClosed: true,
           closedAt: new Date().toISOString(),
-          closedBy: 'peter',
+          closedBy: currentUser.username,
           closureReason: reason,
           closureNote: note,
           metrics: {
@@ -715,29 +811,191 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
   };
 
   const reopenProject = (id: string) => {
-    setProjects(prev => prev.map(p => {
+    if (!currentUser) return;
+    setAllProjects(prev => prev.map(p => {
       if (p.id === id) {
         return {
           ...p,
           status: 'Analýza',
           isClosed: false,
           reopenedAt: new Date().toISOString(),
-          reopenedBy: 'peter'
+          reopenedBy: currentUser.username
         };
       }
       return p;
     }));
   };
 
+  const sendHandover = (handoverData: Omit<ProjectHandover, 'id' | 'createdAt' | 'status'>) => {
+    if (!currentUser) return;
+    const newHandover: ProjectHandover = {
+      ...handoverData,
+      id: `ho-${Date.now()}`,
+      status: 'pending',
+      createdAt: new Date().toISOString()
+    };
+    setHandovers(prev => [...prev, newHandover]);
+    
+    // Update project visibility
+    setAllProjects(prev => prev.map(p => 
+      p.id === handoverData.projectId ? { ...p, visibility: 'handover_pending' } : p
+    ));
+  };
+
+  const copyProjectSnapshot = (project: Project, toUserId: string, handoverId: string): Project => {
+    const timestamp = new Date().toISOString();
+    const newProjectId = `proj-${Date.now()}`;
+    
+    // Helper to update owner and id for entities
+    const updateEntities = <T extends { id: string; ownerUserId: string; createdByUserId: string }>(entities: T[]): T[] => {
+      return (entities || []).map(e => ({
+        ...e,
+        id: `${e.id}-copy-${Date.now()}`,
+        ownerUserId: toUserId,
+        createdByUserId: toUserId // In copy snapshot, receiver becomes creator of the copy
+      }));
+    };
+
+    return {
+      ...project,
+      id: newProjectId,
+      ownerUserId: toUserId,
+      createdByUserId: toUserId,
+      sourceProjectId: project.id,
+      copiedFromHandoverId: handoverId,
+      visibility: 'copied_snapshot',
+      lastModified: timestamp,
+      handoverCompletedAt: timestamp,
+      // Deep copy all entities
+      requirements: updateEntities(project.requirements),
+      decisions: updateEntities(project.decisions),
+      risks: updateEntities(project.risks),
+      questions: updateEntities(project.questions),
+      dependencies: updateEntities(project.dependencies),
+      asanaTasks: updateEntities(project.asanaTasks),
+      communications: updateEntities(project.communications),
+      meetings: updateEntities(project.meetings),
+      stakeholders: updateEntities(project.stakeholders),
+      acceptanceCriteria: updateEntities(project.acceptanceCriteria),
+      confluenceSources: updateEntities(project.confluenceSources),
+      jiraItems: updateEntities(project.jiraItems),
+      dataFlows: updateEntities(project.dataFlows),
+      systems: updateEntities(project.systems),
+      sqlQueries: updateEntities(project.sqlQueries),
+      sqlResults: updateEntities(project.sqlResults),
+      deadlines: updateEntities(project.deadlines),
+    };
+  };
+
+  const acceptHandover = async (handoverId: string) => {
+    const handover = handovers.find(h => h.id === handoverId);
+    if (!handover || !currentUser) return;
+
+    const timestamp = new Date().toISOString();
+
+    if (handover.mode === 'transfer_ownership') {
+      // Transfer logic
+      setAllProjects(prev => prev.map(p => {
+        if (p.id === handover.projectId) {
+          const updatedHandover = { ...handover, status: 'accepted' as const, completedAt: timestamp, acceptedAt: timestamp };
+          return {
+            ...p,
+            ownerUserId: handover.toUserId,
+            previousOwnerUserId: handover.fromUserId,
+            handoverCompletedAt: timestamp,
+            visibility: 'transferred' as const,
+            lastModified: timestamp,
+            handoverHistory: [...(p.handoverHistory || []), updatedHandover],
+            // Update all sub-entities owner
+            requirements: (p.requirements || []).map(e => ({ ...e, ownerUserId: handover.toUserId })),
+            decisions: (p.decisions || []).map(e => ({ ...e, ownerUserId: handover.toUserId })),
+            risks: (p.risks || []).map(e => ({ ...e, ownerUserId: handover.toUserId })),
+            questions: (p.questions || []).map(e => ({ ...e, ownerUserId: handover.toUserId })),
+            dependencies: (p.dependencies || []).map(e => ({ ...e, ownerUserId: handover.toUserId })),
+            asanaTasks: (p.asanaTasks || []).map(e => ({ ...e, ownerUserId: handover.toUserId })),
+            communications: (p.communications || []).map(e => ({ ...e, ownerUserId: handover.toUserId })),
+            meetings: (p.meetings || []).map(e => ({ ...e, ownerUserId: handover.toUserId })),
+            stakeholders: (p.stakeholders || []).map(e => ({ ...e, ownerUserId: handover.toUserId })),
+            acceptanceCriteria: (p.acceptanceCriteria || []).map(e => ({ ...e, ownerUserId: handover.toUserId })),
+            confluenceSources: (p.confluenceSources || []).map(e => ({ ...e, ownerUserId: handover.toUserId })),
+            jiraItems: (p.jiraItems || []).map(e => ({ ...e, ownerUserId: handover.toUserId })),
+            dataFlows: (p.dataFlows || []).map(e => ({ ...e, ownerUserId: handover.toUserId })),
+            systems: (p.systems || []).map(e => ({ ...e, ownerUserId: handover.toUserId })),
+            sqlQueries: (p.sqlQueries || []).map(e => ({ ...e, ownerUserId: handover.toUserId })),
+            sqlResults: (p.sqlResults || []).map(e => ({ ...e, ownerUserId: handover.toUserId })),
+            deadlines: (p.deadlines || []).map(e => ({ ...e, ownerUserId: handover.toUserId })),
+          };
+        }
+        return p;
+      }));
+    } else {
+      // Copy snapshot logic
+      const sourceProject = allProjects.find(p => p.id === handover.projectId);
+      if (sourceProject) {
+        const snapshot = copyProjectSnapshot(sourceProject, handover.toUserId, handover.id);
+        const updatedHandover = { ...handover, status: 'accepted' as const, completedAt: timestamp, acceptedAt: timestamp };
+        snapshot.handoverHistory = [...(snapshot.handoverHistory || []), updatedHandover];
+        
+        setAllProjects(prev => [...prev, snapshot]);
+        
+        // Update original project to restore visibility
+        setAllProjects(prev => prev.map(p => 
+          p.id === handover.projectId ? { ...p, visibility: 'private' } : p
+        ));
+      }
+    }
+
+    setHandovers(prev => prev.map(h => 
+      h.id === handoverId ? { ...h, status: 'accepted', acceptedAt: timestamp, completedAt: timestamp } : h
+    ));
+  };
+
+  const declineHandover = (handoverId: string, reason?: string) => {
+    const timestamp = new Date().toISOString();
+    setHandovers(prev => prev.map(h => 
+      h.id === handoverId ? { ...h, status: 'declined', declinedAt: timestamp, declineReason: reason } : h
+    ));
+    
+    // Restore project visibility
+    const handover = handovers.find(h => h.id === handoverId);
+    if (handover) {
+      setAllProjects(prev => prev.map(p => 
+        p.id === handover.projectId ? { ...p, visibility: 'private' } : p
+      ));
+    }
+  };
+
+  const cancelHandover = (handoverId: string) => {
+    const timestamp = new Date().toISOString();
+    setHandovers(prev => prev.map(h => 
+      h.id === handoverId ? { ...h, status: 'cancelled', cancelledAt: timestamp } : h
+    ));
+    
+    // Restore project visibility
+    const handover = handovers.find(h => h.id === handoverId);
+    if (handover) {
+      setAllProjects(prev => prev.map(p => 
+        p.id === handover.projectId ? { ...p, visibility: 'private' } : p
+      ));
+    }
+  };
+
   const loadDemoData = async () => {
     try {
+      if (!currentUser) return;
       // Dynamic import to keep runtime bundle clean
       const { demoProjectsData } = await import("../demo/demoSeedData");
-      const existingIds = new Set(projects.map(p => p.id));
-      const newDemoData = demoProjectsData.filter(p => !existingIds.has(p.id));
+      const existingIds = new Set(allProjects.map(p => p.id));
+      const newDemoData = demoProjectsData
+        .filter(p => !existingIds.has(p.id))
+        .map(p => ({ 
+          ...p, 
+          ownerUserId: currentUser.id, 
+          createdByUserId: currentUser.id 
+        }));
       
       if (newDemoData.length > 0) {
-        setProjects(prev => [...prev, ...newDemoData]);
+        setAllProjects(prev => [...prev, ...newDemoData]);
       }
     } catch (error) {
       console.error("Failed to load demo data:", error);
@@ -745,7 +1003,7 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
   };
 
   const clearAllData = () => {
-    setProjects([]);
+    setAllProjects([]);
     setActiveProjectId('');
     // Clear all baWorkspace keys
     Object.keys(localStorage).forEach(key => {
@@ -821,7 +1079,14 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
       closeProject,
       reopenProject,
       loadDemoData,
-      clearAllData
+      clearAllData,
+      readIds,
+      setReadIds,
+      handovers,
+      sendHandover,
+      acceptHandover,
+      declineHandover,
+      cancelHandover
     }}>
       {children}
     </ProjectContext.Provider>

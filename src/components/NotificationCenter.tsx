@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { Bell, Check, X, Filter } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from "../context/AuthContext";
 import { useProject } from '../context/ProjectContext';
 import { cn } from '../lib/utils';
 
@@ -19,28 +20,13 @@ export interface NotificationItem {
 
 export function NotificationCenter() {
   const [isOpen, setIsOpen] = useState(false);
-  const [filter, setFilter] = useState<'All' | 'Unread' | 'Deadline' | 'Risk' | 'Question' | 'Data Quality' | 'System'>('All');
-  const [readIds, setReadIds] = useState<Set<string>>(new Set());
-  const { projects } = useProject();
+  const [filter, setFilter] = useState<'All' | 'Unread' | 'Deadline' | 'Risk' | 'Question' | 'Data Quality' | 'System' | 'Handover'>('All');
+  const { readIds, setReadIds, projects, handovers } = useProject();
+  const { currentUser } = useAuth();
   const navigate = useNavigate();
   const popoverRef = useRef<HTMLDivElement>(null);
 
-  // Load read status from localStorage on mount
-  useEffect(() => {
-    const saved = localStorage.getItem('ba_hub_read_notifications');
-    if (saved) {
-      try {
-        setReadIds(new Set(JSON.parse(saved)));
-      } catch (e) {
-        console.error("Failed to parse read notifications", e);
-      }
-    }
-  }, []);
-
-  // Save read status to localStorage when changed
-  useEffect(() => {
-    localStorage.setItem('ba_hub_read_notifications', JSON.stringify(Array.from(readIds)));
-  }, [readIds]);
+  // Notification read status now handled in ProjectContext for user scoping
 
   // Handle click outside and Escape key
   useEffect(() => {
@@ -175,9 +161,46 @@ export function NotificationCenter() {
       });
     });
 
+    // Handover notifications
+    handovers.forEach(h => {
+      if (h.toUserId === currentUser?.id && h.status === 'pending') {
+        items.push({
+          id: `handover-${h.id}`,
+          title: 'Nový project handover',
+          message: `${h.fromUsername} ti chce odovzdať projekt: ${h.projectName}`,
+          type: 'Handover' as any,
+          severity: 'info',
+          createdAt: h.createdAt,
+          targetPath: '/settings?tab=handover'
+        });
+      }
+      if (h.fromUserId === currentUser?.id && h.status === 'accepted') {
+        items.push({
+          id: `handover-acc-${h.id}`,
+          title: 'Handover prijatý',
+          message: `${h.toUsername} prijal projekt: ${h.projectName}`,
+          type: 'Handover' as any,
+          severity: 'success',
+          createdAt: h.completedAt || h.createdAt,
+          targetPath: '/settings?tab=handover'
+        });
+      }
+      if (h.fromUserId === currentUser?.id && h.status === 'declined') {
+        items.push({
+          id: `handover-dec-${h.id}`,
+          title: 'Handover odmietnutý',
+          message: `${h.toUsername} odmietol projekt: ${h.projectName}`,
+          type: 'Handover' as any,
+          severity: 'warning',
+          createdAt: h.declinedAt || h.createdAt,
+          targetPath: '/settings?tab=handover'
+        });
+      }
+    });
+
     // No static examples anymore - only real data
     return items.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-  }, [projects]);
+  }, [projects, handovers, currentUser]);
 
   const unreadCount = notifications.filter(n => !readIds.has(n.id)).length;
 
@@ -270,7 +293,7 @@ export function NotificationCenter() {
 
         {/* Filters */}
         <div className="px-5 py-3 border-b border-slate-100 flex gap-2 overflow-x-auto no-scrollbar shrink-0">
-          {['All', 'Unread', 'Deadline', 'Risk', 'Question', 'Data Quality', 'System'].map(f => (
+          {['All', 'Unread', 'Deadline', 'Risk', 'Question', 'Data Quality', 'System', 'Handover'].map(f => (
             <button
               key={f}
               onClick={() => setFilter(f as any)}

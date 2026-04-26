@@ -37,8 +37,8 @@ interface TopbarProps {
 }
 
 export function Topbar({ onMenuClick }: TopbarProps) {
-  const { activeProject, setActiveProject, projects } = useProject();
-  const { username, logout } = useAuth();
+  const { activeProject, projects } = useProject();
+  const { username, currentUser, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const params = useParams<{ projectId?: string; module?: string }>();
@@ -144,16 +144,40 @@ export function Topbar({ onMenuClick }: TopbarProps) {
         {/* Notifications */}
         <NotificationCenter />
 
-        {/* User - compact on mobile */}
-        <button className="hidden sm:flex items-center gap-2 p-1 hover:bg-slate-50 rounded-xl transition-all border border-transparent hover:border-slate-200 group">
-          <div className="hidden lg:flex flex-col items-end">
-            <span className="text-[10px] font-black text-slate-900 group-hover:text-indigo-600 transition-colors leading-none">{username || 'BA'}</span>
-            <span className="text-[8px] font-black text-slate-400 uppercase tracking-tighter">Lead</span>
+        {/* User - with logout */}
+        <div className="flex items-center gap-2">
+          <div className="hidden sm:flex flex-col items-end mr-1">
+            <span className="text-[10px] font-black text-slate-900 leading-none">{currentUser?.displayName || username || 'BA'}</span>
+            <span className="text-[8px] font-black text-slate-400 uppercase tracking-tighter">{currentUser?.role || 'Lead'}</span>
           </div>
-          <div className="w-8 h-8 md:w-9 md:h-9 bg-gradient-to-tr from-slate-800 to-slate-900 rounded-xl flex items-center justify-center text-white font-black text-[10px] shadow-lg">
-            {username ? username.charAt(0).toUpperCase() : 'BA'}
+          <div className="relative group">
+            <button className="flex items-center gap-2 p-1 hover:bg-slate-50 rounded-xl transition-all border border-transparent hover:border-slate-200">
+              <div className="w-8 h-8 md:w-9 md:h-9 bg-gradient-to-tr from-slate-800 to-slate-900 rounded-xl flex items-center justify-center text-white font-black text-[10px] shadow-lg">
+                {currentUser?.avatarInitials || (username ? username.charAt(0).toUpperCase() : 'BA')}
+              </div>
+            </button>
+            
+            {/* User Dropdown */}
+            <div className="absolute top-full right-0 mt-2 w-48 bg-white border border-slate-200 rounded-2xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all py-2 z-50">
+              <div className="px-4 py-2 border-b border-slate-50 mb-1">
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Prihlásený ako</p>
+                <p className="text-xs font-black text-slate-900 truncate">@{username}</p>
+              </div>
+              <button 
+                onClick={() => navigate('/settings')}
+                className="w-full px-4 py-2 text-left text-xs font-bold text-slate-600 hover:bg-slate-50 transition-colors"
+              >
+                Nastavenia profilu
+              </button>
+              <button 
+                onClick={handleLogout}
+                className="w-full px-4 py-2 text-left text-xs font-black text-rose-500 hover:bg-rose-50 transition-colors flex items-center gap-2"
+              >
+                <LogOut className="w-3.5 h-3.5" /> Odhlásiť sa
+              </button>
+            </div>
           </div>
-        </button>
+        </div>
       </div>
     </header>
   );

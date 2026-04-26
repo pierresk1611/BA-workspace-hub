@@ -3,7 +3,7 @@ import { Smartphone, CheckCircle2, Download, Info, Building2 } from 'lucide-reac
 import { useSettings } from '../../context/SettingsContext';
 
 export function WorkspaceTab() {
-  const { settings, updateSettings } = useSettings();
+  const { workspaceSettings: settings, updateWorkspaceSettings: updateSettings } = useSettings();
 
   return (
     <div className="space-y-6 md:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">

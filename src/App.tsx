@@ -3,6 +3,7 @@ import { useEffect } from 'react';
 import { Sidebar } from './components/Sidebar';
 import { Topbar } from './components/Topbar';
 import { LoginPage } from './components/LoginPage';
+import { AcceptInvitePage } from './components/AcceptInvitePage';
 import { AllProjectsDashboard } from './components/AllProjectsDashboard';
 import { Dashboard } from './components/Dashboard';
 import { ProjectsView } from './components/ProjectsView';
@@ -89,6 +90,7 @@ function AppRoutes() {
     <Routes>
       {/* Public */}
       <Route path="/login" element={<LoginPageWrapper />} />
+      <Route path="/accept-invite" element={<AcceptInvitePage />} />
 
       {/* Protected shell */}
       <Route element={<ProtectedRoute />}>

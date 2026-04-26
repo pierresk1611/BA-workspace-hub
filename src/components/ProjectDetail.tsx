@@ -8,7 +8,9 @@ import type { Project } from '../types';
 import { useProject } from '../context/ProjectContext';
 import { CloseProjectModal } from './CloseProjectModal';
 import { DeleteProjectModal } from './DeleteProjectModal';
+import { HandoverModal } from './HandoverModal';
 import { cn } from '../lib/utils';
+import { ArrowRightLeft } from 'lucide-react';
 import { calculateProjectHealth } from '../lib/projectUtils';
 
 interface ProjectDetailProps {
@@ -21,6 +23,7 @@ export function ProjectDetail({ project, onBack, onEdit }: ProjectDetailProps) {
   const { closeProject, reopenProject, deleteProject } = useProject();
   const [isCloseModalOpen, setIsCloseModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isHandoverModalOpen, setIsHandoverModalOpen] = useState(false);
   const [showActionMenu, setShowActionMenu] = useState(false);
 
   const healthResult = calculateProjectHealth(project);
@@ -135,6 +138,14 @@ export function ProjectDetail({ project, onBack, onEdit }: ProjectDetailProps) {
                       className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-bold text-amber-600 hover:bg-amber-50 transition-colors"
                     >
                       <Archive className="w-4 h-4" /> Ukončiť projekt
+                    </button>
+                  )}
+                  {!isClosed && (
+                    <button 
+                      onClick={() => { setIsHandoverModalOpen(true); setShowActionMenu(false); }}
+                      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-bold text-indigo-600 hover:bg-indigo-50 transition-colors"
+                    >
+                      <ArrowRightLeft className="w-4 h-4" /> Odovzdať projekt
                     </button>
                   )}
                   <button 
@@ -413,6 +424,12 @@ export function ProjectDetail({ project, onBack, onEdit }: ProjectDetailProps) {
         onClose={() => setIsDeleteModalOpen(false)}
         onConfirm={handleDeleteProject}
         projectName={project.name}
+      />
+
+      <HandoverModal 
+        isOpen={isHandoverModalOpen}
+        onClose={() => setIsHandoverModalOpen(false)}
+        project={project}
       />
     </div>
   );
