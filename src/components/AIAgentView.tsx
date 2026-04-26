@@ -162,8 +162,8 @@ export function AIAgentView() {
       res.shortAnswer = "Pripravil som drafty Jira taskov na základe tvojich požiadaviek.";
       res.details = "Tasky zahŕňajú technické špecifikácie na základe vybraných modulov.";
       res.suggestedEntities = [
-        { type: "Jira task", title: "ARCH-01: System Integration", content: "Story: Ako systémový architekt..." },
-        { type: "Jira task", title: "DEV-02: Backend Service", content: "Task: Implementácia API rozhrania..." }
+        { type: "Jira task", title: "PROJ-101: Integration Layer", content: "Story: Ako systémový architekt..." },
+        { type: "Jira task", title: "PROJ-102: Backend Service", content: "Task: Implementácia API rozhrania..." }
       ];
     } else if (q.includes('sql') || mode === 'SQL') {
       res.shortAnswer = "Navrhnutý SQL dotaz pre analýzu dát.";

@@ -71,7 +71,9 @@ interface ProjectContextType {
 }
 
 const STORAGE_KEY = "baWorkspace.projects";
+const CLEAN_POLICY_VERSION = "2"; // Increment this to force-clean legacy demo data
 const CLEAN_MODE_KEY = "baWorkspace.cleanMode";
+const CLEAN_VERSION_KEY = "baWorkspace.cleanPolicyVersion";
 
 const ProjectContext = createContext<ProjectContextType | undefined>(undefined);
 
@@ -79,14 +81,30 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
   const [projects, setProjects] = useState<Project[]>(() => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
-      const cleanMode = localStorage.getItem(CLEAN_MODE_KEY);
+      const currentPolicyVersion = localStorage.getItem(CLEAN_VERSION_KEY);
       
-      if (stored) return JSON.parse(stored);
-      
-      // If no projects and no cleanMode flag, it's a first run or clear run
-      if (!cleanMode) {
-        localStorage.setItem(CLEAN_MODE_KEY, "true");
+      if (stored) {
+        let parsed = JSON.parse(stored);
+        
+        // If policy version is missing or old, force a cleanup of legacy demo projects
+        if (currentPolicyVersion !== CLEAN_POLICY_VERSION) {
+          const demoIds = ["driver-app", "label-redesign", "dropshipment-matrix"];
+          const filtered = parsed.filter((p: any) => !demoIds.includes(p.id));
+          
+          // Only update if we actually removed something
+          if (filtered.length !== parsed.length) {
+            parsed = filtered;
+          }
+          
+          localStorage.setItem(CLEAN_VERSION_KEY, CLEAN_POLICY_VERSION);
+          localStorage.setItem(CLEAN_MODE_KEY, "true");
+        }
+        return parsed;
       }
+      
+      // First run: set policy and mode
+      localStorage.setItem(CLEAN_VERSION_KEY, CLEAN_POLICY_VERSION);
+      localStorage.setItem(CLEAN_MODE_KEY, "true");
       return [];
     } catch (e) {
       return [];
@@ -732,6 +750,7 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
       }
     });
     localStorage.setItem(CLEAN_MODE_KEY, "true");
+    localStorage.setItem(CLEAN_VERSION_KEY, CLEAN_POLICY_VERSION);
   };
 
   return (

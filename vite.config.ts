@@ -63,7 +63,8 @@ export default defineConfig(({ mode }) => {
         manifest: {
           name: 'BA Workspace – Project Intelligence Hub',
           short_name: 'BA Workspace',
-          description: 'Project intelligence workspace for Business Analysts',
+          version: '2.1.0',
+          description: 'Project intelligence workspace for Business Analysts (Clean Workspace Edition)',
           theme_color: '#0f172a',
           background_color: '#ffffff',
           display: 'standalone',
@@ -92,12 +93,13 @@ export default defineConfig(({ mode }) => {
         workbox: {
           globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
           navigateFallback: 'index.html',
+          cleanupOutdatedCaches: true,
           runtimeCaching: [
             {
               urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
               handler: 'CacheFirst',
               options: {
-                cacheName: 'google-fonts-cache',
+                cacheName: `google-fonts-cache-v2.1.0`,
                 expiration: {
                   maxEntries: 10,
                   maxAgeSeconds: 60 * 60 * 24 * 365 // <== 365 days
@@ -111,7 +113,7 @@ export default defineConfig(({ mode }) => {
               urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
               handler: 'CacheFirst',
               options: {
-                cacheName: 'gstatic-fonts-cache',
+                cacheName: `gstatic-fonts-cache-v2.1.0`,
                 expiration: {
                   maxEntries: 10,
                   maxAgeSeconds: 60 * 60 * 24 * 365 // <== 365 days
