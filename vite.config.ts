@@ -2,7 +2,6 @@ import { defineConfig, loadEnv } from 'vite';
 import type { ViteDevServer } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
-import type { IncomingMessage, ServerResponse } from 'http';
 import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig(({ mode }) => {
@@ -13,7 +12,7 @@ export default defineConfig(({ mode }) => {
   const mockAuthPlugin = () => ({
     name: 'mock-auth-plugin',
     configureServer(server: ViteDevServer) {
-      server.middlewares.use('/api/login', (req: IncomingMessage, res: ServerResponse, next: () => void) => {
+      server.middlewares.use('/api/login', (req: any, res: any, next: () => void) => {
         if (req.method === 'POST') {
           let body = '';
           req.on('data', (chunk: Buffer) => {
