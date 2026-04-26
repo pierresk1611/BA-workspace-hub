@@ -63,7 +63,7 @@ export default defineConfig(({ mode }) => {
         manifest: {
           name: 'BA Workspace – Project Intelligence Hub',
           short_name: 'BA Workspace',
-          version: '2.1.0',
+
           description: 'Project intelligence workspace for Business Analysts (Clean Workspace Edition)',
           theme_color: '#0f172a',
           background_color: '#ffffff',
