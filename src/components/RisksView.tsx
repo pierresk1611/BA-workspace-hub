@@ -122,10 +122,9 @@ export function RisksView() {
                         className="w-full pl-12 pr-4 py-2.5 md:py-3 bg-white border border-slate-200 rounded-xl md:rounded-2xl text-xs md:text-sm font-bold outline-none focus:ring-2 focus:ring-rose-500 transition-all shadow-sm"
                       />
                     </div>
-                  </div>
-
-                  <div className="overflow-x-auto custom-scrollbar">
-                    <table className="w-full text-left border-collapse min-w-[600px] lg:min-w-0">
+                                    <div className="overflow-x-auto custom-scrollbar">
+                    {/* Desktop Table View */}
+                    <table className="hidden md:table w-full text-left border-collapse min-w-[600px] lg:min-w-0">
                       <thead>
                         <tr className="bg-slate-50/30 border-b border-slate-100">
                           <th className="px-6 py-4 text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest">Riziko</th>
@@ -165,7 +164,7 @@ export function RisksView() {
                                   <div className="flex items-center gap-2 text-[8px] md:text-[10px] font-black text-rose-500 uppercase">
                                     <Clock className="w-3 md:w-3.5 h-3 md:h-3.5" /> {r.mitigationDeadline}
                                   </div>
-                               </div>
+                                </div>
                             </td>
                             <td className="px-6 py-5 text-right">
                               <ChevronRight className={cn("w-5 h-5 transition-all", activeRiskId === r.id ? "text-rose-600 translate-x-1" : "text-slate-300")} />
@@ -174,7 +173,31 @@ export function RisksView() {
                         ))}
                       </tbody>
                     </table>
-                  </div>
+
+                    {/* Mobile Card List View */}
+                    <div className="md:hidden divide-y divide-slate-100">
+                      {filteredRisks.map(r => (
+                        <div 
+                          key={r.id} 
+                          onClick={() => setActiveRiskId(r.id)}
+                          className={cn(
+                            "p-4 flex items-center justify-between gap-4 active:bg-rose-50 transition-colors",
+                            activeRiskId === r.id ? "bg-rose-50/50" : ""
+                          )}
+                        >
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="text-[8px] font-black text-slate-300 uppercase">{r.id}</span>
+                              <PriorityBadge priority={r.severity} />
+                            </div>
+                            <h4 className="text-xs font-black text-slate-900 truncate">{r.title}</h4>
+                            <p className="text-[9px] text-slate-400 font-bold mt-0.5 truncate">{r.owner} • {r.status}</p>
+                          </div>
+                          <ChevronRight className="w-4 h-4 text-slate-300 shrink-0" />
+                        </div>
+                      ))}
+                    </div>
+                  </div>  </div>
                 </div>
               ) : (
                 <EmptyState 

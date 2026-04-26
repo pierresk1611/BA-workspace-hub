@@ -245,8 +245,8 @@ export function NotificationCenter() {
 
       {/* Popover / Drawer Container */}
       <div className={cn(
-        "fixed inset-0 z-[60] lg:absolute lg:inset-auto lg:top-full lg:right-0 lg:mt-2 lg:w-[400px] lg:max-h-[85vh] bg-white lg:rounded-2xl shadow-2xl border-l lg:border border-slate-200 overflow-hidden flex flex-col transition-all duration-500",
-        isOpen ? "translate-x-0 opacity-100" : "translate-x-full lg:translate-x-0 lg:opacity-0 lg:pointer-events-none"
+        "fixed inset-y-0 right-0 z-[100] w-full max-w-[400px] lg:absolute lg:inset-auto lg:top-full lg:right-0 lg:mt-2 lg:w-[400px] lg:max-h-[85vh] bg-white shadow-2xl lg:rounded-2xl lg:border border-slate-200 overflow-hidden flex flex-col transition-transform duration-300 ease-out",
+        isOpen ? "translate-x-0" : "translate-x-full lg:hidden"
       )}>
         
         {/* Header */}
@@ -338,7 +338,7 @@ export function NotificationCenter() {
       {isOpen && (
         <div 
           onClick={() => setIsOpen(false)}
-          className="lg:hidden fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 animate-in fade-in duration-300"
+          className="lg:hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[90] animate-in fade-in duration-300"
         />
       )}
     </div>

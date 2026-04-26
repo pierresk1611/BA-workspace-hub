@@ -130,7 +130,7 @@ export function Topbar({ onMenuClick }: TopbarProps) {
 
         {/* Project Context - compact on mobile */}
         {displayedProject && (
-          <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl">
+          <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl">
              <div className={cn(
                "w-2 h-2 rounded-full",
                calculateProjectHealth(displayedProject).score > 80 ? 'bg-emerald-500' : 'bg-amber-500'
@@ -145,8 +145,8 @@ export function Topbar({ onMenuClick }: TopbarProps) {
         <NotificationCenter />
 
         {/* User - compact on mobile */}
-        <button className="flex items-center gap-2 p-1 hover:bg-slate-50 rounded-xl transition-all border border-transparent hover:border-slate-200 group">
-          <div className="hidden sm:flex flex-col items-end">
+        <button className="hidden sm:flex items-center gap-2 p-1 hover:bg-slate-50 rounded-xl transition-all border border-transparent hover:border-slate-200 group">
+          <div className="hidden lg:flex flex-col items-end">
             <span className="text-[10px] font-black text-slate-900 group-hover:text-indigo-600 transition-colors leading-none">{username || 'BA'}</span>
             <span className="text-[8px] font-black text-slate-400 uppercase tracking-tighter">Lead</span>
           </div>

@@ -28,15 +28,28 @@
 }
 
 @layer base {
+  html, body, #root {
+    @apply h-full w-full overflow-x-hidden;
+  }
   * {
     @apply border-slate-200;
   }
   body {
     @apply bg-slate-50 text-slate-900 font-sans antialiased;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    -webkit-tap-highlight-color: transparent;
   }
   h1, h2, h3, h4, h5, h6 {
     @apply font-display tracking-tight;
+  }
+}
+
+@layer utilities {
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .pt-safe {
+    padding-top: env(safe-area-inset-top);
   }
 }
 

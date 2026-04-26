@@ -8,6 +8,7 @@ import {
   Sparkles, History, Kanban, Settings, Trash2
 } from 'lucide-react';
 import { useProject } from '../context/ProjectContext';
+import { cn } from '../lib/utils';
 
 type AgentMode = 
   | 'Project Summary' | 'Requirements' | 'Decision' | 'Open Questions' 
@@ -43,6 +44,7 @@ export function AIAgentView() {
   const [inputText, setInputText] = useState('');
   const [activeMode, setActiveMode] = useState<AgentMode>('Project Summary');
   const [isTyping, setIsTyping] = useState(false);
+  const [showSidebar, setShowSidebar] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -187,15 +189,21 @@ export function AIAgentView() {
       
       {/* Header */}
       <div className="bg-white border-b border-slate-200 px-8 py-4 flex items-center justify-between shadow-sm z-10">
-        <div className="flex items-center gap-4">
-          <div className="p-2.5 bg-indigo-600 rounded-2xl text-white shadow-indigo-100 shadow-xl animate-pulse-slow">
-            <Bot className="w-6 h-6" />
+        <div className="flex items-center gap-3 md:gap-4">
+          <button 
+            onClick={() => setShowSidebar(!showSidebar)}
+            className="lg:hidden p-2 text-slate-400 hover:text-indigo-600"
+          >
+            <List className="w-6 h-6" />
+          </button>
+          <div className="p-2 md:p-2.5 bg-indigo-600 rounded-2xl text-white shadow-indigo-100 shadow-xl animate-pulse-slow">
+            <Bot className="w-5 h-5 md:w-6 md:h-6" />
           </div>
-          <div>
-            <h1 className="text-xl font-black text-slate-900 tracking-tight">BA Project Intelligence Agent</h1>
+          <div className="min-w-0">
+            <h1 className="text-sm md:text-xl font-black text-slate-900 tracking-tight truncate">BA Agent</h1>
             <div className="flex items-center gap-2 mt-0.5">
-              <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
-              <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Active & Working on Local Data</p>
+              <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span>
+              <p className="text-[8px] md:text-[10px] text-slate-400 font-black uppercase tracking-widest truncate">Local Mode</p>
             </div>
           </div>
         </div>
@@ -213,7 +221,16 @@ export function AIAgentView() {
       <div className="flex-1 flex overflow-hidden">
         
         {/* Sidebar: Modes & Tools */}
-        <div className="w-72 bg-white border-r border-slate-200 flex flex-col p-6 space-y-6 overflow-y-auto custom-scrollbar shadow-inner">
+        <div className={cn(
+          "fixed inset-y-0 left-0 z-50 w-72 bg-white border-r border-slate-200 flex flex-col p-6 space-y-6 overflow-y-auto custom-scrollbar shadow-inner transition-transform duration-300 lg:relative lg:inset-auto lg:translate-x-0",
+          showSidebar ? "translate-x-0" : "-translate-x-full"
+        )}>
+           <div className="flex items-center justify-between lg:hidden mb-4">
+              <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Agent Tools</h3>
+              <button onClick={() => setShowSidebar(false)} className="p-2 text-slate-400">
+                <ArrowRight className="w-5 h-5 rotate-180" />
+              </button>
+           </div>
            <div>
              <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Agent Modes</h3>
              <div className="space-y-1">
@@ -228,7 +245,7 @@ export function AIAgentView() {
                ].map((m: any) => (
                  <button 
                    key={m.mode}
-                   onClick={() => setActiveMode(m.mode)}
+                   onClick={() => { setActiveMode(m.mode); if(window.innerWidth < 1024) setShowSidebar(false); }}
                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-bold transition-all ${activeMode === m.mode ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100 translate-x-1' : 'text-slate-600 hover:bg-slate-50'}`}
                  >
                    <m.icon className={`w-4 h-4 ${activeMode === m.mode ? 'text-white' : 'text-slate-400'}`} />
@@ -244,7 +261,7 @@ export function AIAgentView() {
                {suggestedActions.map(action => (
                  <button 
                     key={action}
-                    onClick={() => handleAction(action)}
+                    onClick={() => { handleAction(action); if(window.innerWidth < 1024) setShowSidebar(false); }}
                     className="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-[10px] font-bold text-slate-600 hover:bg-white hover:border-indigo-300 transition-all hover:shadow-sm"
                  >
                    {action}
@@ -253,6 +270,14 @@ export function AIAgentView() {
              </div>
            </div>
         </div>
+
+        {/* Backdrop for mobile */}
+        {showSidebar && (
+          <div 
+            onClick={() => setShowSidebar(false)}
+            className="lg:hidden fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-40 animate-in fade-in duration-300"
+          />
+        )}
 
         {/* Main Chat Area */}
         <div className="flex-1 flex flex-col bg-slate-50 relative">

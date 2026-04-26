@@ -231,7 +231,8 @@ export function AllProjectsDashboard() {
       </div>
 
       {/* Hero Summary Row */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 md:gap-6">
+      {/* KPI Stats Grid */}
+      <div className="grid grid-cols-2 lg:grid-cols-6 gap-4 md:gap-6">
         {[
           { label: 'Projekty', val: projects.length, icon: FolderOpen, color: 'text-indigo-600', bg: 'bg-indigo-50', border: 'border-indigo-100' },
           { label: 'Aktívne', val: activeProjects.length, icon: TrendingUp, color: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-100' },
@@ -253,16 +254,16 @@ export function AllProjectsDashboard() {
       </div>
 
       {/* Portfolio Overview Charts Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 md:gap-8">
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 md:gap-8">
         
         {/* Status Distribution */}
-        <div className="bg-white p-8 rounded-[2.5rem] border border-slate-200 shadow-sm space-y-6">
+        <div className="bg-white p-6 md:p-8 rounded-[2.5rem] border border-slate-200 shadow-sm space-y-6">
           <div className="flex items-center justify-between">
-            <h3 className="text-xs font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2">
+            <h3 className="text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2">
               <PieChartIcon className="w-4 h-4 text-indigo-600" /> Projekty podľa statusu
             </h3>
           </div>
-          <div className="h-[300px] w-full">
+          <div className="h-[250px] md:h-[300px] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
@@ -270,10 +271,10 @@ export function AllProjectsDashboard() {
                   cx="50%"
                   cy="50%"
                   innerRadius={60}
-                  outerRadius={100}
+                  outerRadius={window.innerWidth < 768 ? 80 : 100}
                   paddingAngle={5}
                   dataKey="value"
-                  label={({ name, percent }) => `${name} ${((percent || 0) * 100).toFixed(0)}%`}
+                  label={window.innerWidth < 768 ? false : ({ name, percent }) => `${name} ${((percent || 0) * 100).toFixed(0)}%`}
                 >
                   {statusData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={STATUS_COLORS[entry.name] || '#cbd5e1'} />
@@ -283,6 +284,7 @@ export function AllProjectsDashboard() {
                   contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '16px', color: '#fff', fontSize: '12px' }}
                   itemStyle={{ fontWeight: 'bold' }}
                 />
+                {window.innerWidth < 768 && <Legend iconType="circle" wrapperStyle={{ fontSize: '10px', paddingTop: '20px' }} />}
               </PieChart>
             </ResponsiveContainer>
           </div>

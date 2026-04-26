@@ -179,7 +179,8 @@ export function RequirementsView() {
             </div>
 
             <div className="overflow-x-auto no-scrollbar">
-              <table className="w-full text-left border-collapse min-w-[600px]">
+              {/* Desktop Table View */}
+              <table className="hidden md:table w-full text-left border-collapse min-w-[600px]">
                 <thead>
                   <tr className="bg-slate-50/30 border-b border-slate-100">
                     <th className="px-5 py-3 md:py-4 text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest w-16">ID</th>
@@ -220,6 +221,32 @@ export function RequirementsView() {
                   ))}
                 </tbody>
               </table>
+
+              {/* Mobile Card List View */}
+              <div className="md:hidden divide-y divide-slate-100">
+                {filteredReqs.map(r => (
+                  <div 
+                    key={r.id} 
+                    onClick={() => setActiveReqId(r.id)}
+                    className={cn(
+                      "p-4 flex items-center justify-between gap-4 active:bg-blue-50 transition-colors",
+                      activeReqId === r.id ? "bg-blue-50/50" : ""
+                    )}
+                  >
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-[8px] font-black text-slate-300 uppercase">{r.id}</span>
+                        <span className={cn("px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-tight", getStatusColor(r.status))}>
+                          {r.status}
+                        </span>
+                      </div>
+                      <h4 className="text-xs font-black text-slate-900 truncate">{r.title}</h4>
+                      <p className="text-[9px] text-slate-400 font-bold mt-0.5">{r.type} • {r.owner}</p>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-slate-300 shrink-0" />
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>

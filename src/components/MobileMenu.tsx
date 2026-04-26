@@ -47,7 +47,10 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
       />
       
       {/* Drawer */}
-      <div className="relative w-[85%] max-w-[320px] bg-slate-900 shadow-2xl flex flex-col h-full animate-in slide-in-from-left duration-300">
+      <div className={cn(
+        "relative w-[85%] max-w-[320px] bg-slate-900 shadow-2xl flex flex-col h-full transition-transform duration-300 ease-out transform",
+        isOpen ? "translate-x-0" : "-translate-x-full"
+      )}>
         
         {/* Header */}
         <div className="p-5 border-b border-slate-800 flex items-center justify-between shrink-0">
@@ -70,45 +73,46 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
         </div>
 
         {/* Project Context / Switcher */}
-        <div className="p-5 border-b border-slate-800 bg-slate-800/30 shrink-0 space-y-4">
+        <div className="p-5 border-b border-slate-800 bg-slate-800/20 shrink-0 space-y-3">
            <p className="text-[9px] font-black text-slate-600 uppercase tracking-widest px-1">Aktívny Projekt</p>
            {activeProject && currentProjectId ? (
              <div className="space-y-3">
-               <Link 
-                 to={`/projects/${activeProject.id}`} 
-                 onClick={onClose}
-                 className="w-full bg-slate-800 p-3 rounded-2xl border border-slate-700 flex items-center gap-3 group transition-colors"
-               >
-                 <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-lg flex items-center justify-center text-white font-black text-xs shrink-0">
-                   {activeProject.name.charAt(0)}
-                 </div>
-                 <div className="flex-1 min-w-0">
-                   <h4 className="text-xs font-black text-white truncate">{activeProject.name}</h4>
-                   <p className="text-[9px] text-slate-500 font-bold">{activeProject.status}</p>
-                 </div>
-               </Link>
-               <select 
-                  value={currentProjectId}
-                  onChange={e => { 
-                    const selectedId = e.target.value;
-                    setActiveProject(selectedId); 
-                    navigate(`/projects/${selectedId}`); 
-                    onClose();
-                  }}
-                  className="w-full h-11 px-4 bg-slate-800 border border-slate-700 rounded-xl text-xs font-black text-slate-300 outline-none appearance-none cursor-pointer"
-                >
-                  <optgroup label="AKTÍVNE PROJEKTY">
-                    {projects.filter(p => !p.isClosed).map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-                  </optgroup>
-                  <optgroup label="UKONČENÉ PROJEKTY">
-                    {projects.filter(p => p.isClosed).map(p => <option key={p.id} value={p.id}>{p.name} (Ukončené)</option>)}
-                  </optgroup>
-                </select>
+                <div className="w-full bg-slate-800/50 p-3 rounded-2xl border border-slate-700/50 flex items-center gap-3">
+                  <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-lg flex items-center justify-center text-white font-black text-xs shrink-0 shadow-lg">
+                    {activeProject.name.charAt(0)}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h4 className="text-[11px] font-black text-white truncate">{activeProject.name}</h4>
+                    <p className="text-[8px] text-slate-500 font-bold uppercase tracking-tight">{activeProject.status}</p>
+                  </div>
+                </div>
+                <div className="relative">
+                  <select 
+                    value={currentProjectId}
+                    onChange={e => { 
+                      const selectedId = e.target.value;
+                      setActiveProject(selectedId); 
+                      navigate(`/projects/${selectedId}`); 
+                      onClose();
+                    }}
+                    className="w-full h-10 px-4 bg-slate-800 border border-slate-700 rounded-xl text-[10px] font-black text-slate-300 outline-none appearance-none cursor-pointer pr-10 focus:border-indigo-500 transition-colors"
+                  >
+                    <optgroup label="AKTÍVNE PROJEKTY">
+                      {projects.filter(p => !p.isClosed).map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                    </optgroup>
+                    <optgroup label="UKONČENÉ PROJEKTY">
+                      {projects.filter(p => p.isClosed).map(p => <option key={p.id} value={p.id}>{p.name} (Ukončené)</option>)}
+                    </optgroup>
+                  </select>
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500">
+                    <ChevronRight className="w-3.5 h-3.5 rotate-90" />
+                  </div>
+                </div>
              </div>
            ) : (
              <button 
                onClick={() => { navigate('/projects'); onClose(); }}
-               className="w-full py-4 bg-slate-800 border border-slate-700 border-dashed rounded-2xl text-xs font-black text-slate-500 hover:text-slate-300 transition-colors"
+               className="w-full py-3.5 bg-slate-800/50 border border-slate-700 border-dashed rounded-2xl text-[10px] font-black text-slate-500 hover:text-slate-300 transition-colors flex items-center justify-center gap-2"
              >
                + Vybrať Projekt
              </button>

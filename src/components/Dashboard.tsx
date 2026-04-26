@@ -172,16 +172,63 @@ export function Dashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-10">
         
         {/* Progress & Name Card */}
-        <div className="lg:col-span-2 bg-white rounded-[2.5rem] md:rounded-[3.5rem] p-8 md:p-12 shadow-2xl shadow-indigo-100/50 border border-indigo-50 relative overflow-hidden group">
+        <div className="lg:col-span-2 bg-white rounded-[2.5rem] md:rounded-[3.5rem] p-6 md:p-12 shadow-2xl shadow-indigo-100/50 border border-indigo-50 relative overflow-hidden group">
           <div className="absolute -top-24 -right-24 w-80 h-80 bg-indigo-50/50 rounded-full group-hover:scale-110 transition-transform duration-1000 blur-3xl"></div>
-          <div className="relative z-10 flex flex-col md:flex-row items-center gap-10 md:gap-16">
+          <div className="relative z-10 flex flex-col md:flex-row items-center gap-8 md:gap-16">
             
-            {/* Progress Gauge */}
-            <div className="relative w-48 h-48 md:w-64 md:h-64 flex items-center justify-center shrink-0">
+            {/* Project Info - FIRST on mobile */}
+            <div className="flex-1 space-y-6 md:space-y-8 text-center md:text-left w-full order-1 md:order-2">
+               <div className="space-y-3">
+                  <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 md:gap-3">
+                    <span className="px-3 py-1 bg-slate-900 text-white rounded-full text-[9px] md:text-[10px] font-black uppercase tracking-widest shadow-lg">
+                      {activeProject.status}
+                    </span>
+                    <span className={cn(
+                      "px-3 py-1 rounded-full text-[9px] md:text-[10px] font-black uppercase tracking-widest border",
+                      SEVERITY_COLORS[activeProject.priority] ? "bg-white" : "bg-slate-100"
+                    )} style={{ color: SEVERITY_COLORS[activeProject.priority], borderColor: SEVERITY_COLORS[activeProject.priority] + '33' }}>
+                      {activeProject.priority}
+                    </span>
+                  </div>
+                  <h1 className="text-2xl md:text-5xl font-black text-slate-900 tracking-tight leading-tight">
+                    {activeProject.name}
+                  </h1>
+                  <p className="text-slate-500 font-medium text-xs md:text-lg italic line-clamp-2">
+                    "{activeProject.shortDescription}"
+                  </p>
+               </div>
+
+               <div className="grid grid-cols-2 gap-3 md:gap-6">
+                  <div className="p-4 md:p-5 bg-slate-50 rounded-[1.5rem] border border-slate-100 group/item hover:bg-white hover:shadow-xl transition-all">
+                     <div className="flex items-center gap-2 md:gap-3 mb-1 md:mb-2">
+                        <div className="p-1.5 bg-emerald-100 text-emerald-600 rounded-lg">
+                           <ShieldCheck className="w-3.5 h-3.5" />
+                        </div>
+                        <span className="text-[8px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest">Health</span>
+                     </div>
+                     <span className={cn(
+                       "text-lg md:text-2xl font-black",
+                       health.score > 75 ? "text-emerald-600" : "text-amber-600"
+                     )}>{health.score}%</span>
+                  </div>
+                  <div className="p-4 md:p-5 bg-slate-50 rounded-[1.5rem] border border-slate-100 group/item hover:bg-white hover:shadow-xl transition-all">
+                     <div className="flex items-center gap-2 md:gap-3 mb-1 md:mb-2">
+                        <div className="p-1.5 bg-indigo-100 text-indigo-600 rounded-lg">
+                           <Clock className="w-3.5 h-3.5" />
+                        </div>
+                        <span className="text-[8px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest">Target</span>
+                     </div>
+                     <span className="text-lg md:text-2xl font-black text-slate-900 truncate">{activeProject.targetDate || '---'}</span>
+                  </div>
+               </div>
+            </div>
+
+            {/* Progress Gauge - SECOND on mobile */}
+            <div className="relative w-40 h-40 md:w-64 md:h-64 flex items-center justify-center shrink-0 order-2 md:order-1">
                <svg className="w-full h-full transform -rotate-90">
-                  <circle cx="50%" cy="50%" r="42%" stroke="currentColor" strokeWidth="12" fill="transparent" className="text-slate-100" />
+                  <circle cx="50%" cy="50%" r="42%" stroke="currentColor" strokeWidth="10" fill="transparent" className="text-slate-100" />
                   <circle 
-                    cx="50%" cy="50%" r="42%" stroke="currentColor" strokeWidth="12" fill="transparent" 
+                    cx="50%" cy="50%" r="42%" stroke="currentColor" strokeWidth="10" fill="transparent" 
                     strokeDasharray="264%"
                     strokeDashoffset={`${264 * (1 - stats.progress / 100)}%`}
                     className="text-indigo-600 transition-all duration-1000 ease-out" 
@@ -189,81 +236,34 @@ export function Dashboard() {
                   />
                </svg>
                <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <span className="text-4xl md:text-6xl font-black text-slate-900 tracking-tighter">{stats.progress}%</span>
-                  <span className="text-[10px] md:text-xs font-black text-indigo-500 uppercase tracking-[0.3em] mt-1">Completion</span>
-               </div>
-            </div>
-
-            {/* Project Info */}
-            <div className="flex-1 space-y-6 md:space-y-8 text-center md:text-left w-full">
-               <div className="space-y-3">
-                  <div className="flex flex-wrap items-center justify-center md:justify-start gap-3">
-                    <span className="px-4 py-1.5 bg-slate-900 text-white rounded-full text-[10px] font-black uppercase tracking-widest shadow-lg">
-                      {activeProject.status}
-                    </span>
-                    <span className={cn(
-                      "px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border",
-                      SEVERITY_COLORS[activeProject.priority] ? "bg-white" : "bg-slate-100"
-                    )} style={{ color: SEVERITY_COLORS[activeProject.priority], borderColor: SEVERITY_COLORS[activeProject.priority] + '33' }}>
-                      Priority: {activeProject.priority}
-                    </span>
-                  </div>
-                  <h1 className="text-3xl md:text-5xl font-black text-slate-900 tracking-tight leading-tight">
-                    {activeProject.name}
-                  </h1>
-                  <p className="text-slate-500 font-medium text-sm md:text-lg italic line-clamp-2">
-                    "{activeProject.shortDescription}"
-                  </p>
-               </div>
-
-               <div className="grid grid-cols-2 gap-4 md:gap-6">
-                  <div className="p-5 bg-slate-50 rounded-[1.5rem] border border-slate-100 group/item hover:bg-white hover:shadow-xl transition-all">
-                     <div className="flex items-center gap-3 mb-2">
-                        <div className="p-2 bg-emerald-100 text-emerald-600 rounded-lg">
-                           <ShieldCheck className="w-4 h-4" />
-                        </div>
-                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Health</span>
-                     </div>
-                     <span className={cn(
-                       "text-xl md:text-2xl font-black",
-                       health.score > 75 ? "text-emerald-600" : "text-amber-600"
-                     )}>{health.score}% Stable</span>
-                  </div>
-                  <div className="p-5 bg-slate-50 rounded-[1.5rem] border border-slate-100 group/item hover:bg-white hover:shadow-xl transition-all">
-                     <div className="flex items-center gap-3 mb-2">
-                        <div className="p-2 bg-indigo-100 text-indigo-600 rounded-lg">
-                           <Clock className="w-4 h-4" />
-                        </div>
-                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Target</span>
-                     </div>
-                     <span className="text-xl md:text-2xl font-black text-slate-900">{activeProject.targetDate || '---'}</span>
-                  </div>
+                  <span className="text-3xl md:text-6xl font-black text-slate-900 tracking-tighter">{stats.progress}%</span>
+                  <span className="text-[8px] md:text-xs font-black text-indigo-500 uppercase tracking-[0.3em] mt-1">Completion</span>
                </div>
             </div>
           </div>
         </div>
 
         {/* Health Breakdown Card */}
-        <div className="bg-slate-900 rounded-[2.5rem] md:rounded-[3.5rem] p-8 md:p-10 text-white relative overflow-hidden shadow-2xl flex flex-col justify-between">
+        <div className="bg-slate-900 rounded-[2.5rem] md:rounded-[3.5rem] p-6 md:p-10 text-white relative overflow-hidden shadow-2xl flex flex-col justify-between">
            <div className="absolute top-0 right-0 p-12 opacity-5">
               <ShieldCheck className="w-48 h-48" />
            </div>
            <div className="relative z-10">
-              <h3 className="text-xs font-black text-slate-400 uppercase tracking-[0.3em] mb-8 flex items-center gap-2">
+              <h3 className="text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-[0.3em] mb-6 md:mb-8 flex items-center gap-2">
                  <Zap className="w-4 h-4 text-indigo-400" /> Health Breakdown
               </h3>
-              <div className="space-y-6">
+              <div className="space-y-4 md:space-y-6">
                  <div className="flex items-baseline gap-4">
                     <span className={cn(
-                      "text-6xl md:text-8xl font-black tracking-tighter",
+                      "text-5xl md:text-8xl font-black tracking-tighter",
                       health.score > 75 ? "text-emerald-400" : "text-amber-400"
                     )}>{health.score}</span>
-                    <span className="text-xl font-bold text-slate-500">/ 100</span>
+                    <span className="text-lg md:text-xl font-bold text-slate-500">/ 100</span>
                  </div>
-                 <div className="space-y-4">
+                 <div className="space-y-3 md:space-y-4">
                     {health.deductions.length > 0 ? (
                       health.deductions.slice(0, 3).map((d, i) => (
-                        <div key={i} className="flex items-center justify-between text-xs font-bold">
+                        <div key={i} className="flex items-center justify-between text-[10px] md:text-xs font-bold">
                            <span className="text-slate-400 flex items-center gap-2">
                               <AlertTriangle className="w-3.5 h-3.5 text-rose-500" /> {d.label}
                            </span>
@@ -271,18 +271,18 @@ export function Dashboard() {
                         </div>
                       ))
                     ) : (
-                      <div className="p-4 bg-white/5 rounded-2xl border border-white/10 flex items-center gap-3">
+                      <div className="p-3 md:p-4 bg-white/5 rounded-2xl border border-white/10 flex items-center gap-3">
                          <CheckCircle2 className="w-5 h-5 text-emerald-400" />
-                         <span className="text-xs font-bold text-emerald-100">Všetky faktory sú v norme.</span>
+                         <span className="text-[10px] md:text-xs font-bold text-emerald-100">Všetky faktory sú v norme.</span>
                       </div>
                     )}
                  </div>
               </div>
            </div>
-           <div className="mt-8 pt-8 border-t border-white/10 relative z-10">
+           <div className="mt-6 md:mt-8 pt-6 md:pt-8 border-t border-white/10 relative z-10">
               <button 
                 onClick={() => navigate(`/projects/${activeProject.id}/quality`)}
-                className="w-full py-4 bg-white/10 hover:bg-white text-white hover:text-slate-900 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2"
+                className="w-full py-3.5 md:py-4 bg-white/10 hover:bg-white text-white hover:text-slate-900 rounded-2xl text-[9px] md:text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2"
               >
                 Full Quality Audit <ArrowRight className="w-4 h-4" />
               </button>
@@ -291,7 +291,7 @@ export function Dashboard() {
       </div>
 
       {/* KPI Cards Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4 md:gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 md:gap-6">
         {[
           { label: 'Reqs', val: activeProject.requirements.length, icon: Layers, color: ITEM_COLORS.requirements, path: 'requirements' },
           { label: 'Decs', val: activeProject.decisions.length, icon: CheckCircle2, color: ITEM_COLORS.decisions, path: 'decisions' },
