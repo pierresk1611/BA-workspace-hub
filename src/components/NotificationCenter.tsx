@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { Bell, Check, X, Filter } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useProject } from '../context/ProjectContext';
+import { cn } from '../lib/utils';
 
 export interface NotificationItem {
   id: string;

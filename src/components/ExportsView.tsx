@@ -154,9 +154,9 @@ export function ExportsView() {
                 <span className="text-sm md:text-xl font-black text-indigo-600 leading-none">{stats.progress}%</span>
              </div>
              <div className="w-8 h-8 md:w-12 md:h-12 rounded-full border-2 md:border-4 border-indigo-50 flex items-center justify-center relative">
-                <svg className="w-full h-full transform -rotate-90">
-                  <circle cx="16" cy="16" r="14" stroke="currentColor" strokeWidth="2" fill="transparent" className="text-indigo-50" md:cx="24" md:cy="24" md:r="20" md:strokeWidth="4" />
-                  <circle cx="16" cy="16" r="14" stroke="currentColor" strokeWidth="2" fill="transparent" strokeDasharray={88} strokeDashoffset={88 - (88 * stats.progress) / 100} className="text-indigo-600 transition-all duration-1000" md:cx="24" md:cy="24" md:r="20" md:strokeDasharray={126} md:strokeDashoffset={126 - (126 * stats.progress) / 100} md:strokeWidth="4" />
+                <svg className="w-full h-full transform -rotate-90" viewBox="0 0 32 32">
+                  <circle cx="16" cy="16" r="14" stroke="currentColor" strokeWidth="2" fill="transparent" className="text-indigo-50" />
+                  <circle cx="16" cy="16" r="14" stroke="currentColor" strokeWidth="2" fill="transparent" strokeDasharray={88} strokeDashoffset={88 - (88 * stats.progress) / 100} className="text-indigo-600 transition-all duration-1000" />
                 </svg>
              </div>
           </div>

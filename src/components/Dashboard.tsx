@@ -2,13 +2,13 @@ import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
-  AreaChart, Area, PieChart, Pie, Cell, Legend
+  AreaChart, Area, PieChart as RePieChart, Pie, Cell, Legend
 } from 'recharts';
 import { 
   Activity as ActivityIcon, Clock, Target, Flag, AlertTriangle, 
   TrendingUp, ShieldCheck, ArrowRight, Layers, HelpCircle, 
   CheckCircle2, Zap, Calendar, ExternalLink, Plus, MessageSquare,
-  FileText, Database, ShieldAlert, MoreHorizontal
+  FileText, Database, ShieldAlert, MoreHorizontal, PieChart, FolderOpen
 } from 'lucide-react';
 import { useProject } from '../context/ProjectContext';
 import { calculateProjectProgress, calculateProjectHealth } from '../lib/projectUtils';
@@ -39,7 +39,31 @@ export function Dashboard() {
   const stats = useMemo(() => activeProject ? calculateProjectProgress(activeProject) : null, [activeProject]);
   const health = useMemo(() => activeProject ? calculateProjectHealth(activeProject) : null, [activeProject]);
 
-  if (!activeProject || !stats || !health) return null;
+  if (!activeProject) {
+    return (
+      <div className="p-8 md:p-20 flex flex-col items-center justify-center min-h-[80vh] text-center space-y-8 animate-in fade-in zoom-in-95 duration-700">
+        <div className="w-24 h-24 md:w-32 md:h-32 bg-slate-100 rounded-[2.5rem] flex items-center justify-center text-slate-300 shadow-inner">
+          <FolderOpen className="w-12 h-12 md:w-16 md:h-16" />
+        </div>
+        <div className="space-y-3 max-w-xl">
+          <h2 className="text-3xl md:text-5xl font-black text-slate-900 tracking-tight">Zatiaľ nemáš vytvorený žiadny projekt.</h2>
+          <p className="text-sm md:text-xl text-slate-500 font-medium leading-relaxed">
+            Vyberte si projekt zo zoznamu alebo vytvorte nový, aby ste mohli sledovať jeho metriky.
+          </p>
+        </div>
+        <div className="flex flex-col sm:flex-row items-center gap-4 pt-4 w-full sm:w-auto">
+          <button 
+            onClick={() => navigate('/projects')}
+            className="w-full sm:w-auto px-10 py-5 bg-indigo-600 text-white rounded-[1.5rem] font-black text-sm md:text-base uppercase tracking-widest shadow-2xl shadow-indigo-100 hover:bg-indigo-700 active:scale-95 transition-all flex items-center justify-center gap-3"
+          >
+            <Plus className="w-6 h-6" /> Vytvoriť prvý projekt
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!stats || !health) return null;
 
   const hasData = 
     activeProject.requirements.length > 0 || 
@@ -102,7 +126,7 @@ export function Dashboard() {
     { name: 'Reqs', done: activeProject.requirements.filter(r => r.status === 'Done').length, total: activeProject.requirements.length },
     { name: 'Decs', done: activeProject.decisions.filter(d => d.status === 'Potvrdené').length, total: activeProject.decisions.length },
     { name: 'Risks', done: activeProject.risks.filter(r => r.status === 'Resolved').length, total: activeProject.risks.length },
-    { name: 'Asana', done: activeProject.asanaTasks?.filter(t => t.status === 'Completed').length || 0, total: activeProject.asanaTasks?.length || 0 }
+    { name: 'Asana', done: activeProject.asanaTasks?.filter(t => t.status === 'Done').length || 0, total: activeProject.asanaTasks?.length || 0 }
   ].map(d => ({ ...d, open: d.total - d.done }));
 
   const riskSeverityData = [
@@ -135,9 +159,9 @@ export function Dashboard() {
   ];
 
   const recentActivity = [
-    ...(activeProject.requirements || []).map(r => ({ type: 'requirement', title: r.title, date: r.createdAt || 'Nedávno', icon: Layers, color: 'text-indigo-500' })),
-    ...(activeProject.decisions || []).map(d => ({ type: 'decision', title: d.title, date: d.createdAt || 'Nedávno', icon: CheckCircle2, color: 'text-emerald-500' })),
-    ...(activeProject.questions || []).map(q => ({ type: 'question', title: q.title, date: q.createdAt || 'Nedávno', icon: MessageSquare, color: 'text-amber-500' })),
+    ...(activeProject.requirements || []).map(r => ({ type: 'requirement', title: r.title, date: r.dateCreated || 'Nedávno', icon: Layers, color: 'text-indigo-500' })),
+    ...(activeProject.decisions || []).map(d => ({ type: 'decision', title: d.title, date: d.date || 'Nedávno', icon: CheckCircle2, color: 'text-emerald-500' })),
+    ...(activeProject.questions || []).map(q => ({ type: 'question', title: q.title, date: q.dueDate || 'Nedávno', icon: MessageSquare, color: 'text-amber-500' })),
     ...(activeProject.meetings || []).map(m => ({ type: 'meeting', title: m.title, date: m.date, icon: Calendar, color: 'text-pink-500' }))
   ].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 5);
 
@@ -323,7 +347,7 @@ export function Dashboard() {
                        contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '16px', color: '#fff' }}
                        itemStyle={{ color: '#818cf8', fontWeight: 'bold' }}
                     />
-                    <Area type="monotone" dataKey="progress" stroke="#4f46e5" strokeWidth={4} fillOpacity={1} fill="url(#colorProgProj)" dot={{ r: 4, fill: '#4f46e5', strokeWidth: 2, stroke: '#fff' }} activeDot={{ r: 8, shadow: '0 0 20px rgba(79, 70, 229, 0.4)' }} />
+                    <Area type="monotone" dataKey="progress" stroke="#4f46e5" strokeWidth={4} fillOpacity={1} fill="url(#colorProgProj)" dot={{ r: 4, fill: '#4f46e5', strokeWidth: 2, stroke: '#fff' }} activeDot={{ r: 8 }} />
                  </AreaChart>
               </ResponsiveContainer>
            </div>
@@ -333,12 +357,12 @@ export function Dashboard() {
         <div className="bg-white rounded-[2.5rem] md:rounded-[3rem] p-8 md:p-10 border border-slate-200 shadow-sm space-y-8">
            <div className="flex items-center justify-between">
               <h3 className="text-xs font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2">
-                 <PieChartIcon className="w-4 h-4 text-violet-600" /> Item Distribution
+                 <PieChart className="w-4 h-4 text-violet-600" /> Item Distribution
               </h3>
            </div>
            <div className="h-[300px] w-full">
               <ResponsiveContainer width="100%" height="100%">
-                 <PieChart>
+                 <RePieChart>
                     <Pie
                        data={itemDistributionData}
                        cx="50%"
@@ -354,7 +378,7 @@ export function Dashboard() {
                     </Pie>
                     <Tooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)', fontSize: '11px' }} />
                     <Legend iconType="circle" wrapperStyle={{ fontSize: '10px', paddingTop: '20px' }} />
-                 </PieChart>
+                 </RePieChart>
               </ResponsiveContainer>
            </div>
            <div className="grid grid-cols-2 gap-4">
@@ -422,7 +446,7 @@ export function Dashboard() {
            <div className="h-[250px] w-full">
               {riskSeverityData.length > 0 ? (
                 <ResponsiveContainer width="100%" height="100%">
-                   <PieChart>
+                   <RePieChart>
                       <Pie
                          data={riskSeverityData}
                          cx="50%"
@@ -437,7 +461,7 @@ export function Dashboard() {
                          ))}
                       </Pie>
                       <Tooltip contentStyle={{ fontSize: '11px', borderRadius: '12px' }} />
-                   </PieChart>
+                   </RePieChart>
                 </ResponsiveContainer>
               ) : (
                 <div className="h-full flex flex-col items-center justify-center text-center space-y-3 opacity-30">
@@ -502,7 +526,7 @@ export function Dashboard() {
                   <div key={i} className="relative pl-8 border-l border-white/20 pb-2">
                      <div className={cn(
                        "absolute -left-2 top-0 w-4 h-4 rounded-full border-4 border-indigo-600 shadow-xl",
-                       m.status === 'Done' ? "bg-emerald-400" : m.status === 'In Progress' ? "bg-white animate-pulse" : "bg-indigo-400"
+                       m.status === 'Completed' ? "bg-emerald-400" : m.status === 'In Progress' ? "bg-white animate-pulse" : "bg-indigo-400"
                      )} />
                      <div className="space-y-2">
                         <div className="flex items-center justify-between">

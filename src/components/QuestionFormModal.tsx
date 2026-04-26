@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Save, Link2, Calendar, User, FileText } from 'lucide-react';
 import type { Question, QuestionStatus, ProjectPriority } from '../types';
 import { useProject } from '../context/ProjectContext';
+import { cn } from '../lib/utils';
 
 interface QuestionFormModalProps {
   isOpen: boolean;
@@ -189,8 +190,8 @@ export function QuestionFormModal({ isOpen, onClose, initialData }: QuestionForm
               </div>
             </div>
 
-          </div>
-        </form>
+          </form>
+        </div>
 
         {/* Footer */}
         <div className="p-6 md:p-10 border-t border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row items-center justify-end gap-3 md:gap-4 shrink-0">

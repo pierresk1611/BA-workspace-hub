@@ -19,3 +19,13 @@
 
 **AI Action:**
 Verified existing Vercel `/api/login` and `.env` setup. Refactored `Sidebar.tsx` to use `NavLink` components to replace broken `button` clicks. Added `getProjectModulePath` to dynamically route sidebar links correctly whether a project is selected or not. Checked and confirmed all placeholder routes exist in `App.tsx` including adding `/settings`. Updated documentation to reflect the proper local startup process using `vercel dev` instead of plain `npm run dev`.
+
+## [2026-04-26] Disable Automatic Demo Data Seeding
+- **Task**: Permanently disable automatic demo data seeding and ensure clean workspace by default.
+- **Action**: 
+  - Updated ProjectContext with baWorkspace.cleanMode logic.
+  - Standardized localStorage keys to baWorkspace.* prefix.
+  - Implemented LoadDemoModal for manual demo loading.
+  - Updated AIAgent and Dashboard with custom empty states.
+  - Updated documentation (README, SECURITY, Changelog).
+- **Result**: Application starts with a clean empty workspace. Demo data only loads upon explicit user confirmation.

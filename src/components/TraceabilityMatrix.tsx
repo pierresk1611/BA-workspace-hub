@@ -8,10 +8,11 @@ import {
 import { useProject } from '../context/ProjectContext';
 import { cn } from '../lib/utils';
 import { StatusBadge } from './Badge';
+import type { Requirement, RequirementStatus } from '../types';
 
 interface MatrixRow {
   goal: string;
-  requirement: { id: string; title: string; status: any };
+  requirement: { id: string; title: string; status: RequirementStatus };
   source: string;
   decision: { id: string; title: string } | null;
   jira: string;
@@ -182,7 +183,7 @@ export function TraceabilityMatrix() {
             </thead>
             <tbody className="divide-y divide-slate-50">
               {filteredData.length > 0 ? (
-                filteredData.map((row, idx) => (
+                filteredData.map((row: MatrixRow, idx: number) => (
                   <tr key={idx} className="hover:bg-slate-50/50 transition-all group">
                     <td className="px-8 py-8 min-w-[350px]">
                        <div className="space-y-3">

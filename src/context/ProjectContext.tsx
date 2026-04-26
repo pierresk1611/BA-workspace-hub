@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import type { ReactNode } from "react";
-import type { Project, LinkedSystem, ConfluenceSource, JiraItem, DataFlow, SQLQuery, SQLResult, Deadline, Requirement, Decision, Question, Risk, Dependency, AsanaTask, Communication, Meeting } from "../types";
+import type { Project, LinkedSystem, ConfluenceSource, JiraItem, DataFlow, SQLQuery, SQLResult, Deadline, Requirement, Decision, Question, Risk, Dependency, AsanaTask, Communication, Meeting, Stakeholder, AcceptanceCriteria } from "../types";
 import { demoProjectsData } from "../demo/demoSeedData";
 
 interface ProjectContextType {
@@ -57,23 +57,35 @@ interface ProjectContextType {
   addMeeting: (projectId: string, meeting: Meeting) => void;
   updateMeeting: (projectId: string, meetingId: string, meeting: Partial<Meeting>) => void;
   deleteMeeting: (projectId: string, meetingId: string) => void;
+  addStakeholder: (projectId: string, stakeholder: Stakeholder) => void;
+  updateStakeholder: (projectId: string, stakeholderId: string, stakeholder: Partial<Stakeholder>) => void;
+  deleteStakeholder: (projectId: string, stakeholderId: string) => void;
+  addAcceptanceCriteria: (projectId: string, criteria: AcceptanceCriteria) => void;
+  updateAcceptanceCriteria: (projectId: string, criteriaId: string, criteria: Partial<AcceptanceCriteria>) => void;
+  deleteAcceptanceCriteria: (projectId: string, criteriaId: string) => void;
   closeProject: (id: string, reason: string, note: string) => void;
   reopenProject: (id: string) => void;
   loadDemoData: () => void;
   clearAllData: () => void;
 }
 
-const STORAGE_KEY = "ba_workspace_projects";
-const CLEAN_MODE_KEY = "ba_workspace_clean_mode";
+const STORAGE_KEY = "baWorkspace.projects";
+const CLEAN_MODE_KEY = "baWorkspace.cleanMode";
+
+const ProjectContext = createContext<ProjectContextType | undefined>(undefined);
 
 export function ProjectProvider({ children }: { children: ReactNode }) {
   const [projects, setProjects] = useState<Project[]>(() => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
+      const cleanMode = localStorage.getItem(CLEAN_MODE_KEY);
+      
       if (stored) return JSON.parse(stored);
       
-      // Default behavior: empty
-      localStorage.setItem(CLEAN_MODE_KEY, "true");
+      // If no projects and no cleanMode flag, it's a first run or clear run
+      if (!cleanMode) {
+        localStorage.setItem(CLEAN_MODE_KEY, "true");
+      }
       return [];
     } catch (e) {
       return [];
@@ -86,6 +98,10 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
+      // If we have projects, it's not "clean" in the sense of being empty, 
+      // but cleanMode flag prevents AUTO-SEEDING, which is what we want.
+      // We keep cleanMode = true to ensure no automatic seeding ever happens again.
+      localStorage.setItem(CLEAN_MODE_KEY, "true");
     } catch (e) {
       console.error("Failed to save projects to localStorage", e);
     }
@@ -584,6 +600,66 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
     }));
   };
 
+  const addStakeholder = (projectId: string, stakeholder: Stakeholder) => {
+    setProjects(prev => prev.map(p => {
+      if (p.id === projectId) {
+        return { ...p, stakeholders: [...(p.stakeholders || []), stakeholder] };
+      }
+      return p;
+    }));
+  };
+
+  const updateStakeholder = (projectId: string, stakeholderId: string, updatedFields: Partial<Stakeholder>) => {
+    setProjects(prev => prev.map(p => {
+      if (p.id === projectId) {
+        return {
+          ...p,
+          stakeholders: (p.stakeholders || []).map(s => s.id === stakeholderId ? { ...s, ...updatedFields } : s)
+        };
+      }
+      return p;
+    }));
+  };
+
+  const deleteStakeholder = (projectId: string, stakeholderId: string) => {
+    setProjects(prev => prev.map(p => {
+      if (p.id === projectId) {
+        return { ...p, stakeholders: (p.stakeholders || []).filter(s => s.id !== stakeholderId) };
+      }
+      return p;
+    }));
+  };
+
+  const addAcceptanceCriteria = (projectId: string, criteria: AcceptanceCriteria) => {
+    setProjects(prev => prev.map(p => {
+      if (p.id === projectId) {
+        return { ...p, acceptanceCriteria: [...(p.acceptanceCriteria || []), criteria] };
+      }
+      return p;
+    }));
+  };
+
+  const updateAcceptanceCriteria = (projectId: string, criteriaId: string, updatedFields: Partial<AcceptanceCriteria>) => {
+    setProjects(prev => prev.map(p => {
+      if (p.id === projectId) {
+        return {
+          ...p,
+          acceptanceCriteria: (p.acceptanceCriteria || []).map(ac => ac.id === criteriaId ? { ...ac, ...updatedFields } : ac)
+        };
+      }
+      return p;
+    }));
+  };
+
+  const deleteAcceptanceCriteria = (projectId: string, criteriaId: string) => {
+    setProjects(prev => prev.map(p => {
+      if (p.id === projectId) {
+        return { ...p, acceptanceCriteria: (p.acceptanceCriteria || []).filter(ac => ac.id !== criteriaId) };
+      }
+      return p;
+    }));
+  };
+
   const deleteProject = (id: string) => {
     setProjects(prev => {
       const updated = prev.filter(p => p.id !== id);
@@ -634,6 +710,7 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
     setProjects(prev => {
       const existingIds = new Set(prev.map(p => p.id));
       const newDemoData = demoProjectsData.filter(p => !existingIds.has(p.id));
+      localStorage.setItem(CLEAN_MODE_KEY, "true"); // Still set it just in case
       return [...prev, ...newDemoData];
     });
   };
@@ -641,7 +718,12 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
   const clearAllData = () => {
     setProjects([]);
     setActiveProjectId('');
-    localStorage.removeItem(STORAGE_KEY);
+    // Clear all baWorkspace keys
+    Object.keys(localStorage).forEach(key => {
+      if (key.startsWith('baWorkspace.') || key.startsWith('ba_hub_')) {
+        localStorage.removeItem(key);
+      }
+    });
     localStorage.setItem(CLEAN_MODE_KEY, "true");
   };
 
@@ -700,6 +782,12 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
       addMeeting,
       updateMeeting,
       deleteMeeting,
+      addStakeholder,
+      updateStakeholder,
+      deleteStakeholder,
+      addAcceptanceCriteria,
+      updateAcceptanceCriteria,
+      deleteAcceptanceCriteria,
       closeProject,
       reopenProject,
       loadDemoData,

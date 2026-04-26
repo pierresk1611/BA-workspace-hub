@@ -344,10 +344,6 @@ export function AsanaView() {
         )}
 
       </div>
-         )}
-        </div>
-
-      </div>
 
       <AsanaTaskFormModal 
         isOpen={isModalOpen} 

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Save, Link2, Zap } from 'lucide-react';
 import type { Meeting, MeetingType } from '../types';
 import { useProject } from '../context/ProjectContext';
+import { cn } from '../lib/utils';
 
 interface MeetingFormModalProps {
   isOpen: boolean;

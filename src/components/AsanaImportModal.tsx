@@ -587,18 +587,5 @@ export function AsanaImportModal({ isOpen, onClose }: AsanaImportModalProps) {
         </div>
       </div>
     </div>
-
-        {/* Security Footer */}
-        <div className="px-8 py-5 bg-slate-900 flex items-center justify-center gap-6">
-           <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest">
-             <AlertTriangle className="w-3.5 h-3.5 text-amber-500" /> Bezpečný Manuálny Import
-           </div>
-           <div className="w-1 h-1 bg-slate-700 rounded-full" />
-           <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">No API Connection</p>
-           <div className="w-1 h-1 bg-slate-700 rounded-full" />
-           <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Local Browser Parsing Only</p>
-        </div>
-      </div>
-    </div>
   );
 }

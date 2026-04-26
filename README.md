@@ -1,13 +1,14 @@
 # BA Workspace – Project Intelligence Hub
 
 ## Účel aplikácie
-### 🔐 Bezpečnosť a Izolácia Dát
-**Tento prototyp je navrhnutý ako maximálne bezpečný a izolovaný systém:**
-- **Žiadne API integrácie:** Aplikácia sa nepripája na Jira, Confluence, Teams ani iné externé systémy.
-- **Manuálny vstup:** Všetky dáta, texty (emaily, prepisy meetingov) a Asana tasky (cez CSV/JSON/Text import) musia byť vložené manuálne používateľom.
-- **Asana Import:** Podporuje manuálny import z CSV súborov, JSON dát a Plain Textu bez pripojenia na Asana API. Súbory sa spracovávajú lokálne v prehliadači.
-- **Lokálne úložisko:** Všetky dáta sú uložené výhradne vo vašom prehliadači (LocalStorage). Aplikácia neposiela vaše projektové dáta na žiaden server.
-- **Čistý Workspace:** Pri prvom prihlásení je workspace prázdny. Používateľ si môže manuálne načítať Demo dáta pre otestovanie funkcií.
+## 🔒 Súkromie a Dáta (Clean Workspace Policy)
+
+BA HUB je postavený na princípe **Local-First & Private-First**:
+- **Žiadne servery**: Vaše dáta nikdy neopúšťajú váš prehliadač.
+- **Clean Start**: Aplikácia štartuje s prázdnym workspace. Žiadne demo dáta sa nenačítavajú automaticky.
+- **Manuálne Demo**: Ak chcete preskúmať funkcie, demo dáta si môžete kedykoľvek manuálne načítať v Nastaveniach.
+- **LocalStorage**: Všetko je uložené v šifrovanom alebo lokálnom úložisku vášho prehliadača.
+- **AI Analýza**: Prebieha lokálne na báze kontextových okien bez trénovania modelov na vašich dátach.
 - **Správa dát:** V nastaveniach je možné kedykoľvek vymazať všetky lokálne uložené dáta alebo načítať demo projekty.
 
 Podrobné pravidlá nájdete v [SECURITY.md](SECURITY.md) a [docs/security-rules.md](docs/security-rules.md).

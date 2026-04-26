@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Save, Link2, Calendar, User, AlertTriangle, Shield, Zap } from 'lucide-react';
 import type { Risk, RiskCategory, RiskStatus } from '../types';
 import { useProject } from '../context/ProjectContext';
+import { cn } from '../lib/utils';
 
 interface RiskFormModalProps {
   isOpen: boolean;
@@ -226,7 +227,6 @@ export function RiskFormModal({ isOpen, onClose, initialData }: RiskFormModalPro
                 </div>
               </div>
             </div>
-
           </form>
         </div>
 

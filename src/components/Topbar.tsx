@@ -1,5 +1,6 @@
 import { useNavigate, useLocation, useParams } from 'react-router-dom';
-import { ChevronRight, LogOut, ChevronDown } from 'lucide-react';
+import { ChevronRight, LogOut, ChevronDown, Menu, Bot } from 'lucide-react';
+import { cn } from '../lib/utils';
 import { useProject } from '../context/ProjectContext';
 import { useAuth } from '../context/AuthContext';
 import { GlobalSearch } from './GlobalSearch';
@@ -29,7 +30,7 @@ const MODULE_LABELS: Record<string, string> = {
   'asana': 'Asana',
 };
 
-import { Menu } from 'lucide-react';
+
 
 interface TopbarProps {
   onMenuClick?: () => void;
@@ -155,7 +156,5 @@ export function Topbar({ onMenuClick }: TopbarProps) {
         </button>
       </div>
     </header>
-  );
-}
   );
 }

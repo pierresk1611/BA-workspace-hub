@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { X } from 'lucide-react';
+import { X, Save } from 'lucide-react';
+import { cn } from '../lib/utils';
 import { useProject } from '../context/ProjectContext';
 import type { LinkedSystem, SystemType } from '../types';
 

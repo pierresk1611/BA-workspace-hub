@@ -284,8 +284,6 @@ export function JiraView() {
           onAction={() => setIsFormOpen(true)}
         />
       )}
-        />
-      )}
 
       {/* Modals */}
       <JiraFormModal 

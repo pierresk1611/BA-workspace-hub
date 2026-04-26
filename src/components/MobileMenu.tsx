@@ -145,9 +145,13 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
                             : "text-slate-400 hover:bg-slate-800 hover:text-white"
                       )}
                     >
-                      <item.icon className={cn("w-5 h-5", isActive && !isDisabled ? "text-white" : "text-slate-500")} />
-                      <span className="flex-1">{item.label}</span>
-                      {!isDisabled && <ChevronRight className="w-4 h-4 opacity-30" />}
+                      {({ isActive }) => (
+                        <>
+                          <item.icon className={cn("w-5 h-5", isActive && !isDisabled ? "text-white" : "text-slate-500")} />
+                          <span className="flex-1">{item.label}</span>
+                          {!isDisabled && <ChevronRight className="w-4 h-4 opacity-30" />}
+                        </>
+                      )}
                     </NavLink>
                   );
                 })}

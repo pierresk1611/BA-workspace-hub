@@ -15,6 +15,7 @@ import {
 import { useProject } from '../context/ProjectContext';
 import { calculateProjectProgress, calculateProjectHealth } from '../lib/projectUtils';
 import { cn } from '../lib/utils';
+import { LoadDemoModal } from './LoadDemoModal';
 
 const STATUS_COLORS: Record<string, string> = {
   'Idea': '#94a3b8',
@@ -44,6 +45,7 @@ export function AllProjectsDashboard() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [priorityFilter, setPriorityFilter] = useState('all');
   const [viewMode, setViewMode] = useState<'cards' | 'table'>('cards');
+  const [isDemoModalOpen, setIsDemoModalOpen] = useState(false);
 
   const handleOpenProject = (projectId: string) => {
     setActiveProject(projectId);
@@ -84,12 +86,12 @@ export function AllProjectsDashboard() {
   const nextDeadline = useMemo(() => {
     const today = new Date().toISOString().split('T')[0];
     const allDeadlines = projects.flatMap(p => [
-      ...(p.deadlines || []),
+      ...(p.deadlines || []).map(d => ({ dueDate: d.date, title: d.title, pName: p.name })),
       ...(p.requirements || []).map(r => ({ dueDate: r.deadline, title: r.title, pName: p.name })),
       ...(p.questions || []).map(q => ({ dueDate: q.dueDate, title: q.title, pName: p.name })),
       ...(p.asanaTasks || []).map(t => ({ dueDate: t.dueDate, title: t.title, pName: p.name }))
-    ]).filter(d => d.dueDate && d.dueDate >= today)
-      .sort((a, b) => a.dueDate.localeCompare(b.dueDate));
+    ]).filter(d => d.dueDate && (d.dueDate as string) >= today)
+      .sort((a, b) => (a.dueDate as string).localeCompare(b.dueDate as string));
     
     return allDeadlines[0] || null;
   }, [projects]);
@@ -131,7 +133,7 @@ export function AllProjectsDashboard() {
       requirements: p.requirements.filter(r => r.status !== 'Done').length,
       questions: p.questions.filter(q => q.status !== 'Answered').length,
       risks: p.risks.filter(r => !['Resolved', 'Closed'].includes(r.status)).length,
-      asana: p.asanaTasks?.filter(t => t.status !== 'Completed').length || 0
+      asana: p.asanaTasks?.filter(t => t.status !== 'Done').length || 0
     }));
   }, [projects]);
 
@@ -160,16 +162,19 @@ export function AllProjectsDashboard() {
             <Plus className="w-6 h-6" /> Vytvoriť prvý projekt
           </button>
           <button 
-            onClick={() => {
-              if (confirm('Naozaj chcete načítať demo dáta? Táto akcia pridá testovacie projekty.')) {
-                loadDemoData();
-              }
-            }}
+            onClick={() => setIsDemoModalOpen(true)}
             className="w-full sm:w-auto px-10 py-5 bg-white border-2 border-slate-200 text-slate-600 rounded-[1.5rem] font-black text-sm md:text-base uppercase tracking-widest hover:bg-slate-50 active:scale-95 transition-all flex items-center justify-center gap-3"
           >
             <Library className="w-6 h-6 text-indigo-500" /> Načítať demo dáta
           </button>
         </div>
+
+        <LoadDemoModal 
+          isOpen={isDemoModalOpen} 
+          onClose={() => setIsDemoModalOpen(false)} 
+          onConfirm={loadDemoData}
+          hasExistingProjects={projects.length > 0}
+        />
       </div>
     );
   }
@@ -268,7 +273,7 @@ export function AllProjectsDashboard() {
                   outerRadius={100}
                   paddingAngle={5}
                   dataKey="value"
-                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                  label={({ name, percent }) => `${name} ${((percent || 0) * 100).toFixed(0)}%`}
                 >
                   {statusData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={STATUS_COLORS[entry.name] || '#cbd5e1'} />
@@ -391,7 +396,7 @@ export function AllProjectsDashboard() {
                   fill="#4f46e5" 
                   radius={[10, 10, 0, 0]} 
                   barSize={40}
-                  onClick={(data) => handleOpenProject(data.id)}
+                  onClick={(data) => data && data.id && handleOpenProject(data.id)}
                   className="cursor-pointer"
                 />
               </BarChart>

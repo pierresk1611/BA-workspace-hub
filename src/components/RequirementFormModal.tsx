@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Save, Bot, Link2, Calendar, User } from 'lucide-react';
 import type { Requirement, RequirementType, RequirementStatus, ProjectPriority } from '../types';
 import { useProject } from '../context/ProjectContext';
+import { cn } from '../lib/utils';
 
 interface RequirementFormModalProps {
   isOpen: boolean;
@@ -215,9 +216,8 @@ export function RequirementFormModal({ isOpen, onClose, initialData }: Requireme
                 </div>
               </div>
             </div>
-
-          </div>
-        </form>
+          </form>
+        </div>
         
         {/* Footer */}
         <div className="p-6 md:p-10 border-t border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row items-center justify-end gap-3 md:gap-4 shrink-0">
@@ -232,4 +232,5 @@ export function RequirementFormModal({ isOpen, onClose, initialData }: Requireme
       </div>
     </div>
   );
+
 }

@@ -12,6 +12,23 @@
 | 2026-04-24 | Confluence | Pridanie modulu Confluence zdroje s AI extrakčným UI panelom pre prácu so simulovanými AI metadátami nad manuálne skopírovaným textom. | feat: add confluence source module |
 | 2026-04-24 | Security | - Add: Acceptance Criteria & QA module (Given/When/Then tracking).<br>- Add: BA Quality Check (automated deficiency and security auditor).<br>- Audit: Final Security & Data Isolation Audit (verified no external API/DB connections).<br>- Update: SECURITY.md and docs/security-rules.md with explicit manual-only policies. | feat: finalize security audit and qa modules |
 | 2026-04-25 | Projects | Implementácia akcií "Ukončiť projekt" (archivácia) a "Vymazať projekt" (hard delete). Úprava dashboardov, filtrov a projektového detailu. | feat: add project lifecycle actions |
+| 2026-04-26 | Demo Data | Implementácia manažmentu demo dát s explicitným potvrdením a podporou clean režimu. | feat: add demo data management |
+
+## [2.1.0] - 2026-04-26
+### Added
+- Nový komponent `LoadDemoModal` pre manuálne potvrdenie načítania demo dát.
+- Podpora pre `baWorkspace.cleanMode` príznak v localStorage.
+- Pridané empty states pre Dashboard a AIAgent pri nulovom počte projektov.
+
+### Changed
+- Trvalo vypnuté automatické seedovanie demo dát (Driver App, Delivery 2.0, atď.).
+- Prechod na zjednotené `localStorage` kľúče s prefixom `baWorkspace.*`.
+- Aktualizované empty state správy v AIAgent a Dashboarde.
+- Vylepšená funkcia `clearAllData` pre úplné vyčistenie všetkých workspace kľúčov.
+
+### Fixed
+- Opravené opakované vracanie demo dát po refreshi alebo redeployi.
+- Opravené chyby v zobrazení Dashboardu pri žiadnom aktívnom projekte.
 
 ## [1.1.0] - 2026-04-25
 ### Added

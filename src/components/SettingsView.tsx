@@ -1,16 +1,18 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
-  Settings, Database, Trash2, Library, 
-  ShieldCheck, HardDrive, Info, Download, 
-  Smartphone, Wifi, WifiOff, CheckCircle2 
+  Settings, Wifi, WifiOff, Smartphone, CheckCircle2, 
+  Download, Info, ShieldCheck, Database, Library, 
+  Trash2, HardDrive 
 } from 'lucide-react';
 import { useProject } from '../context/ProjectContext';
+import { LoadDemoModal } from './LoadDemoModal';
 import { ClearDataModal } from './ClearDataModal';
 import { cn } from '../lib/utils';
 
 export function SettingsView() {
-  const { loadDemoData, clearAllData } = useProject();
+  const { projects, loadDemoData, clearAllData } = useProject();
   const [isClearModalOpen, setIsClearModalOpen] = useState(false);
+  const [isDemoModalOpen, setIsDemoModalOpen] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [isInstalled, setIsInstalled] = useState(false);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
@@ -182,11 +184,7 @@ export function SettingsView() {
                     Načítajte demo projekty so všetkými entitami pre testovanie.
                   </p>
                   <button 
-                    onClick={() => {
-                      if (confirm('Naozaj chcete načítať demo dáta?')) {
-                        loadDemoData();
-                      }
-                    }}
+                    onClick={() => setIsDemoModalOpen(true)}
                     className="w-full py-2.5 md:py-3 bg-white border border-indigo-200 text-indigo-600 rounded-lg md:rounded-xl font-black text-[9px] md:text-[10px] uppercase tracking-widest hover:bg-indigo-50 transition-all active:scale-95 shadow-sm"
                   >
                     Načítať
@@ -237,6 +235,13 @@ export function SettingsView() {
         isOpen={isClearModalOpen}
         onClose={() => setIsClearModalOpen(false)}
         onConfirm={clearAllData}
+      />
+
+      <LoadDemoModal 
+        isOpen={isDemoModalOpen} 
+        onClose={() => setIsDemoModalOpen(false)} 
+        onConfirm={loadDemoData}
+        hasExistingProjects={projects.length > 0}
       />
     </div>
   );

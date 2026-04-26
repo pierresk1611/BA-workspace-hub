@@ -450,6 +450,8 @@ export interface Stakeholder {
   name: string;
   role: string;
   team: string;
+  email?: string;
+  phone?: string;
   responsibilityArea: string;
   decisionPower: DecisionPower;
   contactNote: string;

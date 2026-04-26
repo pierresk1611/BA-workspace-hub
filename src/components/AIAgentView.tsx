@@ -53,14 +53,16 @@ export function AIAgentView() {
 
   if (!activeProject) {
     return (
-      <div className="flex flex-col items-center justify-center h-full bg-slate-50 p-8 text-center animate-in fade-in">
-        <div className="w-20 h-20 bg-white rounded-[2rem] shadow-xl flex items-center justify-center text-slate-300 mb-6">
+      <div className="h-full flex flex-col items-center justify-center p-8 text-center space-y-6">
+        <div className="w-20 h-20 bg-slate-100 rounded-[2rem] flex items-center justify-center text-slate-300">
           <Bot className="w-10 h-10" />
         </div>
-        <h2 className="text-2xl font-black text-slate-900 mb-2">Žiadny aktívny projekt</h2>
-        <p className="text-slate-500 font-medium max-w-sm">
-          Vyber projekt a pridaj zdroje alebo texty, aby som mohol pripraviť summary.
-        </p>
+        <div className="space-y-2 max-w-sm">
+          <h3 className="text-xl font-black text-slate-900">AIAgent je pripravený</h3>
+          <p className="text-slate-500 font-medium leading-relaxed">
+            Vyber alebo vytvor projekt a pridaj dáta, aby som mohol pripraviť summary.
+          </p>
+        </div>
       </div>
     );
   }
@@ -72,8 +74,19 @@ export function AIAgentView() {
     (activeProject.asanaTasks?.length || 0) > 0;
 
   if (!hasData && messages.length === 1 && messages[0].role === 'assistant') {
-    // Initial state with no data
-    messages[0].content = "Projekt zatiaľ neobsahuje žiadne dáta. Pridaj požiadavky, riziká alebo importuj Asana tasky, aby som mohol začať analyzovať.";
+    return (
+      <div className="h-full flex flex-col items-center justify-center p-8 text-center space-y-6">
+        <div className="w-20 h-20 bg-slate-100 rounded-[2rem] flex items-center justify-center text-slate-300">
+          <Bot className="w-10 h-10" />
+        </div>
+        <div className="space-y-2 max-w-sm">
+          <h3 className="text-xl font-black text-slate-900">Projekt je prázdny</h3>
+          <p className="text-slate-500 font-medium leading-relaxed">
+            Projekt zatiaľ nemá dostatok dát na analýzu. Pridaj požiadavky, riziká alebo otázky.
+          </p>
+        </div>
+      </div>
+    );
   }
 
   const suggestedActions = [

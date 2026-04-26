@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Save, Link2, Calendar, User, Zap } from 'lucide-react';
 import type { AsanaTask, AsanaTaskStatus, ProjectPriority } from '../types';
 import { useProject } from '../context/ProjectContext';
+import { cn } from '../lib/utils';
 
 interface AsanaTaskFormModalProps {
   isOpen: boolean;

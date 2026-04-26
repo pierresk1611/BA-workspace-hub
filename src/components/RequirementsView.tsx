@@ -3,7 +3,7 @@ import {
   CheckSquare, Search, Plus, Edit, Trash2, 
   Bot, Link2, ExternalLink, MoreVertical,
   CheckCircle2, Clock, AlertTriangle, FileText, 
-  BarChart2, TrendingUp, Info
+  BarChart2, TrendingUp, Info, ChevronRight, ArrowRight
 } from 'lucide-react';
 import { useProject } from '../context/ProjectContext';
 import { RequirementFormModal } from './RequirementFormModal';
@@ -12,6 +12,7 @@ import {
   BarChart, Bar, XAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell,
   PieChart as RePieChart, Pie
 } from 'recharts';
+import { cn } from '../lib/utils';
 
 export function RequirementsView() {
   const { activeProject, deleteRequirement } = useProject();
@@ -66,7 +67,6 @@ export function RequirementsView() {
       case 'Draft':
       case 'Na potvrdenie': return 'bg-slate-100 text-slate-500';
       case 'Obsolete': return 'bg-rose-100 text-rose-700';
-      default: return 'bg-slate-100 text-slate-600';
     }
   };
 
@@ -321,9 +321,6 @@ export function RequirementsView() {
             </div>
           )}
         </div>
-
-      </div>
-
       </div>
 
       <RequirementFormModal 
