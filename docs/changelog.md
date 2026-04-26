@@ -16,6 +16,24 @@
 | 2026-04-24 | Security | - Add: Acceptance Criteria & QA module (Given/When/Then tracking).<br>- Add: BA Quality Check (automated deficiency and security auditor).<br>- Audit: Final Security & Data Isolation Audit (verified no external API/DB connections).<br>- Update: SECURITY.md and docs/security-rules.md with explicit manual-only policies. | feat: finalize security audit and qa modules |
 | 2026-04-25 | Projects | Implementácia akcií "Ukončiť projekt" (archivácia) a "Vymazať projekt" (hard delete). Úprava dashboardov, filtrov a projektového detailu. | feat: add project lifecycle actions |
 | 2026-04-26 | Demo Data | Implementácia manažmentu demo dát s explicitným potvrdením a podporou clean režimu. | feat: add demo data management |
+| 2026-04-26 | Settings | Implementácia stránky Nastavenia s prototypovým user managementom (v2.1.2). | feat: add settings page and users |
+
+## [2.1.2] - 2026-04-26
+### Added
+- Nová stránka **Nastavenia** s tabmi: Workspace, Používatelia, Môj Profil, Správa Dát, Bezpečnosť.
+- Prototypový **User Management** pre Admina (Peter).
+- Podpora pre **Pending Profile** status nových používateľov.
+- Funkcie **Export** a **Import** dát vo formáte JSON.
+- Responzívny **Mobile Cockpit** layout pre navigáciu a dashboardy.
+
+### Changed
+- Sidebar prepracovaný pre lepšiu viditeľnosť nastavení a navigácie.
+- Zjednotená správa workspace nastavení (Meno, Popis).
+
+### Fixed
+- Opravené chýbajúce importy v `AIAgentView.tsx`.
+- Opravený active state navigácie v Sidebare.
+
 
 ## [2.1.0] - 2026-04-26
 ### Added

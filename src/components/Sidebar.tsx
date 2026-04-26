@@ -94,6 +94,12 @@ export const sidebarGroups: SidebarGroup[] = [
       { key: "ai-agent", label: "AI Project Agent", icon: Bot, path: "ai-agent", projectScoped: true },
       { key: "exports", label: "Exporty", icon: Download, path: "exports", projectScoped: true },
     ]
+  },
+  {
+    title: "System",
+    items: [
+      { key: "settings", label: "Nastavenia", icon: Settings, path: "settings", projectScoped: false },
+    ]
   }
 ];
 
@@ -113,7 +119,7 @@ export function Sidebar() {
   };
 
   const isItemActive = (item: SidebarItem, path: string) => {
-    if (item.key === 'overview') return location.pathname === path;
+    if (item.key === 'overview') return location.pathname === '/dashboard' || location.pathname === path;
     if (item.key === 'projects') return location.pathname === '/projects';
     if (item.key === 'settings') return location.pathname === '/settings';
     
@@ -223,10 +229,7 @@ export function Sidebar() {
           </Link>
         )}
         
-        <div className="mt-4 flex items-center justify-between px-1">
-          <Link to="/settings" className="p-2 text-slate-500 hover:text-white transition-colors rounded-lg hover:bg-slate-800">
-            <Settings className="w-4 h-4" />
-          </Link>
+        <div className="mt-4 flex items-center justify-end px-1">
           <button 
             onClick={handleLogout}
             className="flex items-center gap-2 px-3 py-2 text-slate-500 hover:text-rose-400 hover:bg-rose-900/20 rounded-lg transition-all text-[10px] font-black uppercase tracking-widest"

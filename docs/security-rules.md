@@ -21,8 +21,9 @@ Tento dokument definuje záväzné pravidlá pre prácu s prototypom BA Workspac
 - **Implementácia:** Agentova prompt logika je nastavená tak, aby vždy uvádzal, že pracuje s "lokálnymi manuálne vloženými dátami".
 
 ## 5. Prístupové údaje
-- **Pravidlo:** Nulová tolerancia pre ukladanie credentials.
-- **Implementácia:** Aplikácia nepoužíva žiadny systém prihlásenia (Auth). Všetky "Tokeny" v mock dátach sú generované náhodne a nemajú žiadnu funkčnú hodnotu.
+- **Pravidlo:** Nulová tolerancia pre ukladanie credentials vo frontend kóde.
+- **Implementácia:** Prihlásenie je riešené cez bezpečnú serverless funkciu a `.env` premenné. Prototypový User Management v Nastaveniach ukladá používateľské profily lokálne, ale bez hesiel v plaintext podobe.
+- **Audit:** Modul Quality Check skenuje poznámky na prítomnosť podozrivých reťazcov pripomínajúcich prístupové údaje.
 
 ## 6. Mazanie a čistenie dát
 - **Pravidlo:** Používateľ musí mať plnú kontrolu nad lokálnymi dátami.

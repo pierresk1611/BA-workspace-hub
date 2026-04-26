@@ -1,4 +1,4 @@
-# BA Workspace – Project Intelligence Hub
+# BA Workspace – Project Intelligence Hub (v2.1.2)
 
 ## Účel aplikácie
 ## 🔒 Súkromie a Dáta (Clean Workspace Policy)
@@ -9,7 +9,8 @@ BA HUB je postavený na princípe **Local-First & Private-First**:
 - **Manuálne Demo**: Ak chcete preskúmať funkcie, demo dáta si môžete kedykoľvek manuálne načítať v Nastaveniach.
 - **LocalStorage**: Všetko je uložené v šifrovanom alebo lokálnom úložisku vášho prehliadača.
 - **AI Analýza**: Prebieha lokálne na báze kontextových okien bez trénovania modelov na vašich dátach.
-- **Správa dát:** V nastaveniach je možné kedykoľvek vymazať všetky lokálne uložené dáta alebo načítať demo projekty.
+- **Správa používateľov:** Prototypový User Management s rolami Admin/Member.
+- **Správa dát:** V nastaveniach je možné exportovať/importovať dáta, vymazať úložisko alebo načítať demo projekty.
 
 Podrobné pravidlá nájdete v [SECURITY.md](SECURITY.md) a [docs/security-rules.md](docs/security-rules.md).
 

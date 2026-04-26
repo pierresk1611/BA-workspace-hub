@@ -18,8 +18,9 @@ Demo dáta (Driver App, Delivery 2.0, atď.) slúžia výhradne na testovacie ú
 5. **Autentifikácia:** Aplikácia obsahuje bezpečný serverless prihlasovací flow (`/api/login`), kde sa heslo posiela šifrovane z klienta a porovnáva s bezpečným `.env` prostredím na strane servera.
    - Vo frontendovom kóde sa nesmú nachádzať žiadne hardcoded heslá ani mená.
    - Environment variables (`.env.local`) nie sú commitované do repozitára.
-6. **Ochrana pred únikom:** Aplikácia využíva `sessionStorage` pre uchovanie session tokenu, ktorý sa automaticky zmaže po zatvorení prehliadača.
-7. **Odstránenie dát:** Funkcia "Vymazať projekt" odstráni konkrétny projekt. Globálna funkcia "Vymazať všetky lokálne dáta" v nastaveniach (vyžadujúca potvrdenie textom VYMAZAŤ) úplne prečistí `localStorage` od všetkých projektových dát.
+6. **User Management Prototype:** Od verzie 2.1.2 aplikácia simuluje správu používateľov a rolí v rámci workspaceu. Dáta o používateľoch sú uložené v `localStorage`. Noví používatelia sú vytváraní bez hesla (pending profile status) a ich heslá sa v prototype neukladajú ako plaintext.
+7. **Ochrana pred únikom:** Aplikácia využíva `sessionStorage` pre uchovanie session tokenu a `localStorage` pre perzistentné dáta. Lokálne úložisko nie je šifrované, preto tam nevkladajte tajomstvá.
+8. **Odstránenie dát:** Funkcia "Vymazať projekt" odstráni konkrétny projekt. Globálna funkcia "Vymazať všetky lokálne dáta" v nastaveniach úplne prečistí `localStorage` od všetkých projektových dát a používateľov (okrem default admina).
 
 ## Zákaz produkčných údajov
 Používateľom sa dôrazne odporúča nevkladať do prototypu:
@@ -32,4 +33,4 @@ Používateľom sa dôrazne odporúča nevkladať do prototypu:
 Aplikácia obsahuje modul **BA Quality Check**, ktorý proaktívne upozorňuje na prítomnosť podozrivých textov (napr. texty pripomínajúce credentials) v SQL dotazoch alebo poznámkach.
 
 ---
-*Posledná aktualizácia: 2026-04-25*
+*Posledná aktualizácia: 2026-04-26 (v2.1.2)*

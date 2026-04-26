@@ -536,3 +536,31 @@ export interface Project {
   reopenedAt?: string;
   reopenedBy?: string;
 }
+
+export type UserStatus = "active" | "pending_profile" | "disabled";
+
+export interface User {
+  id: string;
+  username: string;
+  displayName?: string;
+  email?: string;
+  role?: string;
+  team?: string;
+  functionTitle?: string;
+  avatarInitials?: string;
+  status: UserStatus;
+  isAdmin: boolean;
+  createdAt: string;
+  createdBy: string;
+  updatedAt?: string;
+  lastLoginAt?: string;
+  profileCompletedAt?: string;
+}
+
+export interface WorkspaceSettings {
+  workspaceName: string;
+  workspaceDescription: string;
+  dataMode: string;
+  demoDataEnabled: boolean;
+  version: string;
+}

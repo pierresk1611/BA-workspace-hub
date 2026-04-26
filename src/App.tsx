@@ -27,9 +27,9 @@ import { StakeholdersView } from './components/StakeholdersView';
 import { QAView } from './components/QAView';
 import { QualityCheckView } from './components/QualityCheckView';
 import { SettingsView } from './components/SettingsView';
-import { ProjectProvider } from './context/ProjectContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
-import { useProject } from './context/ProjectContext';
+import { ProjectProvider, useProject } from './context/ProjectContext';
+import { SettingsProvider } from './context/SettingsContext';
 
 import { useState } from 'react';
 import { MobileMenu } from './components/MobileMenu';
@@ -188,9 +188,11 @@ function LoginPageWrapper() {
 function App() {
   return (
     <AuthProvider>
-      <ProjectProvider>
-        <AppRoutes />
-      </ProjectProvider>
+      <SettingsProvider>
+        <ProjectProvider>
+          <AppRoutes />
+        </ProjectProvider>
+      </SettingsProvider>
     </AuthProvider>
   );
 }
