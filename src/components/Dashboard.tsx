@@ -8,8 +8,10 @@ import {
   Activity as ActivityIcon, Clock, Target, Flag, AlertTriangle, 
   TrendingUp, ShieldCheck, ArrowRight, Layers, HelpCircle, 
   CheckCircle2, Zap, Calendar, ExternalLink, Plus, MessageSquare,
-  FileText, Database, ShieldAlert, MoreHorizontal, PieChart, FolderOpen
+  FileText, Database, ShieldAlert, MoreHorizontal, PieChart, FolderOpen, ArrowRightLeft
 } from 'lucide-react';
+import { HandoverModal } from './HandoverModal';
+import { DeleteProjectModal } from './DeleteProjectModal';
 import { useProject } from '../context/ProjectContext';
 import { calculateProjectProgress, calculateProjectHealth } from '../lib/projectUtils';
 import { cn } from '../lib/utils';
@@ -35,6 +37,11 @@ const SEVERITY_COLORS: Record<string, string> = {
 export function Dashboard() {
   const { activeProject } = useProject();
   const navigate = useNavigate();
+  const [isHandoverModalOpen, setIsHandoverModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [showOptionsMenu, setShowOptionsMenu] = useState(false);
+  const { deleteProject } = useProject();
+  const { currentUser } = useAuth();
 
   const stats = useMemo(() => activeProject ? calculateProjectProgress(activeProject) : null, [activeProject]);
   const health = useMemo(() => activeProject ? calculateProjectHealth(activeProject) : null, [activeProject]);
@@ -190,9 +197,46 @@ export function Dashboard() {
                       {activeProject.priority}
                     </span>
                   </div>
-                  <h1 className="text-2xl md:text-5xl font-black text-slate-900 tracking-tight leading-tight">
-                    {activeProject.name}
-                  </h1>
+                  <div className="flex items-center justify-center md:justify-start gap-4">
+                    <h1 className="text-2xl md:text-5xl font-black text-slate-900 tracking-tight leading-tight">
+                      {activeProject.name}
+                    </h1>
+                    <div className="relative">
+                      <button 
+                        onClick={() => setShowOptionsMenu(!showOptionsMenu)}
+                        className="p-2 hover:bg-slate-100 rounded-xl transition-all text-slate-400 hover:text-indigo-600"
+                      >
+                        <MoreHorizontal className="w-6 h-6" />
+                      </button>
+                      
+                      {showOptionsMenu && (
+                        <>
+                          <div className="fixed inset-0 z-20" onClick={() => setShowOptionsMenu(false)} />
+                          <div className="absolute left-0 md:left-auto md:right-0 mt-2 w-56 bg-white rounded-2xl shadow-2xl border border-slate-100 py-3 z-30 animate-in slide-in-from-top-2 duration-200">
+                            <button 
+                              onClick={() => { setIsHandoverModalOpen(true); setShowOptionsMenu(false); }}
+                              className="w-full flex items-center gap-3 px-4 py-2.5 text-xs font-black text-indigo-600 hover:bg-indigo-50 transition-colors uppercase tracking-widest"
+                            >
+                              <ArrowRightLeft className="w-4 h-4" /> Odovzdať projekt
+                            </button>
+                            <button 
+                              onClick={() => { navigate(`/projects/${activeProject.id}/reports`); setShowOptionsMenu(false); }}
+                              className="w-full flex items-center gap-3 px-4 py-2.5 text-xs font-black text-slate-600 hover:bg-slate-50 transition-colors uppercase tracking-widest"
+                            >
+                              <FileText className="w-4 h-4" /> Detailné info
+                            </button>
+                            <div className="my-2 border-t border-slate-100" />
+                            <button 
+                              onClick={() => { setIsDeleteModalOpen(true); setShowOptionsMenu(false); }}
+                              className="w-full flex items-center gap-3 px-4 py-2.5 text-xs font-black text-rose-600 hover:bg-rose-50 transition-colors uppercase tracking-widest"
+                            >
+                              <Trash2 className="w-4 h-4" /> Vymazať projekt
+                            </button>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  </div>
                   <p className="text-slate-500 font-medium text-xs md:text-lg italic line-clamp-2">
                     "{activeProject.shortDescription}"
                   </p>
@@ -575,17 +619,49 @@ export function Dashboard() {
                  <FileText className="w-4 h-4" /> Generate Report
                </button>
                <div className="flex items-center justify-center gap-6">
-                  <button className="text-[9px] font-black text-slate-400 hover:text-indigo-600 transition-colors uppercase tracking-widest flex items-center gap-1.5">
+                  <a 
+                    href={activeProject.confluenceUrl || "#"} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className={cn(
+                      "text-[9px] font-black uppercase tracking-widest flex items-center gap-1.5 transition-colors",
+                      activeProject.confluenceUrl ? "text-slate-400 hover:text-indigo-600" : "text-slate-300 cursor-not-allowed"
+                    )}
+                  >
                      <ExternalLink className="w-3 h-3" /> Confluence
-                  </button>
-                  <button className="text-[9px] font-black text-slate-400 hover:text-indigo-600 transition-colors uppercase tracking-widest flex items-center gap-1.5">
+                  </a>
+                  <a 
+                    href={activeProject.jiraUrl || "#"} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className={cn(
+                      "text-[9px] font-black uppercase tracking-widest flex items-center gap-1.5 transition-colors",
+                      activeProject.jiraUrl ? "text-slate-400 hover:text-indigo-600" : "text-slate-300 cursor-not-allowed"
+                    )}
+                  >
                      <ExternalLink className="w-3 h-3" /> Jira Board
-                  </button>
+                  </a>
                </div>
             </div>
          </div>
 
       </div>
+
+      <HandoverModal 
+        isOpen={isHandoverModalOpen}
+        onClose={() => setIsHandoverModalOpen(false)}
+        project={activeProject}
+      />
+
+      <DeleteProjectModal 
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={() => {
+          deleteProject(activeProject.id);
+          navigate('/projects');
+        }}
+        projectName={activeProject.name}
+      />
     </div>
   );
 }
