@@ -71,7 +71,7 @@ interface ProjectContextType {
 }
 
 const STORAGE_KEY = "baWorkspace.projects";
-const CLEAN_POLICY_VERSION = "2"; // Increment this to force-clean legacy demo data
+const CLEAN_POLICY_VERSION = "3"; // Increment this to force-clean legacy demo data
 const CLEAN_MODE_KEY = "baWorkspace.cleanMode";
 const CLEAN_VERSION_KEY = "baWorkspace.cleanPolicyVersion";
 
@@ -89,9 +89,13 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
         // If policy version is missing or old, force a cleanup of legacy demo projects
         if (currentPolicyVersion !== CLEAN_POLICY_VERSION) {
           const demoIds = ["driver-app", "label-redesign", "dropshipment-matrix"];
-          const filtered = parsed.filter((p: any) => !demoIds.includes(p.id));
+          const demoNames = ["Driver App", "Delivery 2.0 Label Redesign", "Dropshipment Delivery Matrix"];
           
-          // Only update if we actually removed something
+          const filtered = parsed.filter((p: any) => 
+            !demoIds.includes(p.id) && !demoNames.includes(p.name)
+          );
+          
+          // Force clear if we find any legacy markers
           if (filtered.length !== parsed.length) {
             parsed = filtered;
           }

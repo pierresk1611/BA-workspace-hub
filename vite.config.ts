@@ -99,7 +99,7 @@ export default defineConfig(({ mode }) => {
               urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
               handler: 'CacheFirst',
               options: {
-                cacheName: `google-fonts-cache-v2.1.0`,
+                cacheName: `google-fonts-cache-v2.1.1`,
                 expiration: {
                   maxEntries: 10,
                   maxAgeSeconds: 60 * 60 * 24 * 365 // <== 365 days
@@ -113,7 +113,7 @@ export default defineConfig(({ mode }) => {
               urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
               handler: 'CacheFirst',
               options: {
-                cacheName: `gstatic-fonts-cache-v2.1.0`,
+                cacheName: `gstatic-fonts-cache-v2.1.1`,
                 expiration: {
                   maxEntries: 10,
                   maxAgeSeconds: 60 * 60 * 24 * 365 // <== 365 days
